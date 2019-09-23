@@ -16,7 +16,6 @@ const server = http.createServer((req, res) => {
   })
   req.on('end', () => {
     let msg = parse_data(data) // JSON.parse(data)
-	console.log(msg)
     console.log(msg.msg)
     reply(msg, (bot_resp) => {
         res.statusCode = 200;

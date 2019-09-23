@@ -1,10 +1,5 @@
 /*
-Socket server
-loriacarlos@gmail.com
-EIF400 II-2019
-Para arrancar (lo hace en puerto 3000)
-swipl echo-ws-server
-
+Server Prolog
 */
 
 :- use_module(library(http/http_server)).
@@ -39,20 +34,6 @@ stop_server(Port) :-
 :- http_handler(root(.),
                 http_reply_from_files('.', []),
                 [prefix])
-.
-% websocket echo handler
-:- http_handler(root(echo), 
-                http_upgrade_to_websocket(echo, []),
-                [spawn([])])
-.
-
-echo(WebSocket) :-
-    ws_receive(WebSocket, Message),
-    (   Message.opcode == close
-    ->  true
-    ;   ws_send(WebSocket, Message),
-        echo(WebSocket)
-    )
 .
 
 % Test handler GET
