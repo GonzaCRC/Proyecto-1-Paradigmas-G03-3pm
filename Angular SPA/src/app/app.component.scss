@@ -77,7 +77,7 @@
     }
 
     &:active {
-      background-color: #505b68;
+      background-color: #72808f;
     }
 
     &__avatar {
@@ -122,6 +122,18 @@
     position: relative;
     bottom: 0;
 
+    &::-webkit-scrollbar {
+      width: 0.8rem;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background-color: #babac0;
+    }
+
+    &::-webkit-scrollbar-button {
+      display: none;
+    }
+
     .message-box {
       display: flex;
       align-items: center;
@@ -151,7 +163,7 @@
         box-shadow: 0px 6px 23px -6px rgba(0, 0, 0, 0.24);
         font-size: 1.5rem;
         padding: 1rem;
-        max-width: calc(100% - (2 * 8rem));
+        max-width: 50%;
         word-break: break-all;
 
         &--bot {
@@ -167,30 +179,9 @@
   }
 
   .typer {
-    background-color: #fff;
-
-    display: flex;
-    align-items: center;
-
-    &__input {
-      border: none;
-      outline: none;
-      font-size: 1.8rem;
-      flex: 0 0 90%;
-      padding: 1.5rem 1rem;
-    }
-
-    &__button {
-      cursor: pointer;
-      fill: #a5b5c1;
-      width: 2.25rem;
-      height: 2.25rem;
-      flex: 0 0 10%;
-      transition: fill 0.2s;
-
-      &:hover {
-        fill: #747f88;
-      }
-    }
+    border: none;
+    outline: none;
+    font-size: 1.8rem;
+    padding: 1.5rem 1rem;
   }
 }

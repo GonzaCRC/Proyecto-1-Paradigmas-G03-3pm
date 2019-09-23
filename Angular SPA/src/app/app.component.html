@@ -59,7 +59,7 @@
   </div>
   <div class="chat">
     <h1 class="chat__botname">R2-D2</h1>
-    <div class="messages">
+    <div #messagesDiv class="messages">
       <div
         *ngFor="let message of messages"
         class="message-box"
@@ -81,16 +81,11 @@
         </div>
       </div>
     </div>
-    <div class="typer">
-      <input
-        (keyup.enter)="onSendMessage($event.target)"
-        class="typer__input"
-        type="text"
-        placeholder="Type something..."
-      />
-      <svg class="typer__button">
-        <use xlink:href="assets/img/SVG/sprite.svg#icon-circle-right"></use>
-      </svg>
-    </div>
+    <input
+      (keyup.enter)="onSendMessage($event.target)"
+      class="typer"
+      type="text"
+      placeholder="Type something and hit Enter!"
+    />
   </div>
 </div>

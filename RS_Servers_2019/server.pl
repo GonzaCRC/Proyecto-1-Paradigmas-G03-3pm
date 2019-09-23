@@ -37,7 +37,7 @@ stop_server(Port) :-
 %%%%%%%%%%%%%%%%%%%%% Configure handlers %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % static files handler
 :- http_handler(root(.),
-                http_reply_from_files('./Interface', []),
+                http_reply_from_files('./AngularBuild', []),
                 [prefix])
 .
 % websocket echo handler
