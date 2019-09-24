@@ -10,7 +10,7 @@ import { HttpClient } from "@angular/common/http";
 export class AppComponent implements OnInit {
   @ViewChild("messagesDiv", { static: false }) messagesDiv: ElementRef;
   typedMessage: string;
-  messages: Message[];
+  messages: Message[] = [];
   userPicture: string = "assets/img/user.jpg";
   botPicture: string = "assets/img/bot2.png";
 
@@ -44,7 +44,8 @@ export class AppComponent implements OnInit {
             .post(this.url, postData)
             .toPromise()
             .then(data => {
-              this.messages = data["data"].messages;
+              if (data != null)
+                this.messages = data["data"].messages;
           });
           this.messagesDiv.nativeElement.scrollTop = this.messagesDiv.nativeElement.scrollHeight;
         }, Math.floor(Math.random() * (3000 - 1000 + 1) + 1000));
