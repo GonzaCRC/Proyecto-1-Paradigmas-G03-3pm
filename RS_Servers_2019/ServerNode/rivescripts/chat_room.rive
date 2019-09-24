@@ -8,9 +8,9 @@
 
 + mi nombre es *
 - <set name=<formal>> encantado de conocerte, <get name>.
-- mmnn
-- interesante
-- yo me llamo Cobot Script
+- <set name=<formal>> mmnn
+- <set name=<formal>> interesante
+- <set name=<formal>> yo me llamo Cobot Script
 
 + (cual era mi nombre|quien soy)
 * <get name> == undefined => nunca me dijiste tu nombre
