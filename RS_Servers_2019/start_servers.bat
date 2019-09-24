@@ -1,2 +1,3 @@
 start swipl server.pl
-node server.js
+cd ServerNode
+npm start
