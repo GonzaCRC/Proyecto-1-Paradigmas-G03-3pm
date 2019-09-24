@@ -18,7 +18,7 @@
 - no te acuerdas
 - yo tampoco te conozco
 
-tengo # anos y tu
++ tengo # anos y tu
 * <star> > 50 => no estas viejo, eres un clasico
 - <set age=<star>> ohh vaya tienes <get age> años
 - no llevo la cuenta 
@@ -102,7 +102,7 @@ tengo # anos y tu
 - Larry Bird
 - Bill Russell
 
-+* jugadores de volleyball
++* jugadores de volleyball     
 - Leonel Marshall
 - Angela Leyva 
 - Tatiana Sergeevna Kosheleva
