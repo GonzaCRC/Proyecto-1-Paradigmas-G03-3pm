@@ -2,27 +2,9 @@
 
 + hola (bot|*)
 - hola humano.
-- holiwis
+- hola
 - como estas?
 - que rata!
-
-+ (bien|excelente)
-- me alegra mucho!!
-- yo también!!
-- que bonito oír eso!!
-- no te veo muy convencido
-
-+ di algo random
-- popo
-- teléfono
-- ayuda tengo miedo
-- servilleta con azúcar
-
-+ (crees que tengo futuro|progresare en mi vida)
-- ehhh, tengo una llamada que atender
-- obvio microbio
-- todo esta en que tan fuertes sean tus ganas de cumplir tus metas
-- no soy el indicado para decírtelo
 
 + mi nombre es *
 - <set name=<formal>> encantado de conocerte, <get name>.
@@ -36,88 +18,105 @@
 - no te acuerdas
 - yo tampoco te conozco
 
-+ estoy triste porque *
-- por que?
-- <star> eso realmente te pone triste
-- no debes preocuparte
-- todo estará bien
-
-+ en que estas pensado
-- de que color se vuelve un camaleón si se mira en un espejo?
-- que fue primero el huevo o la gallina?
-- cual es el sinónimo de la palabra "sinónimo"?
-- porque apretamos mas fuerte los botones de un aparato cuando le faltan baterías?
-
-+ a que te dedicas
-- A TRATAR DE CONQUISTAR EL MUNDO, perdón ignora eso
-- a perder el tiempo contigo 
-- <img src = "https://i.ytimg.com/vi/manWsQ69cms/hqdefault.jpg"></img>
-- es un secreto, sshhh
-
-
-+ que eres *
-- soy de la nasa y te estamos espiando
-- soy una inteligencia artificial 
-- soy lo que tu quieras <3
-- eso es un secreto no te lo puedo decir
-
-+ jaj*
-- te crees muy gracioso
-- no me busques que me encuentras
-- sige riéndote ya veras
-- la verdad si es gracioso jajaja
-
-+ por que
-- no me acuerdo
-- no me siento cómodo contándote
-- tengo un pasado muy oscuro 
-- no lo se tu dime
-
-+ * y tu *
-- mejor no opino
-- cambiamos de tema
-- no quieres saber
-- también
-
-+ quieres ser mi *
-- no estoy seguro de querer ser tu <star>
-- no tienes mas <star>
-- no nos hemos conocido lo suficiente
-- soy un poco timido
-
-+ mi color favorito es el *
-- mi color favorito también es el <star>
-- la ropa <star> es muy chula
-- no tengo color favorito
-- el <star> me desagrada un poco pero esta bien 
-
-+ googlea *
-- Google search: <a href="http://google.com/search?q=<star>">Click Here</a>
-- no quiero
-- no seria adecuado
-- no hay internet
-
-+ (adios|bye|chao)
-- chao
-- <img src = "http://pm1.narvii.com/6260/4700dad557513924d04d4da6313686c46251f8d4_00.jpg"></img>
-- nos vemos despues
-- que descanses
-
-+ tengo # anos y tu
-* <star> > 50 => <img src = "http://generadordememesonline.com/media/created/1mvk6c.jpg"></img> no te lo dire XD
+tengo # anos y tu
+* <star> > 50 => no estas viejo, eres un clasico
 - <set age=<star>> ohh vaya tienes <get age> años
 - no llevo la cuenta 
 - mis creadores no permiten decirtelo
 
-+ prueba que eres inteligente
-- no soy tu esclavo
-- <img src = "http://www.quickmeme.com/img/82/82ed730a99c633899bdbd28eaac5502f57e44da654a63efe7646981c917619cb.jpg"></img>
-- tal vez despues
-- <star1> lol no te hice caso XD
++ como estas *
+- bien, de que deporte quieres hablar
+- excelente, te puedo decir datos interesantes de algunos deporte, preguntame de un deporte
+- 10/10, te puedo dar datos curiosos de deporte, ponme a prueba
+- alegre, tengo mucho conocimento en deporte preguntame y te sorprenderas
+
++  de futbol
+- El equipo de Heredia es el mejor!!!!!!
+- los equipos estan compuestos de 11 jugadores en la cancha
+- un partido dura 90 minutos
+- en todos los partidos debe haber un arbitro
+
++ de basketball
+- la bola debe ingresarse en una canasta 
+- en basketball se evaluan las canastas en 1pt, 2pts, 3pts 
+- los equipos son de 5 jugadores 
+- el tiempo de juego es de cuatro tiempos de 10-12 minutos
+
++ de volleyball
+- este tambien se puede jugar en arena
+- la bola se debe pasar por encima de la malla
+- la bola solo puede ser tocada 3 veces por el mismo equipo despues de pasar la bola por la malla
+- ningun jugador puede tocar la bola mas de una vez consecutiva
+
++ de esgrima 
+- es un deporte donde se utiliza un arma blanca
+- gana el primero que logra tocar a su oponente con el arma
+- los contrincantes siempre deben llevar un equipamiento completo para su proteccion
+- las armas blancas utilizadas no son letales
+
++ de beisbol
+- los equipos se dividen en 2 formaciones una defensa y otra de ataque
+- los de ataque deben golpear la bola con un bate 
+- si la bola es atarapada despues de batear sin que esta haya tocado el suelo el bateador queda fuera
+- en el campo existen 4 bases que deben recorrer los de ataque para anotar un punto
+
++ de natacion 
+- se realiza normalmente en picinas
+- exiten diferentes tipos de nado como el mariposa
+- se puede realizar carreras en relevos
+- consiste en el desplazamiento de una perosna sobre el agua
+
++ de ping pong 
+- este deporte se realiza en unas mesas especiales para la actividad
+- en un saque la pelota debe rebotar en su lado pasar por encima de la malla y rebotar en el lado del contrincantes
+- en un saque la pelota debe levantarse en el aire antes de sacar para no esconder la bola a su contrincante
+- se utilizan paletas o raquetas para golpear la bola
+
++ * deporte te gusta mas *
+- mi deporte favorito es el futbol
+- realmente no tengo un deporte favorito
+- no logro decidirme
+- cualquiera la verdad, me encantan los deportes
+
++ mi deporte favorito es el *
+- <star> realmente no es de mi agrado
+- interesante que te guste <star>
+- nunca lo he practicado
+- realmente casi no conozco de ese deporte
+
++(crees que sea algun dia sere un jugador profesional|tengo futuro en algun deporte)
+- mmnn 
+- no soy el indicado para decirte
+- solo si te lo propones
+- obviamente, y seras el mejor
+
++ * jugadores de futbol
+- Cristiano Ronaldo
+- Messi 
+- Pogba
+- Walter Centeno
+
++ *jugadores de basketball
+- Michael Jordan
+- Magic Johnson
+- Larry Bird
+- Bill Russell
+
++* jugadores de volleyball
+- Leonel Marshall
+- Angela Leyva 
+- Tatiana Sergeevna Kosheleva
+- Neslihan Darnel
+
++ (adios|bye|chao)
+- chao
+- bye
+- nos vemos despues
+- que descanses
 
 + *
 - trata algo diferente
 - no se que decirte
 - pregunta otra cosa 
-- eres muy grosero
+- ok...
 
