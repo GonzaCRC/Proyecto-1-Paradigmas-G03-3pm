@@ -1,84 +1,88 @@
 ! version = 2.0
+! sub bola     = futbol
+! var nombre = Cobot Script
 
-+ hola (bot|*)
-- hola humano.
++ hola [*]
+- hola humano{weight=70}.
 - hola
 - como estas?
 - que rata!
 
-+ mi nombre es *
-- <set name=<formal>> encantado de conocerte, <get name>.
++ mi nombre es _
+- <set name=<formal>> encantado de conocerte, <get name>{weight=80}.
 - <set name=<formal>> mmnn
 - <set name=<formal>> interesante
-- <set name=<formal>> yo me llamo Cobot Script
+- <set name=<formal>> yo me llamo <bot nombre>
 
-+ (cual era mi nombre|quien soy)
++ (cual era mi nombre|quien soy)[*]
 * <get name> == undefined => nunca me dijiste tu nombre
 - tu nombre era <get name>
 - no te acuerdas
 - yo tampoco te conozco
 
-+ tengo # anos y tu
++ tengo # anos [*]
 * <star> > 50 => no estas viejo, eres un clasico
 - <set age=<star>> ohh vaya tienes <get age> años
 - no llevo la cuenta 
 - mis creadores no permiten decirtelo
 
-+ como estas *
++ como estas [*]
 - bien, de que deporte quieres hablar
 - excelente, te puedo decir datos interesantes de algunos deporte, preguntame de un deporte
 - 10/10, te puedo dar datos curiosos de deporte, ponme a prueba
 - alegre, tengo mucho conocimento en deporte preguntame y te sorprenderas
 
-+  de futbol
++ [*] de futbol [*]
 - El equipo de Heredia es el mejor!!!!!!
 - los equipos estan compuestos de 11 jugadores en la cancha
 - un partido dura 90 minutos
 - en todos los partidos debe haber un arbitro
 
-+ de basketball
++ [*] de basketball [*] 
 - la bola debe ingresarse en una canasta 
 - en basketball se evaluan las canastas en 1pt, 2pts, 3pts 
 - los equipos son de 5 jugadores 
 - el tiempo de juego es de cuatro tiempos de 10-12 minutos
 
-+ de volleyball
++ [*] de volleyball [*]
 - este tambien se puede jugar en arena
 - la bola se debe pasar por encima de la malla
-- la bola solo puede ser tocada 3 veces por el mismo equipo despues de pasar la bola por la malla
+- la bola solo puede ser tocada 3 veces por el mismo\n
+^ equipo despues de pasar la bola por la malla\n
 - ningun jugador puede tocar la bola mas de una vez consecutiva
 
-+ de esgrima 
++ [*] de esgrima [*] 
 - es un deporte donde se utiliza un arma blanca
 - gana el primero que logra tocar a su oponente con el arma
 - los contrincantes siempre deben llevar un equipamiento completo para su proteccion
 - las armas blancas utilizadas no son letales
 
-+ de beisbol
++ [*] de beisbol [*]
 - los equipos se dividen en 2 formaciones una defensa y otra de ataque
 - los de ataque deben golpear la bola con un bate 
-- si la bola es atarapada despues de batear sin que esta haya tocado el suelo el bateador queda fuera
+- si la bola es atarapada despues de batear\n
+^ sin que esta haya tocado el suelo el bateador queda fuera\n
 - en el campo existen 4 bases que deben recorrer los de ataque para anotar un punto
 
-+ de natacion 
++ [*] de natacion [*]   
 - se realiza normalmente en picinas
 - exiten diferentes tipos de nado como el mariposa
 - se puede realizar carreras en relevos
 - consiste en el desplazamiento de una perosna sobre el agua
 
-+ de ping pong 
++ [*] de ping pong [*] 
 - este deporte se realiza en unas mesas especiales para la actividad
 - en un saque la pelota debe rebotar en su lado pasar por encima de la malla y rebotar en el lado del contrincantes
 - en un saque la pelota debe levantarse en el aire antes de sacar para no esconder la bola a su contrincante
 - se utilizan paletas o raquetas para golpear la bola
 
-+ * deporte te gusta mas *
++ [*] deporte te gusta mas [*]
 - mi deporte favorito es el futbol
 - realmente no tengo un deporte favorito
 - no logro decidirme
 - cualquiera la verdad, me encantan los deportes
 
-+ mi deporte favorito es el *
++ mi deporte favorito es el _
 - <star> realmente no es de mi agrado
 - interesante que te guste <star>
 - nunca lo he practicado
@@ -90,25 +94,25 @@
 - solo si te lo propones
 - obviamente, y seras el mejor
 
-+ * jugadores de futbol
++ [*] jugadores de futbol [*]
 - Cristiano Ronaldo
 - Messi 
 - Pogba
 - Walter Centeno
 
-+ *jugadores de basketball
++ [*] jugadores de basketball [*]
 - Michael Jordan
 - Magic Johnson
 - Larry Bird
 - Bill Russell
 
-+* jugadores de volleyball     
++ [*] jugadores de volleyball [*]     
 - Leonel Marshall
 - Angela Leyva 
 - Tatiana Sergeevna Kosheleva
 - Neslihan Darnel
 
-+ (adios|bye|chao)
++ (adios|bye|chao|hasta luego)([*]|bot)
 - chao
 - bye
 - nos vemos despues
@@ -119,4 +123,3 @@
 - no se que decirte
 - pregunta otra cosa 
 - ok...
-
