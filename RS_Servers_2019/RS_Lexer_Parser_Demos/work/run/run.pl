@@ -6,6 +6,14 @@ test_project nombre_caso_de_un_caso_de_prueba.rive
 El caso de prueba debe estar en el directorio cases del proycto.
 Sino se da un caso de prueba asume cases\micro.rive
 Genera un eco del archivo (más comentarios) en output
+
+Colaboradores:
+
+Erick Vargas Arias 
+Esteban Zúñiga Cruz
+Gonzalo Gonzalez Garro
+Gabriel Araya Ruiz
+
 */
 
 :- assert(file_search_path(rs_path, '../src/rs.compile/')).
@@ -13,7 +21,7 @@ Genera un eco del archivo (más comentarios) en output
 :- use_module(rs_path(rsCompiler)).
 
 
-default_file('micro2.rive').
+default_file('micro3.rive').
 
 run_compiler :-
    %spy(compile/1),

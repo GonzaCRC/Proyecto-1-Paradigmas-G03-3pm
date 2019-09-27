@@ -1,5 +1,11 @@
 /*
 EIF400 loriacarlos@gmail.com
+Colaboradores:
+
+Erick Vargas Arias 
+Esteban Zúñiga Cruz
+Gonzalo Gonzalez Garro
+Gabriel Araya Ruiz
 */
 
 :- module(rsCompiler, [compile/0, compile/1, compile/3]).

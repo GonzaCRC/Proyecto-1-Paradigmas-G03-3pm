@@ -1,6 +1,13 @@
 /*
 loriacarlos@gmail.com
 EIF400 II-2019
+Colaboradores:
+
+Erick Vargas Arias 
+Esteban Zúñiga Cruz
+Gonzalo Gonzalez Garro
+Gabriel Araya Ruiz
+
 */
 
 :- module(rsEmiter, [
@@ -51,6 +58,13 @@ genCode(Out, word(N)) :- !, genCode(Out, atom(N))
 
 genCode(Out, weight(N)) :- !, genCodeWeight(Out, atom(N))
 .
+
+genCode(Out, hash(_)) :- !, genCodeHash(Out, atom(_))
+.
+
+genCode(Out, star(_)) :- !, genCodeStar(Out, atom(_))
+.
+
 genCode(Out, id(N)) :- !, genCode(Out, atom(N))
 .
 genCode(Out, num(N))  :- !, genCode(Out, atom(N))
@@ -77,7 +91,13 @@ genCode(Out, E ) :- close(Out),!,
                     throw(genCode('genCode unhandled Tree', E))
 .
 
-genCodeWeight(Out, atom(N)) :- !, format(Out, '{weight=~d}', [N])
+genCodeWeight(Out, atom(N)) :- !, format(Out, '{weight=~d} ', [N])
+.
+
+genCodeHash(Out, atom(_)) :- !, format(Out, '# ', [])
+.
+
+genCodeStar(Out, atom(_)) :- !, format(Out, '* ', [])
 .
 
 genCodeResponse(Out, trigger(WL)) :- !,

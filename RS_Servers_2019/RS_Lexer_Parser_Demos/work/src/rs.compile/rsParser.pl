@@ -1,6 +1,13 @@
 /*
 EIF400 loriacarlos@gmail.com
 II-2019
+Colaboradores:
+
+Erick Vargas Arias 
+Esteban Zúñiga Cruz
+Gonzalo Gonzalez Garro
+Gabriel Araya Ruiz
+
 */
 
 :- module(rsParser, [testParser/1, parse/2]).
@@ -10,7 +17,7 @@ II-2019
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Main Test %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 testParser(P) :-
-    File = '../../cases/micro2.rive',
+    File = '../../cases/micro3.rive',
     format('~n~n*** Parsing file: ~s ***~n~n', File),
     parse(File, P),
     line_number(LN),
@@ -65,6 +72,7 @@ trigger_token(T) --> trigger_tag(T)
 .
 trigger_token(W) --> word(W)
 .
+
 trigger_tag(set(W, V)) --> ['<', set], id(W), ['='], id(V), ['>'] % incomplete
 .
 trigger_tag(I) --> ['<'], input_ref(I),  ['>']
@@ -79,7 +87,7 @@ trigger_tag(array(inline, WL)) --> ['('], word_list(WL), [')']
 trigger_tag(array(ref, W)) --> ['(', '@'], word(W), [')']
 .
 
-trigger_tag(W) --> ['{'], word(W), ['}']
+trigger_tag(W) --> ['{'], word_list(W), ['}']
 .
 
 input_ref(input(N)) --> [IW], {atomic(IW), separate(IW, input, N)}

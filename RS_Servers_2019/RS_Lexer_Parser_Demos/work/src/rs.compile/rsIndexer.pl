@@ -1,6 +1,12 @@
 /*
 EIF400 loriacarlos@gmail.com
 II-2019
+Colaboradores:
+
+Erick Vargas Arias 
+Esteban Zúñiga Cruz
+Gonzalo Gonzalez Garro
+Gabriel Araya Ruiz
 */
 
 :- module(rsIndexer, [
