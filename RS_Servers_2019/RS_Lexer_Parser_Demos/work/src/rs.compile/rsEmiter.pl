@@ -48,6 +48,9 @@ genCode(Out, response_block(T)) :- !,
 
 genCode(Out, word(N)) :- !, genCode(Out, atom(N))
 .
+
+genCode(Out, weight(N)) :- !, genCodeWeight(Out, atom(N))
+.
 genCode(Out, id(N)) :- !, genCode(Out, atom(N))
 .
 genCode(Out, num(N))  :- !, genCode(Out, atom(N))
@@ -62,14 +65,19 @@ genCode(Out, set(I, E)) :-  !,
 genCode(Out, operation(O, L, R)) :- !,
     genCodeList(Out, [L, O, R])
 .
+
 genCode(Out, atom(N)) :- !, format(Out, '~a ', [N])
 .
+
 genCode(Out, comment(C)):-
      format(Out, '// ~a \n', [C])
 .
 %%%% Error case %%%%%%%%%%%%%%%%%%%%%%%%%%
 genCode(Out, E ) :- close(Out),!,
                     throw(genCode('genCode unhandled Tree', E))
+.
+
+genCodeWeight(Out, atom(N)) :- !, format(Out, '{weight=~d}', [N])
 .
 
 genCodeResponse(Out, trigger(WL)) :- !,
