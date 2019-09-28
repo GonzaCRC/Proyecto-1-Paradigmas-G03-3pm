@@ -17,6 +17,7 @@ Gabriel Araya Ruiz
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Main Test %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 testParser(P) :-
+	spy(trigger_token),
     File = '../../cases/micro3.rive',
     format('~n~n*** Parsing file: ~s ***~n~n', File),
     parse(File, P),
@@ -25,7 +26,7 @@ testParser(P) :-
 .
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Main Parse predicate %%%%%%%%%%%%%%%%%%%%%%%
 parse(_, _) :- reset_line_number, 
-               reset_some_indexes([star, hash, underscore]),
+               reset_some_indexes([start, hash, underscore]),
                fail
 .
 parse(File, ProgAst) :- 
@@ -47,7 +48,7 @@ rsCommandList([]) --> []
 .
 rsCommandList(L) --> ['\n'], {inc_line_number}, rsCommandList(L)
 .
-rsCommandList([trigger_block(B) | R]) --> trigger_block(B), !, rsCommandList(R)
+rsCommandList([trigger_block(B) | R]) --> trigger_block(B), !, {reset_some_indexes([start, hash, underscore])}, rsCommandList(R)
 .
 rsCommandList([response_block(B) | R]) --> response_block(B), !, rsCommandList(R)
 .
@@ -58,7 +59,7 @@ rsCommandList([define_block(B) | R])  --> define_block(B), !, rsCommandList(R)
 trigger_block(trigger(TL)) --> ['+'], trigger_token_list(TL)
 .
 
-response_block(trigger(TL)) --> ['-'], trigger_token_list(TL)
+response_block(response(TL)) --> ['-'], trigger_token_list(TL)
 .
 
 trigger_token_list([])  --> ['\n'], {inc_line_number}
@@ -79,16 +80,15 @@ trigger_tag(I) --> ['<'], input_ref(I),  ['>']
 .
 trigger_tag(I) --> ['<'], reply_ref(I),  ['>']
 .
-trigger_tag(star('')) --> ['<'], [star],  ['>']
+trigger_tag(star(1)) --> ['<'], [star],  ['>']
 .
 trigger_tag(I) --> ['<'], star_ref(I),  ['>']
 .
 trigger_tag(weight(I)) --> ['{'], [weight, '=', V], ['}'], 
                                   {enforce_integer(V, I, 'Invalid weight'), !}
 .
-% trigger_tag(formal(star(''))) --> ['{'], [formal], ['}'], ['<'], [star], ['>'], ['{'], ['/'] , [formal], ['}']
-% .
-trigger_tag(formal(I)) --> ['{'], [formal], ['}'], (trigger_token(I); word(I)), ['{'], ['/'] , [formal], ['}']
+
+trigger_tag(formal(I)) --> ['{'], [formal], ['}'], trigger_tag(I), ['{'], ['/'] , [formal], ['}']
 .
 
 trigger_tag(array(inline, WL)) --> ['('], word_list(WL), [')']
@@ -127,12 +127,16 @@ define_command(var(global, N, V)) --> [global], word(word(N)), {reserved_name(N)
 .
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Common Tools %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-wild_card(asterisk(N)) --> ['*'], {next_index(asterisk, N)}
-.
+
 wild_card(hash(N)) --> ['#'], {next_index(hash, N)}
+.
+wild_card(start(N)) --> ['*'], {next_index(start, N)}
 .
 wild_card(underscore(N)) --> ['_'], {next_index(underscore, N)}
 .
+
+word(num(N)) --> id(id(W)), {convert_value(W, num(N))}.
+
 word(word(W)) --> id(id(W))
 .
 word_list([]), [')'] --> [')']

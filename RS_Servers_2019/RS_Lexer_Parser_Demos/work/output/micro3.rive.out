@@ -1,4 +1,4 @@
-// *** Rive Program *** : Generated at: 28/09/19 02:11:43 
+// *** Rive Program *** : Generated at: 28/09/19 17:11:16 
 
 // >>> Trigger Block 
 + hello world 
@@ -19,7 +19,7 @@
 + 2 plus 2 is # 
 
 // >>> Response Block 
-- <star> is right 
+- <star1> is right 
 
 // >>> Response Block 
 - 4 
@@ -28,7 +28,7 @@
 + your name is * 
 
 // >>> Response Block 
-- Ok . I am {formal}<star>{/formal}
+- Ok . I am {formal}<star1>{/formal}
 
 // >>> Trigger Block 
 + {weight=20} * is * 
