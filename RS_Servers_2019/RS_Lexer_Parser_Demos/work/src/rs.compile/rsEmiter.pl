@@ -62,7 +62,22 @@ genCode(Out, weight(N)) :- !, genCodeWeight(Out, atom(N))
 genCode(Out, hash(_)) :- !, genCodeHash(Out, atom(_))
 .
 
-genCode(Out, star(_)) :- !, genCodeStar(Out, atom(_))
+genCode(Out, asterisk(_)) :- !, genCodeAsterisk(Out, atom(_))
+.
+
+genCode(Out, star('')) :- !, genCodeEmptyStar(Out)
+.
+
+genCode(Out, star(N)) :- !, genCodeStar(Out, atom(N))
+.
+
+genCode(Out, formal(star(N))) :- !, genCodeStarFormal(Out, atom(N))
+.
+
+genCode(Out, formal(word(N))) :- !, genCodeWordFormal(Out, atom(N))
+.
+
+genCode(Out, formal(_)) :- !, genCodeFormal(Out, atom(_))
 .
 
 genCode(Out, id(N)) :- !, genCode(Out, atom(N))
@@ -97,7 +112,22 @@ genCodeWeight(Out, atom(N)) :- !, format(Out, '{weight=~d} ', [N])
 genCodeHash(Out, atom(_)) :- !, format(Out, '# ', [])
 .
 
-genCodeStar(Out, atom(_)) :- !, format(Out, '* ', [])
+genCodeAsterisk(Out, atom(_)) :- !, format(Out, '* ', [])
+.
+
+genCodeEmptyStar(Out) :- !, format(Out, '<star> ', [])
+.
+
+genCodeStar(Out, atom(N)) :- !, format(Out, '<star~d> ', [N])
+.
+
+genCodeStarFormal(Out, atom(N)) :- !, format(Out, '{formal}<star~a>{/formal}', [N])
+.
+
+genCodeStarWord(Out, atom(N)) :- !, format(Out, '{formal}~a{/formal}', [N])
+.
+
+genCodeFormal(Out, atom(_)) :- !, format(Out, '{formal}{/formal}', [])
 .
 
 genCodeResponse(Out, trigger(WL)) :- !,

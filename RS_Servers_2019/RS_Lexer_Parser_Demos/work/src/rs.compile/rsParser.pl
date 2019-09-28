@@ -79,9 +79,18 @@ trigger_tag(I) --> ['<'], input_ref(I),  ['>']
 .
 trigger_tag(I) --> ['<'], reply_ref(I),  ['>']
 .
+trigger_tag(star('')) --> ['<'], [star],  ['>']
+.
+trigger_tag(I) --> ['<'], star_ref(I),  ['>']
+.
 trigger_tag(weight(I)) --> ['{'], [weight, '=', V], ['}'], 
                                   {enforce_integer(V, I, 'Invalid weight'), !}
 .
+% trigger_tag(formal(star(''))) --> ['{'], [formal], ['}'], ['<'], [star], ['>'], ['{'], ['/'] , [formal], ['}']
+% .
+trigger_tag(formal(I)) --> ['{'], [formal], ['}'], (trigger_token(I); word(I)), ['{'], ['/'] , [formal], ['}']
+.
+
 trigger_tag(array(inline, WL)) --> ['('], word_list(WL), [')']
 .
 trigger_tag(array(ref, W)) --> ['(', '@'], word(W), [')']
@@ -90,6 +99,8 @@ trigger_tag(array(ref, W)) --> ['(', '@'], word(W), [')']
 trigger_tag(W) --> ['{'], word_list(W), ['}']
 .
 
+star_ref(star(N)) --> [IW], {atomic(IW), separate(IW, star, N)}
+.
 input_ref(input(N)) --> [IW], {atomic(IW), separate(IW, input, N)}
 .
 reply_ref(reply(N)) --> [IW], {atomic(IW), separate(IW, reply, N)}
@@ -116,7 +127,7 @@ define_command(var(global, N, V)) --> [global], word(word(N)), {reserved_name(N)
 .
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Common Tools %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-wild_card(star(N)) --> ['*'], {next_index(star, N)}
+wild_card(asterisk(N)) --> ['*'], {next_index(asterisk, N)}
 .
 wild_card(hash(N)) --> ['#'], {next_index(hash, N)}
 .
@@ -130,7 +141,6 @@ word_list([W]) --> word(W), word_list([]), !
 .
 word_list([W | WL]) --> word(W), ['|'], !, word_list(WL)
 .
-
 
 idList([]), [')'] --> [')']
 .
