@@ -1,3 +1,29 @@
+<div [ngClass]="{ 'about-modal': true, 'about-modal--visible': aboutIsShown }">
+  <div class="about-modal__section">
+    <h2>Origen del proyecto</h2>
+    <p>
+      Este proyecto fue desarrollado...
+    </p>
+  </div>
+  <div class="about-modal__section">
+    <h2>Autores</h2>
+    <p>
+      Gabriel Araya Ruiz <br />
+      Esteban Zúñiga Cruz <br />
+      Erick Vargas Arias <br />
+      Gonzalo González Garro
+    </p>
+  </div>
+  <div class="about-modal__section">
+    <h2>Créditos</h2>
+    <p>
+      Por definir..
+    </p>
+  </div>
+  <a class="about-modal__closer" (click)="aboutIsShown = !aboutIsShown">
+    &uarr;
+  </a>
+</div>
 <div class="application-grid">
   <nav class="sidebar">
     <div class="user-box">
@@ -6,17 +32,13 @@
         alt="User picture"
         class="user-box__avatar"
       />
-      <span class="user-box__username">Name</span>
+      <span class="user-box__username">User's name</span>
     </div>
-    <a class="option">
-      <svg class="option__icon">
-        <use xlink:href="assets/img/SVG/sprite.svg#icon-bubble"></use>
-      </svg>
+    <a class="time">
+      {{ time | date: "hh:mm:ss a" }}
     </a>
-    <a class="option">
-      <svg class="option__icon">
-        <use xlink:href="assets/img/SVG/sprite.svg#icon-cog"></use>
-      </svg>
+    <a (click)="aboutIsShown = !aboutIsShown" class="option">
+      About
     </a>
     <a class="option">
       <svg class="option__icon">
@@ -24,68 +46,7 @@
       </svg>
     </a>
   </nav>
-  <div class="chats">
-    <h2 class="chats__title">CHATS</h2>
-    <div class="chat-preview chat-preview--active">
-      <img
-        class="chat-preview__avatar"
-        src="assets/img/bot2.png"
-        alt="Bot avatar"
-      />
-      <div class="chat-preview__text">
-        <span class="chat-preview__botname">
-          R2-D2
-        </span>
-        <p class="chat-preview__message">
-          How are you doing? :)
-        </p>
-      </div>
-    </div>
-    <div class="chat-preview">
-      <img
-        class="chat-preview__avatar"
-        src="assets/img/bot1.png"
-        alt="Bot avatar"
-      />
-      <div class="chat-preview__text">
-        <span class="chat-preview__botname">
-          C-3PO
-        </span>
-        <p class="chat-preview__message">
-          Good bye!
-        </p>
-      </div>
-    </div>
-  </div>
-  <div class="chat">
-    <h1 class="chat__botname">R2-D2</h1>
-    <div #messagesDiv class="messages">
-      <div
-        *ngFor="let message of messages"
-        class="message-box"
-        [ngClass]="'message-box--'.concat(message.owner | lowercase)"
-      >
-        <img
-          class="message-box__picture"
-          [ngClass]="'message-box__picture--'.concat(message.owner | lowercase)"
-          [src]="
-            (message.owner | lowercase) == 'bot' ? botPicture : userPicture
-          "
-          alt="Bot picture"
-        />
-        <div
-          class="message-box__message message-box__message--bot"
-          [ngClass]="'message-box__message--'.concat(message.owner | lowercase)"
-        >
-          <span> {{ message.body }}</span>
-        </div>
-      </div>
-    </div>
-    <input
-      (keyup.enter)="onSendMessage($event.target)"
-      class="typer"
-      type="text"
-      placeholder="Type something and hit Enter!"
-    />
+  <div class="content-wrapper">
+    <router-outlet></router-outlet>
   </div>
 </div>

@@ -1,0 +1,46 @@
+<div class="chatter-grid">
+  <div class="brains">
+    <h2 class="brains__title">BRAINS</h2>
+    <div class="brain">
+      <img class="brain__avatar" src="assets/img/bot2.png" alt="Brain avatar" />
+      <span class="brain__name">
+        R2-D2
+      </span>
+    </div>
+  </div>
+  <div class="brain-manager">
+    <h1 class="brain-manager__title">Nuevo brain</h1>
+    <div class="brain-manager__script">
+      <div class="script__file-upload">
+        <button type="button" class="btn--action" (click)="fileInput.click()">
+          Seleccione un archivo .rive
+        </button>
+        <input
+          [style.display]="'none'"
+          type="file"
+          accept=".rive"
+          #fileInput
+          (change)="onFileSelected($event.target.files[0], fileInput)"
+        />
+      </div>
+      <!-- <div class="script__input">
+        Write script here
+      </div> -->
+      <div class="script__result">
+        <div class="result__title">
+          Titulo
+        </div>
+        <div class="result__body">
+          Body
+        </div>
+      </div>
+    </div>
+    <div class="brain-manager__buttons">
+      <!-- <button type="button" class="btn--delete">Eliminar</button>
+      <button type="button" class="btn--update">Acualizar</button> -->
+      <button type="button" [disabled]="!selectedFile" class="btn--create">
+        Crear brain
+      </button>
+    </div>
+  </div>
+</div>
