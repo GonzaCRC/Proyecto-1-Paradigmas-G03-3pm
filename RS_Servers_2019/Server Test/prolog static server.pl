@@ -10,6 +10,8 @@
 :- use_module(library(http/http_client)).
 :- use_module(library(http/html_write)).
 :- use_module(library(lists)).
+:- use_module(library(http/http_cors)).
+:- use_module(library(http/http_json)).
 
 :- assert(file_search_path(rs_path, 'src/rs.compile/')).
 
@@ -21,7 +23,7 @@
 
 :- http_handler(root(.), http_reply_from_files('.', []), [prefix]).
 :- http_handler(root(upload), upload, []).
-
+:- http_handler(root(getRiveFiles), getRiveFiles, [method(get)]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%% Methods %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -33,7 +35,8 @@ upload(Request) :-
 		atom_concat('temp/', FileName, PathFile),
 		open(PathFile,write,Out),
 	    write(Out,DataFile),
-	    close(Out), 
+	    close(Out),
+		cors_enable, 
 		format('Content-type: text/plain~n~n'),
 		rsCompiler:compile('temp/','rive repository/',FileName),
 		delete_file(PathFile)		
@@ -41,6 +44,14 @@ upload(Request) :-
 	).
 
 prolog:message(bad_file_upload) --> [ 'Error' ].
+
+getRiveFiles(_Request) :- 
+	listFiles('rive repository/',Files),
+	cors_enable,
+    reply_json(json([data(Files)]))
+.
+
+listFiles(Path,FileList):- findall(File, directory_member(Path,File,[]), FileList). 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Server Control %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 start_server :-

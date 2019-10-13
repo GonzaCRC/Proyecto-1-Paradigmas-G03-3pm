@@ -4,12 +4,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <title>Test Server Prolog</title>
 </head>
 <body>
     <form method="POST" action="/upload" enctype="multipart/form-data">
             <input type="file" name="file">
             <input type="submit" value="upload file">
-    </form>  
+    </form> 
+    
+    <br><br>
+
+    <button onclick="getRiveFiles()">Get Files</button>
+    <select id="riveFiles"></select>
+
 </body>
 </html>
+
+<script>
+    function getRiveFiles(){
+        $.ajax({type: "GET", 
+        url:"/getRiveFiles",
+        success: function(result) {fillSelect(result.data);},
+        error: function(status){ alert(errorMessage(status))}
+    });}
+
+    function fillSelect(result){
+        var s =  document.getElementById("riveFiles");
+        s.innerHTML="";
+        result.forEach( (file) => {option(s,file);});
+    }
+
+    function option(select,file){
+        var opt = document.createElement("option");
+        opt.value=file;
+        opt.innerHTML = file;
+        select.append(opt);
+    }
+
+</script>
