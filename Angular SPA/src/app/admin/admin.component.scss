@@ -1,0 +1,151 @@
+.chatter-grid {
+  display: grid;
+  grid-template-columns: 17.5rem 95rem;
+}
+
+.brains {
+  background-color: #434c57;
+  color: #fff;
+
+  &__title {
+    text-align: center;
+    padding: 1rem 0;
+  }
+  .brain {
+    cursor: pointer;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    transition: background-color 0.2s;
+
+    &:hover,
+    &--active {
+      background-color: #5d6977;
+    }
+
+    &:active {
+      background-color: #72808f;
+    }
+
+    &__avatar {
+      height: 4.5rem;
+      border-radius: 50%;
+    }
+
+    &__name {
+      font-size: 1.8rem;
+    }
+  }
+}
+
+.brain-manager {
+  background-color: #f2f7f7;
+  color: #888888;
+
+  display: grid;
+  grid-template-rows: auto 47.5rem 7.5rem;
+
+  &__title {
+    justify-self: center;
+
+    border-bottom: 2px solid rgba(187, 182, 182, 0.329);
+    padding: 1rem;
+  }
+
+  &__script {
+    padding: 1rem 1rem 0;
+    display: grid;
+    grid-template-areas:
+      "file-upload file-upload"
+      "result result";
+    grid-gap: 1rem;
+  }
+
+  &__buttons {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+  }
+}
+
+button {
+  cursor: pointer;
+  color: #fff;
+  border: none;
+  font-size: 1.5rem;
+  border-radius: 0.3rem;
+  box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+  padding: 1rem;
+
+  &.btn--action {
+    background-color: #172b4d;
+  }
+
+  &.btn--delete {
+    background-color: #f5365c;
+  }
+
+  &.btn--update {
+    background-color: #5e72e4;
+  }
+
+  &.btn--create {
+    background-color: #2dce89;
+  }
+}
+
+.script {
+  &__file-upload {
+    grid-area: file-upload;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    button {
+      font-size: 1.8rem;
+    }
+  }
+
+  &__input {
+    grid-area: input;
+  }
+
+  &__result {
+    grid-area: result;
+
+    display: grid;
+    grid-template-areas:
+      "title title"
+      "body body";
+    grid-template-rows: 4rem 1fr;
+
+    background-color: #eaecec;
+
+    &--success {
+      background-color: rgba(45, 205, 136, 0.2);
+      color: #2dce89;
+    }
+
+    &--error {
+      background-color: rgba(245, 54, 92, 0.2);
+      color: #f5365c;
+    }
+  }
+}
+
+.result {
+  &__title {
+    border-bottom: 1px solid currentColor;
+    font-size: 1.6rem;
+    padding: 1rem;
+    grid-area: title;
+  }
+
+  &__body {
+    grid-area: body;
+    padding: 1rem;
+    font-size: 1.4rem;
+  }
+}
