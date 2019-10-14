@@ -42,32 +42,33 @@ evaluador([X|L], A, R) :- X = set(id(H),formal([star(P)])), asterisk(P, N),capit
 evaluador([X|L], A, R) :- X = get(P), variable(P, M), evaluador(L, [M|A], R), !.
 evaluador([X|L], A, R) :- evaluador(L, [X|A], R), !.
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-genCodeToFile(File,Codes) :-
-    open(File, read, Str),
-    read_string(Str, "\n", "\r", End, String),
-    close(Str),
-   term_string(RS_Prog, String),  
-   new_memory_file(Handle),     
-   open_memory_file(Handle, write, S),
-   genCode(S, RS_Prog),
-   memory_file_to_atom(Handle, Codes),
-   close(S)
-. 
-
-
-
-
 :- dynamic bandera/1.
 :- dynamic banderaRespuesta/1.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+genCodeToFile(File, String2) :- !,
+    open(File, read, Str),
+    read_string(Str, '\n', '\t', End, String),
+	!,
+    close(Str),
+	open('hola.txt', write, Out),
+	term_string(Atom, String),
+	genCode(Out, Atom),
+	!,
+	close(Out),
+	open('hola.txt', read, Str2),
+	read_string(Str2, '\n', '\t', End, String2),
+	!,
+	close(Str2),
+	retractall(bandera(_)),
+	retractall(banderaRespuesta(_))
+.
 
 genCodeList(Out, L) :- genCodeList(Out, L, ''). 
 
 genCodeList(_, [], _).
 genCodeList(Out, [C], _) :- genCode(Out, C).
 genCodeList(Out, [X, Y | L], Sep) :- bandera(verdadera), banderaRespuesta(verdadera); (genCode(Out, X), 
-                                    format(Out, '~a', [Sep]),
                                     genCodeList(Out, [Y | L], Sep); 
                                     genCodeList(Out, [Y | L], Sep))
 . 
@@ -149,7 +150,6 @@ genCodeResponse(Out, response(WL)) :- !,
      bandera(verdadera),
      genCodeList(Out, WL),
 	 findall(X, palabra(X), L),
-	 writeln(L),
 	 retractall(palabra(_)),
 	 assert(banderaRespuesta(verdadera)),
 	 evaluador(L, [], R), 
