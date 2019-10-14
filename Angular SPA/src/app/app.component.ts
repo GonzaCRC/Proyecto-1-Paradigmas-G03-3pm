@@ -1,4 +1,7 @@
 import { Component, OnInit } from "@angular/core";
+import { environment } from "src/environments/environment";
+import { map } from "rxjs/operators";
+import { RivescriptFilesService } from "./rivescript-files.service";
 
 @Component({
   selector: "app-root",
@@ -8,6 +11,7 @@ import { Component, OnInit } from "@angular/core";
 export class AppComponent implements OnInit {
   aboutIsShown: boolean = false;
   time: Date = new Date();
+
   constructor() {}
 
   ngOnInit() {

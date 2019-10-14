@@ -1,10 +1,19 @@
-<div class="chatter-grid">
+<div class="admin-grid">
   <div class="brains">
     <h2 class="brains__title">BRAINS</h2>
-    <div class="brain">
-      <img class="brain__avatar" src="assets/img/bot2.png" alt="Brain avatar" />
+    <div
+      *ngFor="let brainName of brainsNames; let i = index"
+      (click)="selectedBrain = brainsNames[i]"
+      class="brain"
+      [ngClass]="{ 'brain--active': selectedBrain == brainsNames[i] }"
+    >
+      <img
+        class="brain__avatar"
+        src="assets/img/brain.png"
+        alt="Brain avatar"
+      />
       <span class="brain__name">
-        R2-D2
+        {{ brainName }}
       </span>
     </div>
   </div>
@@ -26,19 +35,43 @@
       <!-- <div class="script__input">
         Write script here
       </div> -->
-      <div class="script__result">
+      <div
+        class="script__result"
+        [ngClass]="
+          brainUploaded
+            ? errorMessage
+              ? 'script__result--error'
+              : 'script__result--success'
+            : ''
+        "
+      >
         <div class="result__title">
-          Titulo
+          <h4>
+            {{
+              brainUploaded
+                ? errorMessage
+                  ? "No se pudo crear el brain. Error:"
+                  : "El brain se creó con éxito. Resultado:"
+                : ""
+            }}
+          </h4>
         </div>
         <div class="result__body">
-          Body
+          {{
+            brainUploaded ? (errorMessage ? errorMessage : successMessage) : ""
+          }}
         </div>
       </div>
     </div>
     <div class="brain-manager__buttons">
       <!-- <button type="button" class="btn--delete">Eliminar</button>
       <button type="button" class="btn--update">Acualizar</button> -->
-      <button type="button" [disabled]="!selectedFile" class="btn--create">
+      <button
+        (click)="onFileUpload()"
+        type="button"
+        [disabled]="!selectedFile"
+        class="btn--create"
+      >
         Crear brain
       </button>
     </div>

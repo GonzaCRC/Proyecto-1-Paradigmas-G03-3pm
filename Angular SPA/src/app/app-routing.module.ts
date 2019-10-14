@@ -9,13 +9,12 @@ const routes: Routes = [
     children: [
       { path: "admin", component: AdminComponent },
       { path: "chatter", component: ChatterComponent }
-      // { path: "admin", component: NewProductComponent }
     ]
   }
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
+  imports: [RouterModule.forRoot(routes, { useHash: true })],
   exports: [RouterModule]
 })
 export class AppRoutingModule {}

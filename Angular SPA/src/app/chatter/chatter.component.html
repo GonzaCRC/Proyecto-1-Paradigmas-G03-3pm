@@ -1,39 +1,29 @@
 <div class="chatter-grid">
   <div class="chats">
     <h2 class="chats__title">CHATS</h2>
-    <div class="chat-preview chat-preview--active">
+    <div
+      *ngFor="let botName of botsNames; let i = index"
+      (click)="selectedBot = botsNames[i]; messages = []"
+      class="chat-preview"
+      [ngClass]="{ 'chat-preview--active': selectedBot == botsNames[i] }"
+    >
       <img
         class="chat-preview__avatar"
-        src="assets/img/bot2.png"
+        src="assets/img/brain.png"
         alt="Bot avatar"
       />
       <div class="chat-preview__text">
         <span class="chat-preview__botname">
-          R2-D2
+          {{ botName }}
         </span>
         <p class="chat-preview__message">
-          How are you doing? :)
-        </p>
-      </div>
-    </div>
-    <div class="chat-preview">
-      <img
-        class="chat-preview__avatar"
-        src="assets/img/bot1.png"
-        alt="Bot avatar"
-      />
-      <div class="chat-preview__text">
-        <span class="chat-preview__botname">
-          C-3PO
-        </span>
-        <p class="chat-preview__message">
-          Good bye!
+          Last message
         </p>
       </div>
     </div>
   </div>
   <div class="chat">
-    <h1 class="chat__botname">R2-D2</h1>
+    <h1 class="chat__botname">BOT'S NAME</h1>
     <div #messagesDiv class="messages">
       <div
         *ngFor="let message of messages; let i = index"

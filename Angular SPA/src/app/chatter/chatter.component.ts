@@ -1,53 +1,80 @@
-import { Component, OnInit, ViewChild, ElementRef } from "@angular/core";
+import {
+  Component,
+  OnInit,
+  ViewChild,
+  ElementRef,
+  OnDestroy
+} from "@angular/core";
+import { ChatService } from "../chat.service";
+import { Subscription } from "rxjs";
 import { Message } from "src/models/Message";
-import { HttpClient } from "@angular/common/http";
+import { RivescriptFilesService } from "../rivescript-files.service";
 
 @Component({
   selector: "app-chatter",
   templateUrl: "./chatter.component.html",
   styleUrls: ["./chatter.component.scss"]
 })
-export class ChatterComponent implements OnInit {
+export class ChatterComponent implements OnInit, OnDestroy {
   @ViewChild("messagesDiv", { static: false }) messagesDiv: ElementRef;
   @ViewChild("messageInput", { static: false }) messageInput: ElementRef;
 
   messages: Message[] = [];
-  userPicture: string = "assets/img/user.jpg";
-  botPicture: string = "assets/img/bot2.png";
-
-  url: string = "http://localhost:3000/api2";
+  userPicture: String = "assets/img/user.jpg";
+  botPicture: String = "assets/img/brain.png";
   messageBeingSent: boolean;
+  chatSubscription: Subscription;
+  botsNames: String[];
+  selectedBot: String;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private chatService: ChatService,
+    private rivescriptFilesService: RivescriptFilesService
+  ) {}
 
   ngOnInit() {
-    this.messages = [
-      { owner: "User", body: "Hello.." },
-      { owner: "Bot", body: "Hellooo" }
-    ];
+    console.log("Subscribe");
+
+    this.rivescriptFilesService
+      .getRivescriptFilesNames()
+      .subscribe((res: String[]) => {
+        this.botsNames = res;
+
+        this.selectedBot = this.botsNames[0];
+      });
+
+    this.chatSubscription = this.chatService.messages.subscribe(msg => {
+      this.messages.push(msg);
+      this.scrollChat();
+    });
+  }
+
+  ngOnDestroy() {
+    console.log("Unsubscribe");
+
+    this.chatSubscription.unsubscribe();
   }
 
   onSendMessage(message) {
     if (message) {
       this.messageBeingSent = true;
-      this.messages.push({ _id: 0, owner: "User", body: message });
-      this.messagesDiv.nativeElement.scrollTop = this.messagesDiv.nativeElement.scrollHeight;
 
-      let postData = { id: 0, owner: "User", body: message };
+      this.messages.push({ owner: "User", body: message });
+
+      this.scrollChat();
 
       setTimeout(() => {
-        this.messages.push({ _id: 0, owner: "Bot", body: "..." });
+        this.messages.push({ owner: "Bot", body: "..." });
+
+        this.scrollChat();
 
         setTimeout(() => {
           this.messages.pop();
 
-          this.http
-            .post(this.url, postData)
-            .toPromise()
-            .then(data => {
-              if (data != null) this.messages = data["data"].messages;
-            });
-          this.messagesDiv.nativeElement.scrollTop = this.messagesDiv.nativeElement.scrollHeight;
+          this.chatService.messages.next({
+            body: message,
+            brainName: this.selectedBot
+          });
 
           this.messageBeingSent = false;
         }, Math.floor(Math.random() * (3000 - 1000 + 1) + 1000));
@@ -55,5 +82,11 @@ export class ChatterComponent implements OnInit {
 
       this.messageInput.nativeElement.value = "";
     }
+  }
+
+  scrollChat() {
+    setTimeout(() => {
+      this.messagesDiv.nativeElement.scrollTop = this.messagesDiv.nativeElement.scrollHeight;
+    }, 5);
   }
 }
