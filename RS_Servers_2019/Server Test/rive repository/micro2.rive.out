@@ -1,0 +1,16 @@
+// *** Rive Program *** : Generated at: 13/10/19 13:14:28 
+
+// >>> Trigger Block 
++ hola bot 
+
+// >>> Response Block 
+- hola 
+
+// >>> Response Block 
+- que pasa { weight = 5 0 } 
+
+// >>> Trigger Block 
++ como estas 
+
+// >>> Response Block 
+- bien 

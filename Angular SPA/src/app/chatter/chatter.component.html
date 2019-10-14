@@ -1,0 +1,82 @@
+<div class="chatter-grid">
+  <div class="chats">
+    <h2 class="chats__title">CHATS</h2>
+    <div class="chat-preview chat-preview--active">
+      <img
+        class="chat-preview__avatar"
+        src="assets/img/bot2.png"
+        alt="Bot avatar"
+      />
+      <div class="chat-preview__text">
+        <span class="chat-preview__botname">
+          R2-D2
+        </span>
+        <p class="chat-preview__message">
+          How are you doing? :)
+        </p>
+      </div>
+    </div>
+    <div class="chat-preview">
+      <img
+        class="chat-preview__avatar"
+        src="assets/img/bot1.png"
+        alt="Bot avatar"
+      />
+      <div class="chat-preview__text">
+        <span class="chat-preview__botname">
+          C-3PO
+        </span>
+        <p class="chat-preview__message">
+          Good bye!
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="chat">
+    <h1 class="chat__botname">R2-D2</h1>
+    <div #messagesDiv class="messages">
+      <div
+        *ngFor="let message of messages; let i = index"
+        class="message-box"
+        [ngClass]="'message-box--'.concat(message.owner | lowercase)"
+      >
+        <img
+          class="message-box__picture"
+          [ngClass]="'message-box__picture--'.concat(message.owner | lowercase)"
+          [src]="
+            (message.owner | lowercase) == 'bot' ? botPicture : userPicture
+          "
+          alt="Bot picture"
+        />
+        <div
+          class="message-box__message message-box__message--bot"
+          [ngClass]="'message-box__message--'.concat(message.owner | lowercase)"
+        >
+          <span> {{ message.body }}</span>
+        </div>
+        <a
+          [ngStyle]="{
+            visibility: messageBeingSent ? 'hidden' : 'visible',
+            opacity: messageBeingSent ? '0' : '1'
+          }"
+          (click)="onSendMessage(messages[i].body)"
+          *ngIf="(message.owner | lowercase) == 'user'"
+          class="message-box__repeat-option"
+          >Repetir mensaje</a
+        >
+      </div>
+    </div>
+    <input
+      (keyup.enter)="onSendMessage($event.target.value)"
+      class="typer"
+      type="text"
+      placeholder="{{
+        messageBeingSent
+          ? 'Waiting for response...'
+          : 'Type something and hit Enter!'
+      }}"
+      #messageInput
+      [disabled]="messageBeingSent"
+    />
+  </div>
+</div>
