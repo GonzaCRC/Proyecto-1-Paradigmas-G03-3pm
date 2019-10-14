@@ -1,28 +1,90 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <title>Test Server Prolog</title>
-</head>
-<body>
-    <form method="POST" action="/upload" enctype="multipart/form-data">
-            <input type="file" name="file">
-            <input type="submit" value="upload file">
-    </form> 
-    
-    <br><br>
+	<title>Sample Websocket Client</title>
 
-    <button onclick="getRiveFiles()">Get Files</button>
-    <select id="riveFiles"></select>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
-</body>
-</html>
+	<script type="text/javascript">
+		var wsUri = 'ws://localhost:9010/chat';
+		var output;
 
-<script>
-    function getRiveFiles(){
+		class WsClient {
+			constructor() {
+				this.output = document.getElementById('output');
+
+				$('#send').on('click', this.sendHandler.bind(this));
+				$('#connect').on('click', this.connectHandler.bind(this));
+				$('#close').on('click', this.closeHandler.bind(this));
+			}
+
+			sendHandler() {
+				var msg = $('#input').val();
+				var file = $('#riveFiles').val();
+				this.doSend(msg,file);
+			}
+
+			connectHandler() {
+				let ws = this.ws = new WebSocket(wsUri);
+
+				ws.onopen = this.onOpen.bind(this);
+				ws.onclose = this.onClose.bind(this);
+				ws.onmessage = this.onMessage.bind(this);
+				ws.onerror = this.onError.bind(this);
+			}
+
+			closeHandler() {
+				if (this.socketConnected()) {
+					this.ws.close();
+				}
+			}
+
+			socketConnected() {
+				let ws = this.ws;
+				return (ws && ws.readyState === ws.OPEN);
+			}
+
+			onOpen(evt) {
+				this.writeToScreen("CONNECTED");
+				// this.doSend("WebSocket rocks");
+			}
+
+			onClose(evt) {
+				this.writeToScreen("DISCONNECTED");
+			}
+
+			onMessage(evt) {
+				this.writeToScreen('<span style="color: blue;">RESPONSE: ' + evt.data + '</span>');
+			}
+
+			onError(evt) {
+				this.writeToScreen('<span style="color: red;">ERROR:</span> ' + evt.data);
+			}
+
+			doSend(message,file) {
+				if (!this.socketConnected()) { return; }
+				this.writeToScreen("SENT: " + message);
+				this.ws.send(JSON.stringify({
+					msg : '"'+message+'"',
+					nameFile: '"'+file+'"'
+				}));
+			}
+
+			writeToScreen(message) {
+				var pre = document.createElement('p');
+				pre.style.wordWrap = 'break-word';
+				pre.innerHTML = message;
+				this.output.appendChild(pre);
+			}
+
+			static getInstance() {
+				return new WsClient();
+			}
+		}
+
+	function getRiveFiles(){
         $.ajax({type: "GET", 
         url:"/getRiveFiles",
         success: function(result) {fillSelect(result.data);},
@@ -37,9 +99,39 @@
 
     function option(select,file){
         var opt = document.createElement("option");
-        opt.value=file;
+        opt.value = file;
         opt.innerHTML = file;
         select.append(opt);
     }
 
-</script>
+		window.addEventListener('load', WsClient.getInstance, false);
+	</script>
+</head>
+<body>
+<div class="container">
+	<h1>Sample Websocket Client</h1>
+	<div class="row">
+		<div class="col-md-6">
+			<div class="form-group">
+				<button id="connect" class="btn btn-default">Connect</button>
+				<button id="close" class="btn btn-default">Close</button>
+			</div>
+			<div class="form-group">
+				<textarea id="input" class="form-control" placeholder="Type message here"></textarea>
+			</div>
+			<div class="form-group">
+				<button class="btn btn-primary" onclick="getRiveFiles()">Get Files</button>
+				<br>
+				<select class="mdb-select form-control" id="riveFiles"></select>
+				<br>
+				<button id="send" class="btn btn-primary">Send</button>
+			</div>
+		</div>
+		<div class="col-md-6">
+			<samp id="output"></samp>
+		</div>
+	</div>
+</div>
+
+</body>
+</html>

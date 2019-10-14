@@ -24,6 +24,7 @@
 :- http_handler(root(.), http_reply_from_files('.', []), [prefix]).
 :- http_handler(root(upload), upload, []).
 :- http_handler(root(getRiveFiles), getRiveFiles, [method(get)]).
+%:- http_handler(root(getResponse),riveResponse,[method(post)]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%% Methods %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -52,6 +53,24 @@ getRiveFiles(_Request) :-
 .
 
 listFiles(Path,FileList):- findall(File, directory_member(Path,File,[]), FileList). 
+
+/*riveResponse(Request) :-
+	http_read_json(Request, Data, []),
+    %arg(1,Data,Msg),
+	%post_msg(Msg,Reply),
+	%cors_enable,
+    reply_json(json([data(Data)]))
+.*/
+
+%%%%%%%%%%%%%%%%%%% Temp Server Node %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+node_endpoint('http://localhost:6000').
+
+post_msg(Msg, Reply) :-
+  node_endpoint(NodeEndPoint),
+  format(atom(AtomMsg), '{"msg":"~s"}', [Msg]), 
+  http_post(NodeEndPoint, atom(AtomMsg), Reply, [])
+.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Server Control %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 start_server :-
