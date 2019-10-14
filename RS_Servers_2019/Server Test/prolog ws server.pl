@@ -4,8 +4,12 @@
 :- use_module(library(http/http_cors)).
 :- use_module(library(http/http_client)).
 :- use_module(library(http/http_dispatch)).
+:- use_module(library(http/http_dispatch)).
+
+:-  use_module(rsEval).
 
 :- initialization(start_server).
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%% Handlers %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -19,10 +23,8 @@ chat(WebSocket) :-
         cors_enable,
         arg(2,Message.data,Msg), %mensaje
         arg(4,Message.data,NameFile), %nombre de archivo
-        
-        %Aqui se agrega el Evaluador devolver MessageRes
-
-    	ws_send(WebSocket, text(MessageRes)),
+        rsEval:genCodeToFile(NameFile, Msg, R),
+    	ws_send(WebSocket, text(R)),
         chat(WebSocket)
     ).
 

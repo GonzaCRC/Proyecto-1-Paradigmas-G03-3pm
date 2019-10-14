@@ -19,8 +19,9 @@ compile(InPath, OutPath, Filename) :-
    rsParser:parse(PathInFile, P),
    atom_concat(OutPath, Filename, PathOutFile),
    atom_concat(PathOutFile, '.out', RSOutFile),
+   atom_concat('src/rs.trees/', Filename, PathInFile2),
    format('*** Writing   :"~a" *** ~n', [RSOutFile]),
-   open(Filename, write, Tree),
+   open(PathInFile2, write, Tree),
    format(Tree, '~w ', [P]),
    close(Tree)
 .
