@@ -42,7 +42,7 @@ upload(Request) :-
 	    close(Out),
 		cors_enable, 
 		format('Content-type: text/plain~n~n'),
-		rsCompiler:compile('temp/','rive repository/',FileName),
+		rsCompiler:compile('temp/','riveRepository/',FileName),
 		delete_file(PathFile)		
 		;throw(http_reply(bad_request(bad_file_upload)))
 	).
@@ -50,7 +50,7 @@ upload(Request) :-
 prolog:message(bad_file_upload) --> [ 'Error' ].
 
 getRiveFiles(_Request) :- 
-	listFiles('rive repository/',Files),
+	listFiles('riveRepository/',Files),
 	cors_enable,
     reply_json(json([data(Files)]))
 .

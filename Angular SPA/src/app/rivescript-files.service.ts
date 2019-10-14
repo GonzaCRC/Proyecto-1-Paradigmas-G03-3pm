@@ -15,7 +15,7 @@ export class RivescriptFilesService {
     return this.http.get(environment.staticServerUrl + "/getRiveFiles").pipe(
       map((res: any) => {
         let filteredArray: Array<String> = res.data.map(botName => {
-          return botName.slice(16, botName.indexOf(".rive.out"));
+          return botName.slice(15, botName.indexOf(".rive.out"));
         });
 
         return filteredArray.slice(1, filteredArray.length);

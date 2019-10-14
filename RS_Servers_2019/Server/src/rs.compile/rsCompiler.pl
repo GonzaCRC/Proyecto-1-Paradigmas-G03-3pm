@@ -11,7 +11,6 @@ Gabriel Araya Ruiz
 :- module(rsCompiler, [compile/0, compile/1, compile/3]).
 
 :- use_module(rsParser).
-:- use_module(rsEmiter).
 
 compile(InPath, OutPath, Filename) :-
    atom_concat(InPath, Filename, PathInFile),
@@ -20,8 +19,12 @@ compile(InPath, OutPath, Filename) :-
    rsParser:parse(PathInFile, P),
    atom_concat(OutPath, Filename, PathOutFile),
    atom_concat(PathOutFile, '.out', RSOutFile),
+   atom_concat('./riveRepository/', Filename, PathInFile2),
+   atom_concat(PathInFile2, '.out', RSOutFile2),
    format('*** Writing   :"~a" *** ~n', [RSOutFile]),
-   rsEmiter:genCodeToFile(RSOutFile, P)
+   open(RSOutFile2, write, Tree),
+   format(Tree, '~w ', [P]),
+   close(Tree)
 .
 compile(InPath, _, Filename) :-
    atom_concat(InPath, Filename, PathInFile),
