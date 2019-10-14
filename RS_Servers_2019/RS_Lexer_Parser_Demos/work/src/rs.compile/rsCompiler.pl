@@ -21,6 +21,9 @@ compile(InPath, OutPath, Filename) :-
    atom_concat(OutPath, Filename, PathOutFile),
    atom_concat(PathOutFile, '.out', RSOutFile),
    format('*** Writing   :"~a" *** ~n', [RSOutFile]),
+   open(Filename, write, Data),
+   format(Data, '~w ', [P]),
+   close(Data),
    rsEmiter:genCodeToFile(RSOutFile, P)
 .
 compile(InPath, _, Filename) :-
