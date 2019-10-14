@@ -16,13 +16,7 @@ Gabriel Araya Ruiz
                        genCode/2
                     ]).
 
-
-:- use_module(rsParser).
-
-testEval :-
-    rsParser:testParser(P),
-    genCode(P)
-.
+:- use_module(library(memfile)).
 
 capitalize_aux(Word,UPword):- 
 atom_chars(Word, [FirstLow|Rest]),
@@ -50,18 +44,26 @@ evaluador([X|L], A, R) :- evaluador(L, [X|A], R), !.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-genCodeToFile(File, RS_Prog) :-
-   writeln(RS_Prog  ),nl,
-   open(File, write, Out),
-   genCode(Out, RS_Prog),
-   close(Out)
+genCodeToFile(File,Codes) :-
+    open(File, read, Str),
+    read_string(Str, "\n", "\r", End, String),
+    close(Str),
+   term_string(RS_Prog, String),  
+   new_memory_file(Handle),     
+   open_memory_file(Handle, write, S),
+   genCode(S, RS_Prog),
+   memory_file_to_atom(Handle, Codes),
+   close(S)
 . 
+
+
+
 
 :- dynamic bandera/1.
 :- dynamic banderaRespuesta/1.
 
-genCodeList(Out, L) :- genCodeList(Out, L, '')
-.
+genCodeList(Out, L) :- genCodeList(Out, L, ''). 
+
 genCodeList(_, [], _).
 genCodeList(Out, [C], _) :- genCode(Out, C).
 genCodeList(Out, [X, Y | L], Sep) :- bandera(verdadera), banderaRespuesta(verdadera); (genCode(Out, X), 
@@ -144,7 +146,7 @@ printList(_, []).
 printList(Out,[X|L]) :- format(Out, '~a ', [X]), printList(Out, L).
 
 genCodeResponse(Out, response(WL)) :- !,
-	 bandera(verdadera),
+     bandera(verdadera),
      genCodeList(Out, WL),
 	 findall(X, palabra(X), L),
 	 writeln(L),
