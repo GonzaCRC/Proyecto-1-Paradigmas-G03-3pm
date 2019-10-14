@@ -28,9 +28,10 @@ capitalize([H1|T1], [H2|T2]):-
 capitalize_aux(H1,H2),
 capitalize(T1,T2).
 
-tablaSimbolos([], _, A2) :- assert(asterisk(1, A2)), !.
-tablaSimbolos([X|L], [X2|L2], A2) :- writeln(X),writeln(X2),writeln(L),writeln(L2),X == X2,tablaSimbolos(L, L2, A2), !. 
-tablaSimbolos([X|L], [X2|L2], A2) :- X2 == *, tablaSimbolos(L, [*|L2], [X|A2]), !.
+tablaSimbolos([], [X|_], A2) :- X == *, assert(asterisk(1, A2)).
+tablaSimbolos([], _, _).
+tablaSimbolos([X|L], [X2|L2], A2) :- term_string(X3, X), X2 == *, tablaSimbolos(L, [*|L2], [X3|A2]).
+tablaSimbolos([X|L], [X2|L2], A2) :- term_string(X3, X), X3 == X2, tablaSimbolos(L, L2, A2). 
 
 evaluador([], A, A) :- !.
 evaluador([X|L], A, R) :- X = star(P), asterisk(P, M), evaluador(L, [M|A], R), !.
@@ -69,13 +70,14 @@ genCodeToFile(File,Ques,String2) :- !,
     retractall(question(_)),
     retractall(asterisk(_,_)),
     retractall(botVariable(_,_)),
+    retractall(palabra(_,_)),
     retractall(variable(_,_)).
 
 genCodeList(Out, L) :- genCodeList(Out, L, ''). 
 
 genCodeList(_, [], _).
 genCodeList(Out, [C], _) :- genCode(Out, C).
-genCodeList(Out, [X, Y | L], Sep) :- bandera(verdadera), banderaRespuesta(verdadera); (genCode(Out, X), 
+genCodeList(Out, [X, Y | L], Sep) :-(bandera(verdadera), banderaRespuesta(verdadera)); (genCode(Out, X), 
                                     genCodeList(Out, [Y | L], Sep); 
                                     genCodeList(Out, [Y | L], Sep))
 . 
@@ -154,7 +156,7 @@ printList(_, []).
 printList(Out,[X|L]) :- format(Out, '~a ', [X]), printList(Out, L).
 
 genCodeResponse(Out, response(WL)) :- !,
-     bandera(verdadera),
+     ((bandera(verdadera),
      genCodeList(Out, WL),
 	 findall(X, palabra(X), L),
 	 retractall(palabra(_)),
@@ -162,18 +164,15 @@ genCodeResponse(Out, response(WL)) :- !,
 	 evaluador(L, [], R), 
 	 flatten(R, R2),
 	 reverse(R2, R3),
-     printList(Out,R3)
+     printList(Out,R3)); (retractall(palabra(_)), true))
 .
 
 genCodeTrigger(Out, trigger(WL)) :- !,
      genCodeList(Out, WL),
      findall(X, palabra(X), L),
-     retractall(palabra(_)),
-     retract(question(M)),
-     writeln(M),
-     tablaSimbolos(M, L, []),
-     retractall(question(_)),
-     assert(bandera(verdadera))
+     question(M),
+     (tablaSimbolos(M, L, []), assert(bandera(verdadera)) ; (true)),
+     retractall(palabra(_))
 .
 
 genCodeDefine(_,var(B, V, word(W))) :- !,
