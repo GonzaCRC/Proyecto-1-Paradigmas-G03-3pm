@@ -1,18 +1,9 @@
-+ hello world
-- hello there
+! var name = Tutorial
 
-+ hi you do paw
-- only god knows how 
-- 666 is my secret
++ *
 
-+ 2 plus 2 is #
-- <star> is right
-- 4
+- <set name={formal}<star1>{/formal}> Nice to meet you, <get name>.
+- <set name=<formal>> Hi <get name>!
+- I am {formal}<bot name>{/formal}
 
-+ your name is *
-- Ok. I am {formal}<star>{/formal}
-
-+ {weight=20} * is *
-- Yes. <star1> is <star2>
-- 2 stars for u
 
