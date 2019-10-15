@@ -1,3 +1,8 @@
++ [do] you know my name
+* <get name> != undefined => Yes, your name is <get name>.
+- No, you've never told me your name before.
+
+
 + *
 - Once again?!
 - I beg you pardon
@@ -5,6 +10,3 @@
 + my name is *
 - <set name=<formal>>I will call you <get name> from now on.
 
-+ [do] you know my name
-* <get name> != undefined => Yes, your name is <get name>.
-- No, you've never told me your name before.

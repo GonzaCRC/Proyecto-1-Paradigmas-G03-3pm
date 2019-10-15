@@ -33,7 +33,7 @@ testParser(P) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Main Parse predicate %%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 parse(_, _) :- reset_line_number, 
-               reset_some_indexes([asterisk, hash, underscore]),
+               reset_some_indexes([star]),
                fail
 .
 parse(File, ProgAst) :- 
@@ -55,23 +55,43 @@ parse(File, _) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 :- dynamic triggerBlock/1.
+:- dynamic responseBlock/1.
 
 rsProgram(rsProg(FL)) --> rsCommandList(FL)
 .
-rsCommandList([]) --> []
+rsCommandList([]) --> [], {triggerBlock(true)}, {responseBlock(true)}
 .
 rsCommandList(L) --> ['\n'], {inc_line_number}, rsCommandList(L)
 .
-rsCommandList([trigger_block(B) | R]) --> trigger_block(B), !, {reset_some_indexes([asterisk, hash, underscore])}, {assert(triggerBlock(true))}, rsCommandList(R)
+rsCommandList([trigger_block(B) | R]) --> trigger_block(B), !, {reset_some_indexes([star])}, {assert(triggerBlock(true))}, rsCommandList(R)
 .
-rsCommandList([response_block(B) | R]) --> {triggerBlock(true)}, response_block(B), !, rsCommandList(R)
+rsCommandList([response_block(B) | R]) --> {assert(responseBlock(true))}, response_block(B), !, rsCommandList(R)
 .
 rsCommandList([define_block(B) | R])  --> define_block(B), !, rsCommandList(R)
 .
+rsCommandList([comment_block(B) | R])  --> comment_block(B), !, rsCommandList(R)
+.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% COMMENT BLOCK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+comment_block(trigger(TL)) --> ['/'], ['/'], comment_token_list(TL)
+.
+
+comment_token_list([])  --> ['\n'], {inc_line_number}
+.
+comment_token_list([T | TL])  --> comment_token(T), comment_token_list(TL)
+.
+
+comment_token(W) --> word(W)
+.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Trigger Block %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -98,7 +118,7 @@ trigger_tag(I) --> ['<'], input_ref(I),  ['>']
 trigger_tag(I) --> ['<'], reply_ref(I),  ['>']
 .
 
-trigger_tag(I) --> ['<'], star_ref(I),  ['>']
+trigger_tag(I) --> ['<'], star_ref(I),  ['>'], fail
 .
 
 trigger_tag(array(inline, WL)) --> ['('], word_list(WL), [')']
@@ -110,6 +130,9 @@ trigger_tag(array(ref, W)) --> ['(', '@'], word(W), [')']
 trigger_tag(W) --> ['{'], word_list(W), ['}']
 .
 
+trigger_tag(optional(W)) --> ['['], word(W), [']']
+.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -118,7 +141,11 @@ trigger_tag(W) --> ['{'], word_list(W), ['}']
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%% Response Block/Commands %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+
 response_block(response(TL)) --> ['-'], response_token_list(TL)
+.
+
+response_block(response_condition(V, equals, B, D)) --> ['*'],  ['<', get], id(V), ['>'], [O], [B], ['=', '>'], response_token_list(D)
 .
 
 response_token_list([])  --> ['\n'], {inc_line_number}
@@ -194,7 +221,6 @@ enforce_integer(A, _, Msg) :- throw(syntaxError(Msg, A))
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Define Block/Commands %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 % Generate formal tag tree
 
 token_list_define([]), ['='] --> ['=']
@@ -208,9 +234,9 @@ token_list_define([T | TL])  --> word(T), token_list_define(TL)
 
 define_block(B) --> ['!'], define_command(B)
 .
-define_command(var(global, version, V)) --> [version], ['='], [T], {convert_value(T, V)}
+define_command(var(global, version, V)) --> [version], ['='], [T], [.], [T2], {convert_value(T, V)}, {convert_value(T2, _)}
 .
-define_command(var(bot, N, V)) --> [var], word(word(N)), ['='], [T], {convert_value(T, V)}
+define_command(var(bot, N, V)) --> [var], word(word(N)), ['='], token_list_define(V)
 .
 define_command(var(global, N, V)) --> [global], word(word(N)), {reserved_name(N)},
                                       ['='], [T], {convert_value(T, V)}
@@ -224,11 +250,17 @@ define_command(substitution(N, V)) --> token_list_define(N), ['='], token_list_d
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Common Tools %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-wild_card(hash(N)) --> ['#'], {next_index(hash, N)}
+wild_card(hash(N)) --> ['#'], {next_index(star, N)}
 .
-wild_card(asterisk(N)) --> ['*'], {next_index(asterisk, N)}
+wild_card(asterisk(N)) --> ['*'], {next_index(star, N)}
 .
-wild_card(underscore(N)) --> ['_'], {next_index(underscore, N)}
+wild_card(underscore(N)) --> ['_'], {next_index(star, N)}
+.
+
+word(word('''''')) -->  ['''']
+.
+
+word(word(''''|'''')) -->  ['|']
 .
 
 word(num(N)) --> id(id(W)), {convert_value(W, num(N))}
