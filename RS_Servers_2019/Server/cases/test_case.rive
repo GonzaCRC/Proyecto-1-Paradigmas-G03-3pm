@@ -1,0 +1,13 @@
+! var prueba = BOT
+
++ hola como estas
+- respuesta de trigger sencillo
+
++ mi nombre es *
+-<set name=<formal>>, prueba de star con formal <get name>
+
++ bot variable prueba
+- prueba <bot prueba>
+
++ *
+- respuesta de trigger de <star> sola

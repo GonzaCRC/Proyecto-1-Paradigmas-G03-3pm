@@ -145,7 +145,7 @@ trigger_tag(optional(W)) --> ['['], word(W), [']']
 response_block(response(TL)) --> ['-'], response_token_list(TL)
 .
 
-response_block(response_condition(V, equals, B, D)) --> ['*'],  ['<', get], id(V), ['>'], [O], [B], ['=', '>'], response_token_list(D)
+response_block(response_condition(V, OP , B, D)) --> ['*'],  ['<', get], id(V), ['>'], [O], [B], ['=', '>'], response_token_list(D), {(O == '==', OP = eq); (O == '!=', OP = ne)}
 .
 
 response_token_list([])  --> ['\n'], {inc_line_number}

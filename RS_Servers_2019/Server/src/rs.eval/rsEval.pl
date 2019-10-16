@@ -16,7 +16,6 @@ Gabriel Araya Ruiz
                        genCode/2
                     ]).
 
-:- use_module(library(memfile)).
 
 capitalize_aux(Word,UPword):- 
 atom_chars(Word, [FirstLow|Rest]),
@@ -24,38 +23,49 @@ upcase_atom(FirstLow,R),
 atom_chars(UPword, [R|Rest]).
 
 capitalize([], []).
+capitalize([word(H1)|T1], [H2|T2]):- 
+capitalize_aux(H1,H2),
+capitalize(T1,T2).
 capitalize([H1|T1], [H2|T2]):- 
 capitalize_aux(H1,H2),
 capitalize(T1,T2).
 
-tablaSimbolos([], [X|_], A2) :- X = asterisk(N), assert(star(N, A2)).
-tablaSimbolos([], _, _).
- tablaSimbolos([X|L], [X2|L2], A2) :- 
-	term_string(X3, X), X2 = optional(N), 
-	(X3 == N, tablaSimbolos(L, L2, A2); tablaSimbolos([X3|L], L2, A2)).
-tablaSimbolos([X|L], [X2|L2], A2) :- term_string(X3, X), X3 == X2, tablaSimbolos(L, L2, A2). 
-tablaSimbolos([X|L], [X2|L2], A2) :- term_string(X3, X), X2 = hash(N),assert(star(N, X3)), tablaSimbolos(L, L2, A2).
-tablaSimbolos([X|L], [X2|L2], A2) :- term_string(X3, X), X2 = underscore(N), assert(star(N, X3)), tablaSimbolos(L, L2, A2).
-tablaSimbolos([X|L], [X2|L2], A2) :- term_string(X3, X), X2 = asterisk(N), L2 == [], tablaSimbolos(L, [asterisk(N)|L2], [X3|A2]).
-tablaSimbolos([X|L], [X2|L2], A2) :- term_string(X3, X), X2 = asterisk(N), assert(star(N, X3)), tablaSimbolos(L, L2, A2).
+initializeVariables([]).
+initializeVariables([X|L]) :- X = hash(N), assert(star(N, undefined)), initializeVariables(L).
+initializeVariables([X|L]) :- X = underscore(N), assert(star(N, undefined)), initializeVariables(L).
+initializeVariables([X|L]) :- X = asterisk(N), assert(star(N, undefined)), initializeVariables(L).
+initializeVariables([X|L]) :- X = set(id(H),_), assert(variable(H, undefined)), initializeVariables(L).
+initializeVariables([_|L]) :- initializeVariables(L).
 
-evaluador([], A, A) :- !.
-evaluador([X|L], A, R) :- X = underscore(P), star(P, M), evaluador(L, [M|A], R), !.
-evaluador([X|L], A, R) :- X = hash(P), star(P, M), evaluador(L, [M|A], R), !.
-evaluador([X|L], A, R) :- X = weight(P), writeln(P), evaluador(L, A, R), !.
-evaluador([X|L], A, R) :- X = star(P), star(P, M), evaluador(L, [M|A], R), !.
-evaluador([X|L], A, R) :- X = formal(star(P)), star(P, M),capitalize(M,U),evaluador(L, [U|A], R), !.
-evaluador([X|L], A, R) :- X = formal(bot(id(P))), botVariable(P, M),capitalize([M],K),evaluador(L, [K|A], R), !.
-evaluador([X|L], A, R) :- X = bot(N), botVariable(N, M), evaluador(L, [M|A], R), !.
-evaluador([X|L], A, R) :- X = set(id(H),star(P)), star(P, N), assert(variable(H, N)), evaluador(L, A, R), !.
-evaluador([X|L], A, R) :- X = set(id(H),formal([star(P)])), star(P, N),capitalize(N,U),assert(variable(H, U)), evaluador(L, A, R), !.
-evaluador([X|L], A, R) :- X = get(P), (variable(P, M), evaluador(L, [M|A], R); evaluador(L, [undefined|A], R)), !.
-% evaluador([X|L], A, R) :- X = response_condition(V, O, _, D), O == '!=', (variable(V, M), evaluador(L, A, R); evaluador(L, [D|A], R)), !.
-% evaluador([X|L], A, R) :- X = response_condition(V, O, _, D), O == '==', (evaluador(L, [D|A], R); variable(V, M), evaluador(L, A, R); ), !.
-evaluador([X|L], A, R) :- evaluador(L, [X|A], R), !.
+symbolTable([], [], _).
+symbolTable([], [asterisk(_)], _).
+symbolTable([X|L], [X2|L2], A2) :- term_string(X3, X), X2 = optional(N), (X3 == N, symbolTable(L, L2, A2); symbolTable([X3|L], L2, A2)).
+symbolTable([X|L], [X2|L2], A2) :- term_string(X3, X), X3 == X2, symbolTable(L, L2, A2). 
+symbolTable([X|L], [X2|L2], A2) :- term_string(X3, X), X2 = hash(N), number(X3), retract(star(N, _)), assert(star(N, X3)), symbolTable(L, L2, A2).
+symbolTable([X|L], [X2|L2], A2) :- term_string(X3, X), X2 = underscore(N), retract(star(N, _)), assert(star(N, X3)), symbolTable(L, L2, A2).
+symbolTable([X|L], [X2|[Y|L2]], A2) :- term_string(X3, X), X2 = asterisk(N),((Y == X3); (symbolTable([X|L], [Y|L2], A2))), star(N, M), M \= 'undefined', symbolTable([X|L], [Y|L2], A2).
+symbolTable([X|L], [X2|L2], A2) :- term_string(X3, X), X2 = asterisk(N), retract(star(N, M)), ((M == 'undefined', P = ''); P = M), assert(star(N, [X3|P])), symbolTable(L, [asterisk(N)|L2], A2).
+symbolTable([_|L], [X2|L2], A2) :- X2 = set(id(H),formal([star(P)])), star(P, N), capitalize(N,U), retract(variable(H, _)), assert(variable(H, U)), symbolTable(L, L2, A2).
+symbolTable([_|L], [X2|L2], A2) :- X2 = set(id(H),star(P)), star(P, N), retract(variable(H, _)), assert(variable(H, N)), symbolTable(L, L2, A2).
 
-:- dynamic bandera/1.
-:- dynamic banderaRespuesta/1.
+interpreter([], A, A).
+interpreter([X|L], A, R) :- X = underscore(P), star(P, M), interpreter(L, [M|A], R).
+interpreter([X|L], A, R) :- X = hash(P), star(P, M), interpreter(L, [M|A], R).
+interpreter([X|L], A, R) :- X = weight(_), interpreter(L, A, R).
+interpreter([X|L], A, R) :- X = star(P), star(P, M), interpreter(L, [M|A], R).
+interpreter([X|L], A, R) :- X = formal([get(id(P))|N]), variable(P, M), capitalize([M|N],U), reverse(U, U2), flatten([U2|A], L2), writeln(L2), interpreter(L, L2, R).
+interpreter([X|L], A, R) :- X = formal(star(P)), star(P, M),capitalize(M,U),interpreter(L, [U|A], R).
+interpreter([X|L], A, R) :- X = formal(bot(id(P))), botVariable(P, M),capitalize([M],K),interpreter(L, [K|A], R).
+interpreter([X|L], A, R) :- X = bot(N), botVariable(N, M), interpreter(L, [M|A], R).
+interpreter([X|L], A, R) :- X = get(P), variable(P, M), interpreter(L, [M|A], R).
+interpreter([X|L], A, R) :- X = set(id(H),formal([star(P)])), star(P, N), capitalize(N,U), retract(variable(H, _)), assert(variable(H, U)), interpreter(L, A, R).
+interpreter([X|L], A, R) :- X = set(id(H),star(P)), star(P, N), retract(variable(H, _)), assert(variable(H, N)), interpreter(L, A, R).
+% interpreter([X|L], A, R) :- X = response_condition(id(V), O, B, _), O == 'eq', variable(V, M); (initializeVariables([set(V,_)]), variable(V, M)), M == B, interpreter(L, A, R));  false).
+% interpreter([X|L], A, R) :- X = response_condition(id(V), O, B, _), O == 'ne', ((variable(V, M), M \= B, interpreter(L, A, R)); false).
+interpreter([X|L], A, R) :- interpreter(L, [X|A], R).
+
+:- dynamic triggerFlag/1.
+:- dynamic responseFlag/1.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -78,28 +88,28 @@ genCodeToFile(File,Ques,String2) :- !,
 	read_string(Str2, '\n', '\t', End, String2),
 	!,
 	close(Str2),
-	retractall(bandera(_)),
-    retractall(banderaRespuesta(_)),
+	retractall(triggerFlag(_)),
+    retractall(responseFlag(_)),
     retractall(question(_)),
     retractall(star(_,_)),
     retractall(botVariable(_,_)),
     retractall(palabra(_,_)),
-    retractall(variable(_,_)).
+    retractall(variable(_,_))
+.
 
-genCodeList(Out, L) :- genCodeList(Out, L, ''). 
-
-genCodeList(_, [], _).
-genCodeList(Out, [C], _) :- genCode(Out, C).
-genCodeList(Out, [X, Y | L], Sep) :-(bandera(verdadera), banderaRespuesta(verdadera)); (genCode(Out, X), 
-                                    genCodeList(Out, [Y | L], Sep); 
-                                    genCodeList(Out, [Y | L], Sep))
+walkTree(Out, L) :- walkTree(Out, L, ''). 
+walkTree(_, [], _).
+walkTree(Out, [C], _) :- genCode(Out, C).
+walkTree(Out, [X, Y | L], Sep) :-(triggerFlag(true), responseFlag(true)); (genCode(Out, X), 
+                                    walkTree(Out, [Y | L], Sep); 
+                                    walkTree(Out, [Y | L], Sep))
 . 
 
 
 genCode(P) :- genCode(user_output, P)
 .
 genCode(Out, rsProg(L)) :- !,
-    genCodeList(Out, L)
+    walkTree(Out, L)
 . 
 
 genCode(Out, trigger_block(T)) :- !,
@@ -117,22 +127,13 @@ genCode(Out, define_block(T)) :- !,
     genCodeDefine(Out, T) 
 .
 
-% genCode(_, response_condition(V, O, B, D)) :- !, assert(palabra(response_condition(V,O,B,D)))
-% .
-
 genCode(_, word('')) :- !, assert(palabra(''''))
 .
 
-genCode(Out, word(N)) :- !, genCode(Out, atom(N))
+genCode(_, set(I, E)) :-  !, assert(palabra(set(I, E)))
 .
 
-genCode(_, weight(N)) :- !, assert(palabra(weight(N)))
-.
-
-genCode(_, hash(N)) :- !, assert(palabra(hash(N)))
-.
-
-genCode(_, star(N)) :- !, assert(palabra(star(N)))
+genCode(_, optional(word(N))) :- !, assert(palabra(optional(N)))
 .
 
 genCode(_, get(id(N))) :- !, assert(palabra(get(N)))
@@ -141,16 +142,7 @@ genCode(_, get(id(N))) :- !, assert(palabra(get(N)))
 genCode(_, bot(id(N))) :- !, assert(palabra(bot(N)))
 .
 
-genCode(_, asterisk(N)) :- !, assert(palabra(asterisk(N)))
-.
-
-genCode(_, formal([N])) :- !, assert(palabra(formal(N)))
-.
-
-genCode(_, underscore(N)) :- !, assert(palabra(underscore(N)))
-.
-
-genCode(_, optional(word(N))) :- !, assert(palabra(optional(N)))
+genCode(Out, word(N)) :- !, genCode(Out, atom(N))
 .
 
 genCode(Out, id(N)) :- !, genCode(Out, atom(N))
@@ -159,48 +151,61 @@ genCode(Out, num(N))  :- !, genCode(Out, atom(N))
 .
 genCode(Out, oper(N)) :- !, genCode(Out, atom(N))
 .
-genCode(_, set(I, E)) :-  !,
-	assert(palabra(set(I, E)))
-.
 
 % Internal Representations
-genCode(Out, operation(O, L, R)) :- !,
-    genCodeList(Out, [L, O, R])
+genCode(Out, operation(O, L, R)) :- !, walkTree(Out, [L, O, R])
 .
 
 genCode(_, atom(N)) :- !, assert(palabra(N))
 .
 
-genCode(Out, comment(C)):-
-     format(Out, '// ~a \n', [C])
+genCode(_, N) :- !, assert(palabra(N))
 .
+
 %%%% Error case %%%%%%%%%%%%%%%%%%%%%%%%%%
-genCode(Out, E ) :- close(Out),!,
+genCode(Out, E) :- close(Out),!,
                     throw(genCode('genCode unhandled Tree', E))
 .
 
-
-printList(_, []).
-printList(Out,[X|L]) :- format(Out, '~a ', [X]), printList(Out, L).
+saveResponse(_, []).
+saveResponse(Out,[X|L]) :- format(Out, '~a ', [X]), saveResponse(Out, L).
 
 genCodeResponse(Out, response(WL)) :- !,
-     ((bandera(verdadera),
-     genCodeList(Out, WL),
-	 findall(X, palabra(X), L),
-	 retractall(palabra(_)),
-	 assert(banderaRespuesta(verdadera)),
-	 evaluador(L, [], R), 
-	 flatten(R, R2),
-	 reverse(R2, R3),
-     printList(Out,R3)); (retractall(palabra(_)), true))
+    initializeVariables(WL),
+    ((triggerFlag(true),
+    walkTree(Out, WL),
+	findall(X, palabra(X), L),
+	retractall(palabra(_)),
+	assert(responseFlag(true)),
+	interpreter(L, [], R), 
+	flatten(R, R2),
+	reverse(R2, R3),
+    saveResponse(Out,R3)); (retractall(palabra(_)), true))
+.
+
+genCodeResponse(Out, response_condition(V, O, B, D)) :- !,
+    assert(palabra(response_condition(V, O, B, _))),
+    ((triggerFlag(true),
+    walkTree(Out, D),
+	findall(X, palabra(X), L),
+	retractall(palabra(_)),
+	interpreter(L, [], R), 
+	flatten(R, R2),
+	reverse(R2, R3),
+    saveResponse(Out,R3), 
+	assert(responseFlag(true))); (retractall(palabra(_)), true))
 .
 
 genCodeTrigger(Out, trigger(WL)) :- !,
-     genCodeList(Out, WL),
-     findall(X, palabra(X), L),
-     question(M),
-     (tablaSimbolos(M, L, []), assert(bandera(verdadera)) ; (true)),
-     retractall(palabra(_))
+    retractall(hash(N)),
+    retractall(underscore(N)),
+    retractall(asterisk(N)),
+    initializeVariables(WL),
+    walkTree(Out, WL),
+    findall(X, palabra(X), L),
+    question(M),
+    (symbolTable(M, L, []), assert(triggerFlag(true)) ; (true)),
+    retractall(palabra(_))
 .
 
 genCodeDefine(_,var(B, V, [word(W)])) :- !,

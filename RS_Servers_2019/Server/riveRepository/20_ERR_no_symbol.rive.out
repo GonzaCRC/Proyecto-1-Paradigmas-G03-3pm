@@ -1,1 +1,0 @@
-rsProg([trigger_block(trigger([asterisk(1)])),response_block(response([word(Hi),get(id(name))]))]) 

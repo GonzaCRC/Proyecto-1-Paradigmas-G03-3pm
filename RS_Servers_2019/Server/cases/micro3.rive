@@ -1,15 +1,4 @@
 ! var name = Tutorial
 
-
-+ hola 
-- hola xdd
-
-
-+ hola
-
-- <set name={formal}<star1>{/formal}> Nice to meet you, <get name>.
-- <set name=<formal>> Hi <get name>!
-- I am {formal}<bot name>{/formal}
-
-
-
++ a * # _ 
+- <star1> <star3>
