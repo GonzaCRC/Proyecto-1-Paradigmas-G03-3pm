@@ -17,17 +17,17 @@ Gabriel Araya Ruiz
                     ]).
 
 
-capitalize_aux(Word,UPword):- 
+capitalize_optional(Word,UPword):- 
 atom_chars(Word, [FirstLow|Rest]),
 upcase_atom(FirstLow,R),
 atom_chars(UPword, [R|Rest]).
 
 capitalize([], []).
 capitalize([word(H1)|T1], [H2|T2]):- 
-capitalize_aux(H1,H2),
+capitalize_optional(H1,H2),
 capitalize(T1,T2).
 capitalize([H1|T1], [H2|T2]):- 
-capitalize_aux(H1,H2),
+capitalize_optional(H1,H2),
 capitalize(T1,T2).
 
 initializeVariables([]).
@@ -37,36 +37,54 @@ initializeVariables([X|L]) :- X = asterisk(N), assert(star(N, undefined)), initi
 initializeVariables([X|L]) :- X = set(id(H),_), assert(variable(H, undefined)), initializeVariables(L).
 initializeVariables([_|L]) :- initializeVariables(L).
 
-symbolTable([], [], _).
-symbolTable([], [asterisk(_)], _).
-symbolTable([X|L], [X2|L2], A2) :- term_string(X3, X), X2 = optional(N), (X3 == N, symbolTable(L, L2, A2); symbolTable([X3|L], L2, A2)).
-symbolTable([X|L], [X2|L2], A2) :- term_string(X3, X), X3 == X2, symbolTable(L, L2, A2). 
-symbolTable([X|L], [X2|L2], A2) :- term_string(X3, X), X2 = hash(N), number(X3), retract(star(N, _)), assert(star(N, X3)), symbolTable(L, L2, A2).
-symbolTable([X|L], [X2|L2], A2) :- term_string(X3, X), X2 = underscore(N), retract(star(N, _)), assert(star(N, X3)), symbolTable(L, L2, A2).
-symbolTable([X|L], [X2|[Y|L2]], A2) :- term_string(X3, X), X2 = asterisk(N),((Y == X3); (symbolTable([X|L], [Y|L2], A2))), star(N, M), M \= 'undefined', symbolTable([X|L], [Y|L2], A2).
-symbolTable([X|L], [X2|L2], A2) :- term_string(X3, X), X2 = asterisk(N), retract(star(N, M)), ((M == 'undefined', P = ''); P = M), assert(star(N, [X3|P])), symbolTable(L, [asterisk(N)|L2], A2).
-symbolTable([_|L], [X2|L2], A2) :- X2 = set(id(H),formal([star(P)])), star(P, N), capitalize(N,U), retract(variable(H, _)), assert(variable(H, U)), symbolTable(L, L2, A2).
-symbolTable([_|L], [X2|L2], A2) :- X2 = set(id(H),star(P)), star(P, N), retract(variable(H, _)), assert(variable(H, N)), symbolTable(L, L2, A2).
+/*
+[rsEval].
+genCodeToFile('04_star_set_get_formal','i dreamed potado',R).
+*/
+symbolTable([], [], _) :- !.
+symbolTable(N, [], _) :- N \= [], false.
+symbolTable([], [asterisk(_)], _) :- !.
+symbolTable(L, [X2|L2], A2) :- X2 = optional(N), N = asterisk(M), assert(star(M, undefined)), symbolTable(L, [asterisk(M)|L2], A2), !.
+symbolTable([X|L], [X2|L2], A2) :- term_string(X3, X), X2 = optional(N), (X3 == N, symbolTable(L, L2, A2); symbolTable([X|L], L2, A2)), !.
+symbolTable([X|L], [X2|L2], A2) :- term_string(X3, X), X3 == X2, symbolTable(L, L2, A2), !. 
+symbolTable([X|L], [X2|L2], A2) :- term_string(X3, X), X2 = hash(N), number(X3), retract(star(N, _)), assert(star(N, X3)), symbolTable(L, L2, A2), !.
+symbolTable([X|L], [X2|L2], A2) :- term_string(X3, X), X2 = underscore(N), retract(star(N, _)), assert(star(N, X3)), symbolTable(L, L2, A2), !.
+symbolTable([X|L], [X2|[Y|L2]], A2) :- X2 = asterisk(N), Y = asterisk(_), star(N, M), M \= 'undefined', symbolTable([X|L], [Y|L2], A2), !.
+symbolTable([X|L], [X2|[Y|L2]], A2) :- X2 = asterisk(N), term_string(X3, X), Y == X3, star(N, M), M \= 'undefined', symbolTable([X|L], [Y|L2], A2), !.
+symbolTable([X|L], [X2|[Y|L2]], A2) :- X2 = asterisk(N), Y \= asterisk(_), symbolTable([X|L], [Y|L2], A2), star(N, M), M \= 'undefined', symbolTable([X|L], [Y|L2], A2), !.
+symbolTable([X|L], [X2|L2], A2) :- X2 = asterisk(N), term_string(X3, X), retract(star(N, M)), ((M == 'undefined', P = []); P = M), assert(star(N, [X3|P])), symbolTable(L, [asterisk(N)|L2], A2), !.
+symbolTable([_|L], [X2|L2], A2) :- X2 = set(id(H),formal([star(P)])), star(P, N), capitalize(N,U), retract(variable(H, _)), assert(variable(H, U)), symbolTable(L, L2, A2), !.
+symbolTable([_|L], [X2|L2], A2) :- X2 = set(id(H),star(P)), star(P, N), retract(variable(H, _)), assert(variable(H, N)), symbolTable(L, L2, A2), !.
 
-interpreter([], A, A).
-interpreter([X|L], A, R) :- X = underscore(P), star(P, M), interpreter(L, [M|A], R).
-interpreter([X|L], A, R) :- X = hash(P), star(P, M), interpreter(L, [M|A], R).
-interpreter([X|L], A, R) :- X = weight(_), interpreter(L, A, R).
-interpreter([X|L], A, R) :- X = star(P), star(P, M), interpreter(L, [M|A], R).
-interpreter([X|L], A, R) :- X = formal([get(id(P))|N]), variable(P, M), capitalize([M|N],U), reverse(U, U2), flatten([U2|A], L2), writeln(L2), interpreter(L, L2, R).
-interpreter([X|L], A, R) :- X = formal(star(P)), star(P, M),capitalize(M,U),interpreter(L, [U|A], R).
-interpreter([X|L], A, R) :- X = formal(bot(id(P))), botVariable(P, M),capitalize([M],K),interpreter(L, [K|A], R).
-interpreter([X|L], A, R) :- X = bot(N), botVariable(N, M), interpreter(L, [M|A], R).
-interpreter([X|L], A, R) :- X = get(P), variable(P, M), interpreter(L, [M|A], R).
-interpreter([X|L], A, R) :- X = set(id(H),formal([star(P)])), star(P, N), capitalize(N,U), retract(variable(H, _)), assert(variable(H, U)), interpreter(L, A, R).
-interpreter([X|L], A, R) :- X = set(id(H),star(P)), star(P, N), retract(variable(H, _)), assert(variable(H, N)), interpreter(L, A, R).
-% interpreter([X|L], A, R) :- X = response_condition(id(V), O, B, _), O == 'eq', variable(V, M); (initializeVariables([set(V,_)]), variable(V, M)), M == B, interpreter(L, A, R));  false).
-% interpreter([X|L], A, R) :- X = response_condition(id(V), O, B, _), O == 'ne', ((variable(V, M), M \= B, interpreter(L, A, R)); false).
-interpreter([X|L], A, R) :- interpreter(L, [X|A], R).
+interpreter([], A, A) :- !.
+interpreter([X|L], A, R) :- X = underscore(P), star(P, M), interpreter(L, [M|A], R), !.
+interpreter([X|L], A, R) :- X = underscore(_), interpreter(L, [undefined|A], R), !.
+interpreter([X|L], A, R) :- X = hash(P), star(P, M), interpreter(L, [M|A], R), !. 
+interpreter([X|L], A, R) :- X = hash(_), interpreter(L, [undefined|A], R), !.
+interpreter([X|L], A, R) :- X = weight(_), interpreter(L, A, R), !.
+interpreter([X|L], A, R) :- X = star(P), star(P, M), interpreter(L, [M|A], R), !.
+interpreter([X|L], A, R) :- X = star(_), interpreter(L, [undefined|A], R), !.
+interpreter([X|L], A, R) :- X = formal([]), interpreter(L, A, R), !.
+interpreter([X|L], A, R) :- X = formal([word(P)|N]), capitalize([P],U), interpreter([formal(N)|L], [U|A], R), !.
+interpreter([X|L], A, R) :- X = formal([get(id(P))|N]), variable(P, M), capitalize(M,U), interpreter([formal(N)|L], [U|A], R), !.
+interpreter([X|L], A, R) :- X = formal([bot(id(P))|N]), botVariable(P, M), capitalize(M,U), interpreter([formal(N)|L], [U|A], R), !.
+interpreter([X|L], A, R) :- X = formal([star(P)|N]), star(P, M), capitalize(M,U), interpreter([formal(N)|L], [U|A], R), !.
+interpreter([X|L], A, R) :- X = formal(star(P)), star(P, M), capitalize(M,U),interpreter(L, [U|A], R), !.
+interpreter([X|L], A, R) :- X = formal(bot(id(P))), botVariable(P, M),capitalize([M],K),interpreter(L, [K|A], R), !.
+interpreter([X|L], A, R) :- X = bot(N), botVariable(N, M), interpreter(L, [M|A], R), !.
+interpreter([X|L], A, R) :- X = bot(_), interpreter(L, [undefined|A], R), !.
+interpreter([X|L], A, R) :- X = get(P), variable(P, M), interpreter(L, [M|A], R), !.
+interpreter([X|L], A, R) :- X = get(_), interpreter(L, [undefined|A], R), !.
+interpreter([X|L], A, R) :- X = set(id(H),formal([star(P)])), star(P, N), capitalize(N,U), retract(variable(H, _)), assert(variable(H, U)), interpreter(L, A, R), !.
+interpreter([X|L], A, R) :- X = set(id(H),star(P)), star(P, N), retractall(variable(H, _)), assert(variable(H, N)), interpreter(L, A, R), !.
+interpreter([X|L], A, R) :- X = response_condition(id(V), O, B, _), O == 'eq', (variable(V, M); M = 'undefined'), !, B == M, interpreter(L, A, R), !.
+interpreter([X|L], A, R) :- X = response_condition(id(V), O, B, _), O == 'ne', (variable(V, M); M = 'undefined'), !, B \= M, interpreter(L, A, R), !.
+interpreter([X|_], _, _) :- X = response_condition(id(_), _, _, _), !, interpreter(_, _, []), fail.
+interpreter([X|L], A, R) :- interpreter(L, [X|A], R), !.
 
 :- dynamic triggerFlag/1.
 :- dynamic responseFlag/1.
-
+:- dynamic variable/2.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -93,8 +111,7 @@ genCodeToFile(File,Ques,String2) :- !,
     retractall(question(_)),
     retractall(star(_,_)),
     retractall(botVariable(_,_)),
-    retractall(palabra(_,_)),
-    retractall(variable(_,_))
+    retractall(palabra(_,_))
 .
 
 walkTree(Out, L) :- walkTree(Out, L, ''). 
@@ -189,7 +206,8 @@ genCodeResponse(Out, response_condition(V, O, B, D)) :- !,
     walkTree(Out, D),
 	findall(X, palabra(X), L),
 	retractall(palabra(_)),
-	interpreter(L, [], R), 
+	!,
+	interpreter(L, [], R),
 	flatten(R, R2),
 	reverse(R2, R3),
     saveResponse(Out,R3), 
@@ -197,9 +215,7 @@ genCodeResponse(Out, response_condition(V, O, B, D)) :- !,
 .
 
 genCodeTrigger(Out, trigger(WL)) :- !,
-    retractall(hash(N)),
-    retractall(underscore(N)),
-    retractall(asterisk(N)),
+    retractall(star(_,_)),
     initializeVariables(WL),
     walkTree(Out, WL),
     findall(X, palabra(X), L),

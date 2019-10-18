@@ -33,12 +33,13 @@ testParser(P) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Main Parse predicate %%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 parse(_, _) :- reset_line_number, 
-               reset_some_indexes([star]),
+               reset_some_indexes([star, optional]),
                fail
 .
 parse(File, ProgAst) :- 
     tokenize(File, Tokens),
-    rsProgram(ProgAst, Tokens, []),
+	append(Tokens, ['\n'], FTokens),
+    rsProgram(ProgAst, FTokens, []),
     !
 .
 parse(File, _) :-
@@ -63,7 +64,7 @@ rsCommandList([]) --> [], {triggerBlock(true)}, {responseBlock(true)}
 .
 rsCommandList(L) --> ['\n'], {inc_line_number}, rsCommandList(L)
 .
-rsCommandList([trigger_block(B) | R]) --> trigger_block(B), !, {reset_some_indexes([star])}, {assert(triggerBlock(true))}, rsCommandList(R)
+rsCommandList([trigger_block(B) | R]) --> trigger_block(B), !, {reset_some_indexes([star, optional])}, {assert(triggerBlock(true))}, rsCommandList(R)
 .
 rsCommandList([response_block(B) | R]) --> {assert(responseBlock(true))}, response_block(B), !, rsCommandList(R)
 .
@@ -130,9 +131,11 @@ trigger_tag(array(ref, W)) --> ['(', '@'], word(W), [')']
 trigger_tag(W) --> ['{'], word_list(W), ['}']
 .
 
-trigger_tag(optional(W)) --> ['['], word(W), [']']
+trigger_tag(optional(asterisk(optional(N)))) --> ['['], ['*'], [']'], {next_index(optional, N)}
 .
 
+trigger_tag(optional(W)) --> ['['], word(W), [']']
+.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

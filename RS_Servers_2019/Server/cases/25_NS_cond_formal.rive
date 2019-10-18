@@ -1,5 +1,5 @@
 + my name is *
-* <get name> == undefined => Yes, your name is {formal}<get name>.{/formal}
+* <get name> != undefined => Yes, your name is {formal}<get name> hola <star>{/formal}
 - <set name=<star>> Oki <get name>
 + do you know my name
 - No, you've never told me your name before.

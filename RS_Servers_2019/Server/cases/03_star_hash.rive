@@ -1,8 +1,9 @@
 ! var age = 61
 
 + i am # years old
-- <set age=<star>>A lot of people are <get age>, you're not alone.
+
 - <set age=<star>>Cool, I'm <bot age> myself.{weight=49}
+- <set age=<star>>A lot of people are <get age>, you're not alone.
 
 + *
 - Once again?!
