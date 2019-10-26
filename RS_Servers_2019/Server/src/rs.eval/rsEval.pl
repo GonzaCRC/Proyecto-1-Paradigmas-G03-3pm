@@ -52,12 +52,15 @@ symbolTable([X|L], [X2|L2], A2) :- term_string(X3, X), X2 = hash(N), number(X3),
 symbolTable([X|L], [X2|L2], A2) :- term_string(X3, X), X2 = underscore(N), retract(star(N, _)), assert(star(N, X3)), symbolTable(L, L2, A2), !.
 symbolTable([X|L], [X2|[Y|L2]], A2) :- X2 = asterisk(N), Y = asterisk(_), star(N, M), M \= 'undefined', symbolTable([X|L], [Y|L2], A2), !.
 symbolTable([X|L], [X2|[Y|L2]], A2) :- X2 = asterisk(N), term_string(X3, X), Y == X3, star(N, M), M \= 'undefined', symbolTable([X|L], [Y|L2], A2), !.
-symbolTable([X|L], [X2|[Y|L2]], A2) :- X2 = asterisk(N), Y \= asterisk(_), symbolTable([X|L], [Y|L2], A2), star(N, M), M \= 'undefined', symbolTable([X|L], [Y|L2], A2), !.
+symbolTable([X|L], [X2|[Y|[H|L2]]], A2) :- X2 = asterisk(N), Y \= asterisk(_), symbolTable([X|L], [Y|[H|L2]], A2), star(N, M), M \= 'undefined', (H = asterisk(_); symbolTable([X|L], [Y|[H|L2]], A2)), !.
 symbolTable([X|L], [X2|L2], A2) :- X2 = asterisk(N), term_string(X3, X), retract(star(N, M)), ((M == 'undefined', P = []); P = M), assert(star(N, [X3|P])), symbolTable(L, [asterisk(N)|L2], A2), !.
 symbolTable([_|L], [X2|L2], A2) :- X2 = set(id(H),formal([star(P)])), star(P, N), capitalize(N,U), retract(variable(H, _)), assert(variable(H, U)), symbolTable(L, L2, A2), !.
 symbolTable([_|L], [X2|L2], A2) :- X2 = set(id(H),star(P)), star(P, N), retract(variable(H, _)), assert(variable(H, N)), symbolTable(L, L2, A2), !.
+symbolTable([X|L], [X2|L2], A2) :- X2 = array(K, word(N)), retract(array(N, [Y|V])), assert(array(N, V)), term_string(X3, X), (X3 == Y; symbolTable([X|L], [X2|L2], A2)), assert(star(K, X)), symbolTable(L, L2, A2), !.
+symbolTable([X|L], [X2|L2], A2) :- X2 = array(word(N)), retract(array(N, [Y|V])), assert(array(N, V)), term_string(X3, X), ((X3 == Y, symbolTable(L, L2, A2)); symbolTable([X|L], [X2|L2], A2)), !.
 
 interpreter([], A, A) :- !.
+interpreter([X|L], A, R) :- X = underscore(_), interpreter(L, [undefined|A], R), !.
 interpreter([X|L], A, R) :- X = underscore(P), star(P, M), interpreter(L, [M|A], R), !.
 interpreter([X|L], A, R) :- X = underscore(_), interpreter(L, [undefined|A], R), !.
 interpreter([X|L], A, R) :- X = hash(P), star(P, M), interpreter(L, [M|A], R), !. 
@@ -86,6 +89,7 @@ interpreter([X|L], A, R) :- interpreter(L, [X|A], R), !.
 :- dynamic triggerFlag/1.
 :- dynamic responseFlag/1.
 :- dynamic variable/2.
+:- dynamic substitution/2.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -258,5 +262,29 @@ genCodeDefine(Out,substitution(B, V)) :- !,
 	assert(substitution(A, C))
 .
 
+genCodeDefine(Out, array(N, V)) :- !,
+	walkTree(Out, V),
+	findall(X, palabra(X), L),
+	retractall(palabra(_)),
+	assert(array(N, L))
+.
+
 genCodeTopic(_, _, _) :- !
 .
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -138,10 +138,10 @@ trigger_tag(I) --> ['<'], star_ref(I),  ['>'], fail
 trigger_tag(array(inline, WL)) --> ['('], word_list(WL), [')']
 .
 
-trigger_tag(array(ref, W)) --> ['('], word(W), [')']
+trigger_tag(array(N, W)) --> ['('], ['@'], word(W), [')'], {next_index(star, N)}
 .
 
-trigger_tag(array(ref, W)) --> ['@'], word(W), [')']
+trigger_tag(array(W)) --> ['@'], word(W)
 .
 
 trigger_tag(W) --> ['{'], word_list(W), ['}']
@@ -266,7 +266,7 @@ define_command(var(global, N, V)) --> [global], word(word(N)), {reserved_name(N)
 define_command(substitution(N, V)) --> ['sub'], token_list_define(N), ['='], token_list_define(V)
 .
 
-define_command(array(B, N)) --> ['!'], ['array'], ['='], [B], token_list_define(N)
+define_command(array(B, N)) --> ['array'], [B], ['='], token_list_define(N)
 .
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
