@@ -43,8 +43,9 @@ genCodeToFile('04_star_set_get_formal','i dreamed potado',R).
 */
 symbolTable([], [], _) :- !.
 symbolTable(N, [], _) :- N \= [], false.
-symbolTable([], [asterisk(_)], _) :- !.
+symbolTable([], [asterisk(_)], _) :- !. 
 symbolTable(L, [X2|L2], A2) :- X2 = optional(N), N = asterisk(M), assert(star(M, undefined)), symbolTable(L, [asterisk(M)|L2], A2), !.
+symbolTable([X|L], L2, A2) :- atom_string(X, S), re_replace('\'', ' ', S, R), atom_string(Z, R), substitution(Z, N), atomic_list_concat(M, ' ', N), flatten([M|L], L3), symbolTable(L3, L2, A2), !.
 symbolTable([X|L], [X2|L2], A2) :- term_string(X3, X), X2 = optional(N), (X3 == N, symbolTable(L, L2, A2); symbolTable([X|L], L2, A2)), !.
 symbolTable([X|L], [X2|L2], A2) :- term_string(X3, X), X3 == X2, symbolTable(L, L2, A2), !. 
 symbolTable([X|L], [X2|L2], A2) :- term_string(X3, X), X2 = hash(N), number(X3), retract(star(N, _)), assert(star(N, X3)), symbolTable(L, L2, A2), !.
@@ -144,7 +145,17 @@ genCode(Out, define_block(T)) :- !,
     genCodeDefine(Out, T) 
 .
 
-genCode(_, word('')) :- !, assert(palabra(''''))
+genCode(Out, topic(T, L)) :- !,
+    genCodeTopic(Out, T, L) 
+.
+
+genCode(_, word(''))
+.
+
+genCode(_, word('\''))
+.
+
+genCode(_, word(''''))
 .
 
 genCode(_, set(I, E)) :-  !, assert(palabra(set(I, E)))
@@ -232,4 +243,20 @@ genCodeDefine(_,var(B, V, [word(W)])) :- !,
 genCodeDefine(_,var(B, V, [num(W)])) :- !,
 	B = bot,
     assert(botVariable(V,W))
+.
+
+genCodeDefine(Out,substitution(B, V)) :- !,
+    walkTree(Out, B),
+	findall(X, palabra(X), L),
+	retractall(palabra(_)),
+	!,
+	walkTree(Out, V),
+	findall(X2, palabra(X2), L2),
+	atomic_list_concat(L, ' ', A),
+	atomic_list_concat(L2, ' ', C),
+	retractall(palabra(_)),
+	assert(substitution(A, C))
+.
+
+genCodeTopic(_, _, _) :- !
 .

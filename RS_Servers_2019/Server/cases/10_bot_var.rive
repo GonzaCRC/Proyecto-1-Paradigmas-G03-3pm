@@ -1,0 +1,19 @@
+! var name = betty
+! var master = Daddy
+! var mood = happy
+
++ what is your name
+- You can call me {formal}<bot name>{/formal}
+- I am {formal}<bot name>{/formal}
+
++ tell me about yourself
+- I am {formal}<bot name>{/formal}, a chatterbot written by <bot master>.
+
++ i hate you
+- Aww! You've just ruined my day.<bot mood=depressed>
+
++ i love you
+- Me too <bot mood=happy>
+
++ [*] feel [*]
+- I am <bot mood> now

@@ -1,0 +1,10 @@
+// star(colors, [red, blue, green, yellow])
+
+// Lista de colores y voy separando los colores hasta que pegue alguno
+
+! array colors = red blue green yellow
++ i am wearing a (@colors) shirt
+- Do you really like <star>?
+
++ what color is my @colors *
+- I don't know what color your <star> is.

@@ -1,0 +1,30 @@
++ go normal
+- going normal {topic=normal}
++ go random
+- going random {topic=random}
++ *
+- Still random
+
+> topic normal
+
++ i hate you
+- You're really mean! I'm not talking again until you apologize.{topic=sorry}
+
++ *
+- Still normal
+
+< topic
+
+> topic sorry
+
+  // This will match if the word "sorry" exists ANYWHERE in their message
+  + [*] sorry [*]
+  - It's OK, I'll forgive you!{topic=normal}
+
+  + *
+  - Nope, not until you apologize.
+  - Say you're sorry!
+  - Apologize!
+
+< topic
+

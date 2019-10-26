@@ -1,0 +1,12 @@
++ groovy # {weight=20}
+- response 1
+
++ groovy # 
+- response 2
+
++ groovy #
+- response 3
+
++ * {weight=20}
+- response 4.1 {weight=60}
+- response 4.2 {weight=30}

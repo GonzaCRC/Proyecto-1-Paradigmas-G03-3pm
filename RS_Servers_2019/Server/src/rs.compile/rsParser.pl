@@ -72,10 +72,23 @@ rsCommandList([define_block(B) | R])  --> define_block(B), !, rsCommandList(R)
 .
 rsCommandList([comment_block(B) | R])  --> comment_block(B), !, rsCommandList(R)
 .
+rsCommandList([topic_block(B) | R])  --> topic_block(B), !, rsCommandList(R)
+.
+
+rsCommandList([sub_block(B) | R])  --> sub_block(B), !, rsCommandList(R)
+.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TOPIC BLOCK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+topic_block(topic(B, TL)) --> ['>'], ['topic'], [B], rsCommandList(TL), ['<'], ['topic']
+.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% COMMENT BLOCK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -125,7 +138,10 @@ trigger_tag(I) --> ['<'], star_ref(I),  ['>'], fail
 trigger_tag(array(inline, WL)) --> ['('], word_list(WL), [')']
 .
 
-trigger_tag(array(ref, W)) --> ['(', '@'], word(W), [')']
+trigger_tag(array(ref, W)) --> ['('], word(W), [')']
+.
+
+trigger_tag(array(ref, W)) --> ['@'], word(W), [')']
 .
 
 trigger_tag(W) --> ['{'], word_list(W), ['}']
@@ -199,6 +215,9 @@ response_tag(formal(I)) --> ['{'], [formal], ['}'], token_list_formal(I)
 response_tag(formal([star(1)])) --> ['<'], [formal], ['>']
 .
 
+response_tag(topic(T)) --> ['{'], ['topic'], ['='], [T], ['}']
+.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -244,7 +263,10 @@ define_command(var(bot, N, V)) --> [var], word(word(N)), ['='], token_list_defin
 define_command(var(global, N, V)) --> [global], word(word(N)), {reserved_name(N)},
                                       ['='], [T], {convert_value(T, V)}
 .
-define_command(substitution(N, V)) --> token_list_define(N), ['='], token_list_define(V)
+define_command(substitution(N, V)) --> ['sub'], token_list_define(N), ['='], token_list_define(V)
+.
+
+define_command(array(B, N)) --> ['!'], ['array'], ['='], [B], token_list_define(N)
 .
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
