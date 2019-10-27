@@ -1,0 +1,1 @@
+rsProg([trigger_block(trigger([word(i),word(will),optional(word(not)),asterisk(1)])),response_block(response([word(It),word(doesn),word(''),word(t),word(matter),word(to),word(me),word(whether),word(you),star(1),word(or),word(not),word(.)]))]) 

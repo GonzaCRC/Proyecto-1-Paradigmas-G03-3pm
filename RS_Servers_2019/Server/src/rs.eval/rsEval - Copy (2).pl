@@ -12,7 +12,8 @@ Gabriel Araya Ruiz
 
 :- module(rsEval, [
                        genCodeToFile/3,
-                       genCode/1
+                       genCode/1,
+                       genCode/2
                     ]).
 
 
@@ -28,11 +29,6 @@ capitalize(T1,T2).
 capitalize([H1|T1], [H2|T2]):- 
 capitalize_optional(H1,H2),
 capitalize(T1,T2).
-
-not_member(_, []) :- !.
-not_member(X, [H|T]) :-
-     X \= H,
-    not_member(X, T).
 
 initializeVariables([]).
 initializeVariables([X|L]) :- X = hash(N), assert(star(N, undefined)), initializeVariables(L).
@@ -64,7 +60,6 @@ symbolTable([X|L], [X2|L2], A2) :- X2 = array(K, word(N)), retract(array(N, [Y|V
 symbolTable([X|L], [X2|L2], A2) :- X2 = array(word(N)), retract(array(N, [Y|V])), assert(array(N, V)), term_string(X3, X), ((X3 == Y, symbolTable(L, L2, A2)); symbolTable([X|L], [X2|L2], A2)), !.
 
 interpreter([], A, A) :- !.
-interpreter([X|L], A, R) :- X = topic(N), retractall(topic(_, _)), assert(topic(N, true)), interpreter(L, A, R), !.
 interpreter([X|L], A, R) :- X = underscore(_), interpreter(L, [undefined|A], R), !.
 interpreter([X|L], A, R) :- X = underscore(P), star(P, M), interpreter(L, [M|A], R), !.
 interpreter([X|L], A, R) :- X = underscore(_), interpreter(L, [undefined|A], R), !.
@@ -98,9 +93,6 @@ interpreter([X|L], A, R) :- X = response_condition(id(V), O, B, _), O == 'ne', (
 interpreter([X|_], _, _) :- X = response_condition(id(_), _, _, _), !, interpreter(_, _, []), fail.
 interpreter([X|L], A, R) :- interpreter(L, [X|A], R), !.
 
-:- dynamic topics/1.
-:- dynamic topic/2.
-:- dynamic answer/1.
 :- dynamic triggerFlag/1.
 :- dynamic responseFlag/1.
 :- dynamic variable/2.
@@ -109,160 +101,170 @@ interpreter([X|L], A, R) :- interpreter(L, [X|A], R), !.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-genCodeToFile(File,Ques, R) :- !,
+genCodeToFile(File,Ques,String2) :- !,
     atom_concat('../../riveRepository/', File, PathInFile),
     atom_concat(PathInFile, '.rive.out', RSOutFile),
     split_string(Ques, " ", "", L),
-    assert(question(L)), assert(responseFlag(false)), assert(triggerFlag(false)), assert(condition(false)),
+    assert(question(L)),
+	assert(responseFlag(false)),
+	assert(triggerFlag(false)),
     open(RSOutFile, read, Str),
-    read_string(Str, '\n', '\t', End, String), !,
+    read_string(Str, '\n', '\t', End, String),
+	!,
     close(Str),
+	open('response.txt', write, Out),
     term_string(Atom, String, [var_prefix(true)]),
-	genCode(Atom), !,
-	findall(X, answer(X), L2),
-	((random_member(A, L2)); (A = ["ERR: No Reply Matched"])), !,
-	((topic(N, _), findall(X2, topics(X2), L3), not_member(N, L3), retractall(topic(_, _))); (true)), !,
-	atomic_list_concat(A, ' ', R),
-	retractall(question(_)), retractall(condition(_)), retractall(answer(_)), retractall(star(_,_)),
-    retractall(memory(_,_)), retractall(responseFlag(_)), retractall(triggerFlag(_)), retractall(topics(_))
+	genCode(Out, Atom),
+	!,
+	close(Out),
+	open('response.txt', read, Str2),
+	read_string(Str2, '\n', '\t', End, String2),
+	!,
+	close(Str2),
+    retractall(question(_)),
+    retractall(star(_,_)),
+    retractall(memory(_,_)),
+	retractall(responseFlag(_)),
+	retractall(triggerFlag(_))
 .
 
-walkTree(L) :- walkTree(L, ''). 
-walkTree([], _).
-walkTree([C], _) :- genCode(C).
-walkTree([X, Y | L], Sep) :- genCode(X), 
-                             walkTree([Y | L], Sep)
+walkTree(Out, L) :- walkTree(Out, L, ''). 
+walkTree(_, [], _).
+walkTree(Out, [C], _) :- genCode(Out, C).
+walkTree(Out, [X, Y | L], Sep) :- 	genCode(Out, X), 
+                                    walkTree(Out, [Y | L], Sep)
 . 
 
-genCode(rsProg(L)) :- !,
-    walkTree(L)
+
+genCode(P) :- genCode(user_output, P)
+.
+genCode(Out, rsProg(L)) :- !,
+    walkTree(Out, L)
 . 
 
-genCode(trigger_block(T)) :- !,
-	((topic(_, true), retractall(responseFlag(_)), assert(responseFlag(true)));
+genCode(Out, trigger_block(T)) :- !,
 	((triggerFlag(false),
-    genCodeTrigger(T));
-	(retractall(responseFlag(_)), assert(responseFlag(true)))))
+    genCodeTrigger(Out, T));
+	(retractall(responseFlag(_)), assert(responseFlag(true))))
 .
 
-genCode(comment_block(_)) :- !
+genCode(_, comment_block(_)) :- !
 .
 
-genCode(response_block(T)) :- !,
-	((responseFlag(false), condition(false),
-    genCodeResponse(T)); true)
+genCode(Out, response_block(T)) :- !,
+	((responseFlag(false),
+    genCodeResponse(Out, T)); true)
 .
 
-genCode(define_block(T)) :- !,
-    genCodeDefine(T) 
+genCode(Out, define_block(T)) :- !,
+    genCodeDefine(Out, T) 
 .
 
-genCode(topic_block(T)) :- !,
-    genCodeTopic(T)
+genCode(Out, topic(T, L)) :- !,
+    genCodeTopic(Out, T, L) 
 .
 
-genCode(word(''))
+genCode(_, word(''))
 .
 
-genCode(word('\''))
+genCode(_, word('\''))
 .
 
-genCode(word(''''))
+genCode(_, word(''''))
 .
 
-genCode(set(I, E)) :-  !, assert(memory(set(I, E)))
+genCode(_, set(I, E)) :-  !, assert(memory(set(I, E)))
 .
 
-genCode(optional(word(N))) :- !, assert(memory(optional(N)))
+genCode(_, optional(word(N))) :- !, assert(memory(optional(N)))
 .
 
-genCode(get(id(N))) :- !, assert(memory(get(N)))
+genCode(_, get(id(N))) :- !, assert(memory(get(N)))
 .
 
-genCode(bot(id(N))) :- !, assert(memory(bot(N)))
+genCode(_, bot(id(N))) :- !, assert(memory(bot(N)))
 .
 
-genCode(word(N)) :- !, genCode(atom(N))
+genCode(Out, word(N)) :- !, genCode(Out, atom(N))
 .
 
-genCode(id(N)) :- !, genCode(atom(N))
+genCode(Out, id(N)) :- !, genCode(Out, atom(N))
 .
-genCode(num(N))  :- !, genCode(atom(N))
+genCode(Out, num(N))  :- !, genCode(Out, atom(N))
 .
-genCode(oper(N)) :- !, genCode(atom(N))
+genCode(Out, oper(N)) :- !, genCode(Out, atom(N))
 .
 
 % Internal Representations
-genCode(operation(O, L, R)) :- !, walkTree([L, O, R])
+genCode(Out, operation(O, L, R)) :- !, walkTree(Out, [L, O, R])
 .
 
-genCode(atom(N)) :- !, assert(memory(N))
+genCode(_, atom(N)) :- !, assert(memory(N))
 .
 
-genCode(N) :- !, assert(memory(N))
+genCode(_, N) :- !, assert(memory(N))
 .
 
 %%%% Error case %%%%%%%%%%%%%%%%%%%%%%%%%%
-% genCode(E) :- close(Out),!,
-%                    throw(genCode('genCode unhandled Tree', E))
-% .
-
-genCode(E) :- writeln(E) %  throw('genCode unhandled Tree', E)
+genCode(Out, E) :- close(Out),!,
+                    throw(genCode('genCode unhandled Tree', E))
 .
 
+saveResponse(_, []).
+saveResponse(Out,[X|L]) :- format(Out, '~a ', [X]), saveResponse(Out, L).
 
-genCodeResponse(response(WL)) :- !,
+genCodeResponse(Out, response(WL)) :- !,
     initializeVariables(WL),
     ((triggerFlag(true),
-    walkTree(WL),
+    walkTree(Out, WL),
 	findall(X, memory(X), L),
 	retractall(memory(_)),
 	interpreter(L, [], R), 
 	flatten(R, R2),
 	reverse(R2, R3),
-	assert(answer(R3))); (retractall(memory(_)), true))
+	assert(answer(R3)),
+    saveResponse(Out,R3)); (retractall(memory(_)), true))
 .
 
-genCodeResponse(response_condition(V, O, B, D)) :- !,
+genCodeResponse(Out, response_condition(V, O, B, D)) :- !,
     assert(memory(response_condition(V, O, B, _))),
     ((triggerFlag(true),
-    walkTree(D),
+    walkTree(Out, D),
 	findall(X, memory(X), L),
 	retractall(memory(_)),
 	!,
 	interpreter(L, [], R),
 	flatten(R, R2),
 	reverse(R2, R3),
-	retractall(answer(_)), assert(answer(R3)), retractall(condition(_)),
-	assert(condition(true))); (retractall(memory(_)), true))
+    saveResponse(Out,R3)); (retractall(memory(_)), true))
 .
 
-genCodeTrigger(trigger(WL)) :- !,
+genCodeTrigger(Out, trigger(WL)) :- !,
     retractall(star(_,_)),
     initializeVariables(WL),
-    walkTree(WL),
+    walkTree(Out, WL),
     findall(X, memory(X), L),
     question(M),
     (symbolTable(M, L, []), retractall(triggerFlag(_)), assert(triggerFlag(true)); (true)),
     retractall(memory(_))
 .
 
-genCodeDefine(var(B, V, [word(W)])) :- !,
+genCodeDefine(_,var(B, V, [word(W)])) :- !,
 	B = bot,
     assert(botVariable(V,W))
 .
 
-genCodeDefine(var(B, V, [num(W)])) :- !,
+genCodeDefine(_,var(B, V, [num(W)])) :- !,
 	B = bot,
     assert(botVariable(V,W))
 .
 
-genCodeDefine(substitution(B, V)) :- !,
-    walkTree(B),
+genCodeDefine(Out,substitution(B, V)) :- !,
+    walkTree(Out, B),
 	findall(X, memory(X), L),
 	retractall(memory(_)),
 	!,
-	walkTree(V),
+	walkTree(Out, V),
 	findall(X2, memory(X2), L2),
 	atomic_list_concat(L, ' ', A),
 	atomic_list_concat(L2, ' ', C),
@@ -270,22 +272,14 @@ genCodeDefine(substitution(B, V)) :- !,
 	assert(substitution(A, C))
 .
 
-genCodeDefine(array(N, V)) :- !,
-	walkTree(V),
+genCodeDefine(Out, array(N, V)) :- !,
+	walkTree(Out, V),
 	findall(X, memory(X), L),
 	retractall(memory(_)),
 	assert(array(N, L))
 .
 
-genCodeTopic(topic(N, L)) :- !,
-	assert(topics(N)),
-	(answer(_); 
-	(topic(M, _), !,
-	((M == N,
-	retractall(topic(_, _)), assert(topic(M, false)),
-	retractall(responseFlag(_)), assert(responseFlag(false)),
-	walkTree(L), retract(topic(K, _)), assert(topic(K, true))); true)
-	))
+genCodeTopic(_, _, _) :- !
 .
 
 

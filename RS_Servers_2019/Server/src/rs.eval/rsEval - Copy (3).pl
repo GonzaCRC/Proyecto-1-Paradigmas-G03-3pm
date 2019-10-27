@@ -29,11 +29,6 @@ capitalize([H1|T1], [H2|T2]):-
 capitalize_optional(H1,H2),
 capitalize(T1,T2).
 
-not_member(_, []) :- !.
-not_member(X, [H|T]) :-
-     X \= H,
-    not_member(X, T).
-
 initializeVariables([]).
 initializeVariables([X|L]) :- X = hash(N), assert(star(N, undefined)), initializeVariables(L).
 initializeVariables([X|L]) :- X = underscore(N), assert(star(N, undefined)), initializeVariables(L).
@@ -64,7 +59,6 @@ symbolTable([X|L], [X2|L2], A2) :- X2 = array(K, word(N)), retract(array(N, [Y|V
 symbolTable([X|L], [X2|L2], A2) :- X2 = array(word(N)), retract(array(N, [Y|V])), assert(array(N, V)), term_string(X3, X), ((X3 == Y, symbolTable(L, L2, A2)); symbolTable([X|L], [X2|L2], A2)), !.
 
 interpreter([], A, A) :- !.
-interpreter([X|L], A, R) :- X = topic(N), retractall(topic(_, _)), assert(topic(N, true)), interpreter(L, A, R), !.
 interpreter([X|L], A, R) :- X = underscore(_), interpreter(L, [undefined|A], R), !.
 interpreter([X|L], A, R) :- X = underscore(P), star(P, M), interpreter(L, [M|A], R), !.
 interpreter([X|L], A, R) :- X = underscore(_), interpreter(L, [undefined|A], R), !.
@@ -98,8 +92,6 @@ interpreter([X|L], A, R) :- X = response_condition(id(V), O, B, _), O == 'ne', (
 interpreter([X|_], _, _) :- X = response_condition(id(_), _, _, _), !, interpreter(_, _, []), fail.
 interpreter([X|L], A, R) :- interpreter(L, [X|A], R), !.
 
-:- dynamic topics/1.
-:- dynamic topic/2.
 :- dynamic answer/1.
 :- dynamic triggerFlag/1.
 :- dynamic responseFlag/1.
@@ -115,16 +107,17 @@ genCodeToFile(File,Ques, R) :- !,
     split_string(Ques, " ", "", L),
     assert(question(L)), assert(responseFlag(false)), assert(triggerFlag(false)), assert(condition(false)),
     open(RSOutFile, read, Str),
-    read_string(Str, '\n', '\t', End, String), !,
+    read_string(Str, '\n', '\t', End, String),
+	!,
     close(Str),
     term_string(Atom, String, [var_prefix(true)]),
-	genCode(Atom), !,
+	genCode(Atom),
+	!,
 	findall(X, answer(X), L2),
-	((random_member(A, L2)); (A = ["ERR: No Reply Matched"])), !,
-	((topic(N, _), findall(X2, topics(X2), L3), not_member(N, L3), retractall(topic(_, _))); (true)), !,
+	(random_member(A, L2); A = ["ERR: No Reply Matched"]),
 	atomic_list_concat(A, ' ', R),
 	retractall(question(_)), retractall(condition(_)), retractall(answer(_)), retractall(star(_,_)),
-    retractall(memory(_,_)), retractall(responseFlag(_)), retractall(triggerFlag(_)), retractall(topics(_))
+    retractall(memory(_,_)), retractall(responseFlag(_)), retractall(triggerFlag(_))
 .
 
 walkTree(L) :- walkTree(L, ''). 
@@ -139,10 +132,9 @@ genCode(rsProg(L)) :- !,
 . 
 
 genCode(trigger_block(T)) :- !,
-	((topic(_, true), retractall(responseFlag(_)), assert(responseFlag(true)));
 	((triggerFlag(false),
     genCodeTrigger(T));
-	(retractall(responseFlag(_)), assert(responseFlag(true)))))
+	(retractall(responseFlag(_)), assert(responseFlag(true))))
 .
 
 genCode(comment_block(_)) :- !
@@ -157,8 +149,8 @@ genCode(define_block(T)) :- !,
     genCodeDefine(T) 
 .
 
-genCode(topic_block(T)) :- !,
-    genCodeTopic(T)
+genCode(topic(T, L)) :- !,
+    genCodeTopic(T, L) 
 .
 
 genCode(word(''))
@@ -207,7 +199,7 @@ genCode(N) :- !, assert(memory(N))
 %                    throw(genCode('genCode unhandled Tree', E))
 % .
 
-genCode(E) :- writeln(E) %  throw('genCode unhandled Tree', E)
+genCode(E) :- throw(genCode('genCode unhandled Tree', E))
 .
 
 
@@ -233,7 +225,7 @@ genCodeResponse(response_condition(V, O, B, D)) :- !,
 	interpreter(L, [], R),
 	flatten(R, R2),
 	reverse(R2, R3),
-	retractall(answer(_)), assert(answer(R3)), retractall(condition(_)),
+	retractall(answer(_)), assert(answer(R3)), 
 	assert(condition(true))); (retractall(memory(_)), true))
 .
 
@@ -277,15 +269,7 @@ genCodeDefine(array(N, V)) :- !,
 	assert(array(N, L))
 .
 
-genCodeTopic(topic(N, L)) :- !,
-	assert(topics(N)),
-	(answer(_); 
-	(topic(M, _), !,
-	((M == N,
-	retractall(topic(_, _)), assert(topic(M, false)),
-	retractall(responseFlag(_)), assert(responseFlag(false)),
-	walkTree(L), retract(topic(K, _)), assert(topic(K, true))); true)
-	))
+genCodeTopic(_, _) :- !
 .
 
 

@@ -1,0 +1,1 @@
+rsProg([trigger_block(trigger([asterisk(1)])),response_block(response([word(Once),word(again),word(?),word(!)])),response_block(response([word(What),word(do),word(you),word(mean),word(with),star(1)])),response_block(response([star(1),word(?),word(Really),word(?)]))]) 
