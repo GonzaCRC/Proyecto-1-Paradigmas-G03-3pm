@@ -33,6 +33,18 @@ not_member(_, []) :- !.
 not_member(X, [H|T]) :-
      X \= H,
     not_member(X, T).
+	
+return_input(I, V) :- 
+	inputs(X), 
+	nth1(I, X, V)
+.
+	
+save_input(I) :- 
+	inputs(X), 
+	append([I], X, V), 
+	retract(inputs(_)), 
+	assert(inputs(V))
+.
 
 initializeVariables([]).
 initializeVariables([X|L]) :- X = hash(N), assert(star(N, undefined)), initializeVariables(L).
@@ -41,10 +53,6 @@ initializeVariables([X|L]) :- X = asterisk(N), assert(star(N, undefined)), initi
 initializeVariables([X|L]) :- X = set(id(H),_), assert(variable(H, undefined)), initializeVariables(L).
 initializeVariables([_|L]) :- initializeVariables(L).
 
-/*
-[rsEval].
-genCodeToFile('04_star_set_get_formal','i dreamed potado',R).
-*/
 symbolTable([], [], _) :- !.
 symbolTable(N, [], _) :- N \= [], false.
 symbolTable([], [asterisk(_)], _) :- !. 
@@ -64,6 +72,8 @@ symbolTable([X|L], [X2|L2], A2) :- X2 = array(K, word(N)), retract(array(N, [Y|V
 symbolTable([X|L], [X2|L2], A2) :- X2 = array(word(N)), retract(array(N, [Y|V])), assert(array(N, V)), term_string(X3, X), ((X3 == Y, symbolTable(L, L2, A2)); symbolTable([X|L], [X2|L2], A2)), !.
 
 interpreter([], A, A) :- !.
+interpreter([X|L], A, R) :- X = input(N), return_input(N, V), interpreter(L, [V|A], R), !.
+interpreter([X|L], A, R) :- X = input(_), interpreter(L, [undefined|A], R), !.
 interpreter([X|L], A, R) :- X = topic(N), retractall(topic(_, _)), assert(topic(N, true)), interpreter(L, A, R), !.
 interpreter([X|L], A, R) :- X = underscore(_), interpreter(L, [undefined|A], R), !.
 interpreter([X|L], A, R) :- X = underscore(P), star(P, M), interpreter(L, [M|A], R), !.
@@ -89,6 +99,11 @@ interpreter([X|L], A, R) :- X = get(_), interpreter(L, [undefined|A], R), !.
 interpreter([X|L], A, R) :- X = set(id(H),formal([star(P)])), star(P, N), capitalize(N,U), retractall(variable(H, _)), assert(variable(H, U)), interpreter(L, A, R), !.
 interpreter([X|L], A, R) :- X = set(id(H),star(P)), star(P, N), retractall(variable(H, _)), assert(variable(H, N)), interpreter(L, A, R), !.
 interpreter([X|L], A, R) :- X = set(id(H),get(id(P))), variable(P, N), retractall(variable(H, _)), assert(variable(H, N)), interpreter(L, A, R), !.
+interpreter([X|L], A, R) :- X = response_condition(star(N), O, input(M), _), O == 'eq', !, star(N, [P]), return_input(M, K), K == P, interpreter(L, A, R), !.
+interpreter([X|L], A, R) :- X = response_condition(star(N), O, input(_), _), O == 'eq', !, star(N, [P]), 'undefined' == P, interpreter(L, A, R), !.
+interpreter([X|L], A, R) :- X = response_condition(star(N), O, input(M), _), O == 'ne', !, star(N, [P]), return_input(M, K), K \= P, interpreter(L, A, R), !.
+interpreter([X|L], A, R) :- X = response_condition(star(N), O, input(_), _), O == 'ne', !, star(N, [P]), 'undefined' \= P, interpreter(L, A, R), !.
+interpreter([X|L], A, R) :- X = response_condition(formal([star(N)]), O, bot(id(M)), _), O == 'ne', !, star(N, P), capitalize(P, [U]), botVariable(M, K), U \= K, interpreter(L, A, R), !.
 interpreter([X|L], A, R) :- X = response_condition(formal([star(N)]), O, bot(id(M)), _), O == 'eq', !, star(N, P), capitalize(P, [U]), botVariable(M, K), U == K, interpreter(L, A, R), !.
 interpreter([X|L], A, R) :- X = response_condition(formal([star(N)]), O, bot(id(M)), _), O == 'ne', !, star(N, P), capitalize(P, [U]), botVariable(M, K), U \= K, interpreter(L, A, R), !.
 interpreter([X|L], A, R) :- X = response_condition(formal([star(N)]), O, get(id(M)), _), O == 'eq', !, star(N, P), capitalize(P, U), variable(M, K), U == K, interpreter(L, A, R), !.
@@ -98,6 +113,7 @@ interpreter([X|L], A, R) :- X = response_condition(id(V), O, B, _), O == 'ne', (
 interpreter([X|_], _, _) :- X = response_condition(id(_), _, _, _), !, interpreter(_, _, []), fail.
 interpreter([X|L], A, R) :- interpreter(L, [X|A], R), !.
 
+:- dynamic inputs/1.
 :- dynamic topics/1.
 :- dynamic topic/2.
 :- dynamic answer/1.
@@ -115,11 +131,13 @@ genCodeToFile(File,Ques, R) :- !,
     split_string(Ques, " ", "", L),
     assert(question(L)), assert(responseFlag(false)), assert(triggerFlag(false)), assert(condition(false)),
     open(RSOutFile, read, Str),
-    read_string(Str, '\n', '\t', End, String), !,
+    read_string(Str, '\n', '\t', _, String), !,
     close(Str),
+	(inputs(_); assert(inputs([]))), 
     term_string(Atom, String, [var_prefix(true)]),
 	genCode(Atom), !,
 	findall(X, answer(X), L2),
+	save_input(Ques),
 	((random_member(A, L2)); (A = ["ERR: No Reply Matched"])), !,
 	((topic(N, _), findall(X2, topics(X2), L3), not_member(N, L3), retractall(topic(_, _))); (true)), !,
 	atomic_list_concat(A, ' ', R),
