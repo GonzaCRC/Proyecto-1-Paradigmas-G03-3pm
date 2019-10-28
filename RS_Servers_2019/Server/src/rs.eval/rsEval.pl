@@ -33,7 +33,8 @@ not_member(_, []) :- !.
 not_member(X, [H|T]) :-
      X \= H,
     not_member(X, T).
-	
+
+% input_value
 return_input(I, V) :- 
 	inputs(X), 
 	nth1(I, X, V)
@@ -130,6 +131,7 @@ interpreter([X|L], A, R) :- interpreter(L, [X|A], R), !.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% generate_response
 genCodeToFile(File,Ques, R) :- !,
     atom_concat('../../riveRepository/', File, PathInFile),
     atom_concat(PathInFile, '.rive.out', RSOutFile),
@@ -272,14 +274,17 @@ genCodeTrigger(trigger(WL)) :- !,
     retractall(memory(_))
 .
 
-genCodeDefine(var(B, V, [word(W)])) :- !,
+genCodeDefine(var(B, V, L)) :- !,
 	B = bot,
-    assert(botVariable(V,W))
+    walkTree(L),
+	findall(X, memory(X), L2),
+	retractall(memory(_)),
+	reverse(L2, L3),
+    assert(botVariable(V, L3))
 .
 
-genCodeDefine(var(B, V, [num(W)])) :- !,
-	B = bot,
-    assert(botVariable(V,W))
+genCodeDefine(var(B, _)) :- !,
+	B = version
 .
 
 genCodeDefine(substitution(B, V)) :- !,

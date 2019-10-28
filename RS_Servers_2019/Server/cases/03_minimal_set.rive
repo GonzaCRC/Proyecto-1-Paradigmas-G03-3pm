@@ -6,15 +6,15 @@
 ! var name     = Aiden
 ! var fullname = Aiden Rive
 
++ i say *
+- Don't say <star>{weight=20}
+
 + *
 - You say <star>
 
 ! var age      = 5
 ! var birthday = October 15
 
-
-+ i say *
-- Don't say <star>{weight=20}
 
 ! var sex = male
 

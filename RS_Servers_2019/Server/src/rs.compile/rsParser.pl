@@ -227,6 +227,9 @@ response_tag(M) --> ['<'], input_ref(M), ['>']
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% AUX PREDICATES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 star_ref(star(N)) --> [IW], {atomic(IW), separate(IW, star, N)}
 .
 
@@ -246,6 +249,9 @@ enforce_integer(A, N, _):- atom_number(A, N)
 enforce_integer(A, _, Msg) :- throw(syntaxError(Msg, A))
 .
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Define Block/Commands %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Generate formal tag tree
@@ -261,10 +267,16 @@ token_list_define([T | TL])  --> word(T), token_list_define(TL)
 
 define_block(B) --> ['!'], define_command(B)
 .
-define_command(var(global, version, V)) --> [version], ['='], [T], [.], [T2], {convert_value(T, V)}, {convert_value(T2, _)}
-.
+
 define_command(var(bot, N, V)) --> [var], word(word(N)), ['='], token_list_define(V)
 .
+
+define_command(var(version, V)) --> [version], ['='], [T], [.], [T2], {convert_value(T, V)}, {convert_value(T2, _)}
+.
+
+define_command(var(version, V)) --> [version], ['='], [T], {convert_value(T, V)}
+.
+
 define_command(var(global, N, V)) --> [global], word(word(N)), {reserved_name(N)},
                                       ['='], [T], {convert_value(T, V)}
 .
