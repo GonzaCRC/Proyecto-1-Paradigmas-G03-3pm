@@ -46,6 +46,10 @@ save_input(I) :-
 	assert(inputs(V))
 .
 
+append_lists([], R, R) :- !.
+append_lists([X|L], A, R) :- append(A, X, K), append_lists(L, K, R), !.
+append_lists(L, R) :- append_lists(L, [], R), !.
+
 initializeVariables([]).
 initializeVariables([X|L]) :- X = hash(N), assert(star(N, undefined)), initializeVariables(L).
 initializeVariables([X|L]) :- X = underscore(N), assert(star(N, undefined)), initializeVariables(L).
@@ -80,7 +84,7 @@ interpreter([X|L], A, R) :- X = underscore(P), star(P, M), interpreter(L, [M|A],
 interpreter([X|L], A, R) :- X = underscore(_), interpreter(L, [undefined|A], R), !.
 interpreter([X|L], A, R) :- X = hash(P), star(P, M), interpreter(L, [M|A], R), !. 
 interpreter([X|L], A, R) :- X = hash(_), interpreter(L, [undefined|A], R), !.
-interpreter([X|L], A, R) :- X = weight(_), interpreter(L, A, R), !.
+interpreter([X|L], A, R) :- X = weight(N), assert(probability(N)), interpreter(L, A, R), !.
 interpreter([X|L], A, R) :- X = star(P), star(P, M), interpreter(L, [M|A], R), !.
 interpreter([X|L], A, R) :- X = star(_), interpreter(L, [undefined|A], R), !.
 interpreter([X|L], A, R) :- X = formal([]), interpreter(L, A, R), !.
@@ -113,6 +117,7 @@ interpreter([X|L], A, R) :- X = response_condition(id(V), O, B, _), O == 'ne', (
 interpreter([X|_], _, _) :- X = response_condition(id(_), _, _, _), !, interpreter(_, _, []), fail.
 interpreter([X|L], A, R) :- interpreter(L, [X|A], R), !.
 
+:- dynamic probability/1.
 :- dynamic inputs/1.
 :- dynamic topics/1.
 :- dynamic topic/2.
@@ -138,7 +143,8 @@ genCodeToFile(File,Ques, R) :- !,
 	genCode(Atom), !,
 	findall(X, answer(X), L2),
 	save_input(Ques),
-	((random_member(A, L2)); (A = ["ERR: No Reply Matched"])), !,
+	append_lists(L2, J),
+	((random_member(A, J)); (A = ["ERR: No Reply Matched"])), !,
 	((topic(N, _), findall(X2, topics(X2), L3), not_member(N, L3), retractall(topic(_, _))); (true)), !,
 	atomic_list_concat(A, ' ', R),
 	retractall(question(_)), retractall(condition(_)), retractall(answer(_)), retractall(star(_,_)),
@@ -238,7 +244,8 @@ genCodeResponse(response(WL)) :- !,
 	interpreter(L, [], R), 
 	flatten(R, R2),
 	reverse(R2, R3),
-	assert(answer(R3))); (retractall(memory(_)), true))
+	((probability(N), length(K, N), maplist(=(R3), K), assert(answer(K)), retractall(probability(_))); assert(answer([R3])))); 
+	(retractall(memory(_)), true))
 .
 
 genCodeResponse(response_condition(V, O, B, D)) :- !,

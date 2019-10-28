@@ -1,1 +1,1 @@
-rsProg([trigger_block(trigger([word(say)])),response_block(response([num(1),word(.),word(Hi),word(there),word(!),weight(60)])),response_block(response([num(2),word(.),word(Hello),word(!),weight(30)])),response_block(response([num(3),word(.),word(Seldom)]))]) 
+rsProg([trigger_block(trigger([word(say)])),response_block(response([num(1),word(.),word(Hi),word(there),word(!)])),response_block(response([num(2),word(.),word(Hello),word(!)])),response_block(response([num(3),word(.),word(Seldom)]))]) 
