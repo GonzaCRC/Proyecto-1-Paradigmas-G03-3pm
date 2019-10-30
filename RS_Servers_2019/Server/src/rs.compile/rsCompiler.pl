@@ -1,4 +1,4 @@
-/*
+﻿/*
 EIF400 loriacarlos@gmail.com
 Colaboradores:
 
@@ -11,6 +11,7 @@ Gabriel Araya Ruiz
 :- module(rsCompiler, [compile/0, compile/1, compile/3]).
 
 :- use_module(rsParser).
+:- use_module(rsEmiter).
 
 compile(InPath, OutPath, Filename) :-
    atom_concat(InPath, Filename, PathInFile),
@@ -19,19 +20,15 @@ compile(InPath, OutPath, Filename) :-
    rsParser:parse(PathInFile, P),
    atom_concat(OutPath, Filename, PathOutFile),
    atom_concat(PathOutFile, '.out', RSOutFile),
-   atom_concat('./riveRepository/', Filename, PathInFile2),
-   atom_concat(PathInFile2, '.out', RSOutFile2),
    format('*** Writing   :"~a" *** ~n', [RSOutFile]),
-   open(RSOutFile2, write, Tree),
-   format(Tree, '~w ', [P]),
-   close(Tree)
+   rsEmiter:genCodeToFile(RSOutFile, P)
 .
 compile(InPath, _, Filename) :-
    atom_concat(InPath, Filename, PathInFile),
    format('*** RSCompiler: File Not found :"~a" *** ~n', [PathInFile]),
    fail
 .
-compile(Filename) :- compile('./cases/', './output/', Filename)
+compile(Filename) :- compile('./cases/', './riveRepository/', Filename)
 .
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%  Default test case %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 compile :- 

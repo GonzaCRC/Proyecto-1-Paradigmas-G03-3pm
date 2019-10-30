@@ -17,7 +17,6 @@
 
 > topic sorry
 
-  // This will match if the word "sorry" exists ANYWHERE in their message
   + [*] sorry [*]
   - It's OK, I'll forgive you!{topic=normal}
 

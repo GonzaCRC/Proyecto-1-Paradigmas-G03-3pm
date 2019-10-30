@@ -1,3 +1,7 @@
++ *
+- Once again?!
+- I beg you pardon
+
 + my name is *
 * <get name> == undefined => <set name = <star>> Nice to meet you <get name>
 - You already told me your name, <get name>
@@ -5,7 +9,3 @@
 + [do] you know my name
 * <get name> != undefined => Yes, your name is <get name>.
 - No, you've never told me your name before.
-
-+ *
-- Once again?!
-- I beg you pardon

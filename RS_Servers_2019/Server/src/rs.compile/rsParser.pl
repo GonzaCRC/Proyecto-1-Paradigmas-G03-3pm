@@ -19,12 +19,11 @@ Gabriel Araya Ruiz
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 testParser(P) :-
-    File = '../../cases/micro3.rive',
+    File = '../../cases/60_topic.rive',
     format('~n~n*** Parsing file: ~s ***~n~n', File),
     parse(File, P),
     line_number(LN),
-    format('File ~s parsed: ~d lines processed~n~n', [File, LN]),
-	retractAll(triggerBlock(_))
+    format('File ~s parsed: ~d lines processed~n~n', [File, LN])
 .
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -33,7 +32,7 @@ testParser(P) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Main Parse predicate %%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 parse(_, _) :- reset_line_number, 
-               reset_some_indexes([star, optional]),
+               reset_some_indexes([star, optional, trigger]),
                fail
 .
 parse(File, ProgAst) :- 
@@ -84,7 +83,21 @@ rsCommandList([sub_block(B) | R])  --> sub_block(B), !, rsCommandList(R)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TOPIC BLOCK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-topic_block(topic(B, TL)) --> ['>'], ['topic'], [B], rsCommandList(TL), ['<'], ['topic']
+topic_block(topic(B, TL)) --> ['>'], ['topic'], [B], topic_token_list(B, TL), ['<'], ['topic']
+.
+
+topic_token_list(_, []), ['<'] --> ['<'], {inc_line_number}
+.
+
+topic_token_list(B, L) --> ['\n'], {inc_line_number}, topic_token_list(B,L)
+.
+topic_token_list(B, [T | TL])  --> topic_token(B, T), topic_token_list(B, TL)
+.
+
+topic_token(B, trigger_topic(B,ID, TL)) --> ['+'], trigger_token_list(TL), {get_index(trigger, ID)}
+.
+
+topic_token(B, response_topic(B,ID, TL)) --> ['-'], response_token_list(TL), {get_index(trigger, ID)}
 .
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -93,7 +106,7 @@ topic_block(topic(B, TL)) --> ['>'], ['topic'], [B], rsCommandList(TL), ['<'], [
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% COMMENT BLOCK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-comment_block(trigger(TL)) --> ['/'], ['/'], comment_token_list(TL)
+comment_block(comment(TL)) --> ['/'], ['/'], comment_token_list(TL)
 .
 
 comment_token_list([])  --> ['\n'], {inc_line_number}
@@ -109,10 +122,10 @@ comment_token(W) --> word(W)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Trigger Block %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-trigger_block(trigger(TL)) --> ['+'], trigger_token_list(TL)
+trigger_block(trigger(ID, TL)) --> ['+'], trigger_token_list(TL), {get_index(trigger, ID)}
 .
 
-trigger_token_list([])  --> ['\n'], {inc_line_number}
+trigger_token_list([])  --> ['\n'], {inc_line_number}, {next_index(trigger, _)}
 .
 trigger_token_list([T | TL])  --> trigger_token(T), trigger_token_list(TL)
 .
@@ -135,19 +148,23 @@ trigger_tag(I) --> ['<'], reply_ref(I),  ['>']
 trigger_tag(I) --> ['<'], star_ref(I),  ['>'], fail
 .
 
+trigger_tag(weight(I)) --> ['{'], [weight, '=', V], ['}'], 
+                                  {enforce_integer(V, I, 'Invalid weight'), !}
+.
+
 trigger_tag(array(inline, WL)) --> ['('], word_list(WL), [')']
 .
 
-trigger_tag(array(N, W)) --> ['('], ['@'], word(W), [')'], {next_index(star, N)}
+trigger_tag(array(N, W)) --> ['('], ['@'], id(W), [')'], {next_index(star, N)}
 .
 
-trigger_tag(array(W)) --> ['@'], word(W)
+trigger_tag(array(W)) --> ['@'], id(W)
 .
 
 trigger_tag(W) --> ['{'], word_list(W), ['}']
 .
 
-trigger_tag(optional(asterisk(optional(N)))) --> ['['], ['*'], [']'], {next_index(optional, N)}
+trigger_tag(optional(optional_asterisk(N))) --> ['['], ['*'], [']'], {next_index(optional, N)}
 .
 
 trigger_tag(optional(W)) --> ['['], word(W), [']']
@@ -161,13 +178,13 @@ trigger_tag(optional(W)) --> ['['], word(W), [']']
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-response_block(response(TL)) --> ['-'], response_token_list(TL)
+response_block(response(ID, TL)) --> ['-'], response_token_list(TL), {get_index(trigger, ID)}
 .
 
-response_block(response_condition(V, OP , B, D)) --> ['*'],  ['<', get], id(V), ['>'], [O], [B], ['=', '>'], response_token_list(D), {(O == '==', OP = eq); (O == '!=', OP = ne)}
+response_block(response_condition(ID, V, OP , B, D)) --> ['*'],  ['<', get], id(V), ['>'], [O], [B], ['=', '>'], response_token_list(D), {(O == '==', OP = eq); (O == '!=', OP = ne)}, {get_index(trigger, ID)}
 .
 
-response_block(response_condition(V, OP , B, D)) --> ['*'],  response_tag(V), [O], response_tag(B), ['=', '>'], response_token_list(D), {(O == '==', OP = eq); (O == '!=', OP = ne)}
+response_block(response_condition(ID, V, OP , B, D)) --> ['*'],  response_tag(V), [O], response_tag(B), ['=', '>'], response_token_list(D), {(O == '==', OP = eq); (O == '!=', OP = ne)}, {get_index(trigger, ID)}
 .
 
 response_token_list([])  --> ['\n'], {inc_line_number}
@@ -202,7 +219,7 @@ response_tag(get(W)) --> ['<', get], id(W), ['>']
 response_tag(set(W, V)) --> ['<', set], id(W), ['='], response_token(V), ['>']
 .
 
-response_tag(bot(W, V)) --> ['<'], [bot], id(W), ['='], response_token(V), ['>']
+response_tag(updateBotVariable(W, V)) --> ['<'], [bot], id(W), ['='], response_token(V), ['>']
 .
 
 response_tag(bot(V)) --> ['<'], [bot], id(V), ['>']
@@ -271,10 +288,10 @@ define_block(B) --> ['!'], define_command(B)
 define_command(var(bot, N, V)) --> [var], word(word(N)), ['='], token_list_define(V)
 .
 
-define_command(var(version, V)) --> [version], ['='], [T], [.], [T2], {convert_value(T, V)}, {convert_value(T2, _)}
+define_command(var(version, [V])) --> [version], ['='], [T], [.], [T2], {convert_value(T, V)}, {convert_value(T2, _)}
 .
 
-define_command(var(version, V)) --> [version], ['='], [T], {convert_value(T, V)}
+define_command(var(version, [V])) --> [version], ['='], [T], {convert_value(T, V)}
 .
 
 define_command(var(global, N, V)) --> [global], word(word(N)), {reserved_name(N)},
@@ -283,7 +300,7 @@ define_command(var(global, N, V)) --> [global], word(word(N)), {reserved_name(N)
 define_command(substitution(N, V)) --> ['sub'], token_list_define(N), ['='], token_list_define(V)
 .
 
-define_command(array(B, N)) --> ['array'], [B], ['='], token_list_define(N)
+define_command(array(B, N)) --> ['array'], id(B), ['='], token_list_define(N)
 .
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -297,12 +314,6 @@ wild_card(hash(N)) --> ['#'], {next_index(star, N)}
 wild_card(asterisk(N)) --> ['*'], {next_index(star, N)}
 .
 wild_card(underscore(N)) --> ['_'], {next_index(star, N)}
-.
-
-word(word('''''')) -->  ['''']
-.
-
-word(word(''''|'''')) -->  ['|']
 .
 
 word(num(N)) --> id(id(W)), {convert_value(W, num(N))}
