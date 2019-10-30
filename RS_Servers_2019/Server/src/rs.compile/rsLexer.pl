@@ -90,7 +90,7 @@ startOneToken([C | Input], Partial, Token, Rest) :- isOper(C), !,
                                                     finishOper(Input, [ C | Partial], Token, Rest)
 .
 startOneToken([C | Input], Partial, Token, Rest) :- isQuote(C), !,
-                                                    finishQuote(Input, [ C | Partial], Token, Rest)
+                                                    finishQuote(Input, [ '''' | Partial], Token, Rest)
 .
 startOneToken([C | _] , _, _, _) :- report_invalid_symbol(C)
 .
@@ -116,7 +116,7 @@ finishId(Input, Partial, Token, Rest) :- finishToken(Input, isAlpha, Partial, To
 .
 % FINISH QUOTE
 finishQuote([C | Input], Partial, Token, Input) :- isQuote(C), !,
-                                                   convertToAtom([C | Partial], Token) 
+                                                   convertToAtom(['''' | Partial], Token) 
 .
 finishQuote([C | Input], Partial, Token, Rest) :- finishQuote(Input, [C |Partial], Token, Rest)
 .
