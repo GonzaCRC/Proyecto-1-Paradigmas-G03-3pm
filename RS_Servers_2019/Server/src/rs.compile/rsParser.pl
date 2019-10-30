@@ -97,6 +97,9 @@ topic_token_list(B, [T | TL])  --> topic_token(B, T), topic_token_list(B, TL)
 topic_token(B, trigger_topic(B,ID, TL)) --> ['+'], trigger_token_list(TL), {get_index(trigger, ID)}
 .
 
+topic_token(B, comment_topic(B, TL)) --> comment_token_list(TL)
+.
+
 topic_token(B, response_topic(B,ID, TL)) --> ['-'], response_token_list(TL), {get_index(trigger, ID)}
 .
 
@@ -115,6 +118,9 @@ comment_token_list([T | TL])  --> comment_token(T), comment_token_list(TL)
 .
 
 comment_token(W) --> word(W)
+.
+
+comment_token(W) --> wild_card(W)
 .
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -101,6 +101,12 @@ genCode(Out, response_topic(T, I, WL)) :- !,
 	 format(Out, '])', [])
 .
 
+genCode(Out, comment_topic(N, V)) :- !,
+     format(Out, 'comment(~a,[', [N]),
+     genCodeList(Out, V, ','),
+	 format(Out, '])', [])
+.
+
 genCode(Out, array(id(N))) :- !, format(Out, 'array(~a)', [N])
 .
 genCode(Out, input(N)) :- !, format(Out, 'input(~a)', [N])
