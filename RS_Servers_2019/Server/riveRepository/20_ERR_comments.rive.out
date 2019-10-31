@@ -1,1 +1,8 @@
-rsProg([comment_block(comment([word(This),word(is),word(a),word(comment)])),trigger_block(trigger(2,[asterisk(1)])),comment_block(comment([word(One),word(response),word(only)])),response_block(response(2,[star(1)]))]) 
+
+comment("This","is","a","comment").
+
+trigger(2, [asterisk(1)]).
+
+comment("One","response","only").
+
+response(2, [star(1)]).

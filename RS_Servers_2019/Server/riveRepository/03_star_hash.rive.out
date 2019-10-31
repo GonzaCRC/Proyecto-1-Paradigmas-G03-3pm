@@ -1,1 +1,14 @@
-rsProg([define_block(var(bot,age,[num(61)])),trigger_block(trigger(2,[asterisk(1)])),response_block(response(2,[word(Once),word(again),word(?),word(!)])),response_block(response(2,[word(I),word(beg),word(you),word(pardon),weight(70)])),trigger_block(trigger(3,[word(i),word(am),hash(1),word(years),word(old)])),response_block(response(3,[set(id(age),star(1)),word(A),word(lot),word(of),word(people),word(are),get(id(age)),word(,),word(you),word('),word(re),word(not),word(alone),word(.)])),response_block(response(3,[set(id(age),star(1)),word(Cool),word(,),word(I),word('),word(m),bot(id(age)),word(myself),word(.),weight(49)]))]) 
+
+botVariable(age, ["61"]).
+
+trigger(2, ["i","am",hash(1),"years","old"]).
+
+response(2, [variable(age, star(1)),"A","lot","of","people","are",variable(age),",","you","'","re","not","alone","."]).
+
+response(2, [variable(age, star(1)),"Cool",",","I","'","m",botVariable(age),"myself",".",weight(49)]).
+
+trigger(3, [asterisk(1)]).
+
+response(3, ["Once","again","?","!"]).
+
+response(3, ["I","beg","you","pardon",weight(70)]).

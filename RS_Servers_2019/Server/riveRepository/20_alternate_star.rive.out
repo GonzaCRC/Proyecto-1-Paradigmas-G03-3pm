@@ -1,1 +1,4 @@
-rsProg([trigger_block(trigger(2,[word(i),word(will),optional(word(not)),asterisk(1)])),response_block(response(2,[word(It),word(doesn),word('),word(t),word(matter),word(to),word(me),word(whether),word(you),star(1),word(or),word(not),word(.)]))]) 
+
+trigger(2, ["i","will",optional("not"),asterisk(1)]).
+
+response(2, ["It","doesn","'","t","matter","to","me","whether","you",star(1),"or","not","."]).

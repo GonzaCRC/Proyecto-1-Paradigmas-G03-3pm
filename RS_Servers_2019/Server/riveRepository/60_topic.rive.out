@@ -7,10 +7,10 @@ trigger(3, ["go","random"]).
 
 response(3, ["going","random",topic(random)]).
 
-trigger(4, [star(1)]).
+trigger(4, [asterisk(1)]).
 
 response(4, ["Still","random"]).
 
-topic(normal,[trigger_topic(normal,5, ["i","hate","you"]),response_topic(normal,5, ["You","'","re","really","mean","!","I","'","m","not","talking","again","until","you","apologize",".",topic(sorry)]),trigger_topic(normal,6, [star(1)]),response_topic(normal,6, ["Still","normal"])]).
+topic(normal,[trigger_topic(normal,5, ["i","hate","you"]),response_topic(normal,5, ["You","'","re","really","mean","!","I","'","m","not","talking","again","until","you","apologize",".",topic(sorry)]),trigger_topic(normal,6, [asterisk(1)]),response_topic(normal,6, ["Still","normal"])]).
 
-topic(sorry,[comment(sorry,["This","will","match","if","the","word","'sorry'","exists","ANYWHERE","in","their","message"]),trigger_topic(sorry,7, [optional_asterisk(1),"sorry",optional_asterisk(2)]),response_topic(sorry,7, ["It","'","s","OK",",","I","'","ll","forgive","you","!",topic(normal)]),trigger_topic(sorry,8, [star(2)]),response_topic(sorry,8, ["Nope",",","not","until","you","apologize","."]),response_topic(sorry,8, ["Say","you","'","re","sorry","!"]),response_topic(sorry,8, ["Apologize","!"])]).
+topic(sorry,[comment(sorry,["This","will","match","if","the","word","'sorry'","exists","ANYWHERE","in","their","message"]),trigger_topic(sorry,7, [optional_asterisk(1),"sorry",optional_asterisk(2)]),response_topic(sorry,7, ["It","'","s","OK",",","I","'","ll","forgive","you","!",topic(normal)]),trigger_topic(sorry,8, [asterisk(2)]),response_topic(sorry,8, ["Nope",",","not","until","you","apologize","."]),response_topic(sorry,8, ["Say","you","'","re","sorry","!"]),response_topic(sorry,8, ["Apologize","!"])]).

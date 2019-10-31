@@ -1,1 +1,8 @@
-rsProg([trigger_block(trigger(2,[optional(optional_asterisk(1)),word(i),word(dreamed),asterisk(1)])),response_block(response(2,[word(Really),word(,),star(1),word(?)])),response_block(response(2,[word(Have),word(you),word(ever),word(fantasized),star(1),word(while),word(you),word(were),word(awake),word(?)])),response_block(response(2,[word(Have),word(you),word(ever),word(dreamed),star(1),word(before),word(?)]))]) 
+
+trigger(2, [optional_asterisk(optional(1)),"i","dreamed",asterisk(1)]).
+
+response(2, ["Really",",",star(1),"?"]).
+
+response(2, ["Have","you","ever","fantasized",star(1),"while","you","were","awake","?"]).
+
+response(2, ["Have","you","ever","dreamed",star(1),"before","?"]).

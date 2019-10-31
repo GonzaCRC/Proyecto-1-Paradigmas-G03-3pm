@@ -1,1 +1,8 @@
-rsProg([trigger_block(trigger(2,[word(what),word(is),word(my),word(name)])),response_block(response_condition(2,id(name),eq,undefined,[word(You),word(never),word(told),word(me),word(your),word(name),word(.)])),response_block(response(2,[word(Your),word(name),word(is),get(id(name)),word(,),word(silly),word(!)])),response_block(response(2,[word(Aren),word('),word(t),word(you),get(id(name)),word(?)]))]) 
+
+trigger(2, ["what","is","my","name"]).
+
+response_condition(2,variable(name),eq,undefined,["You","never","told","me","your","name","."]).
+
+response(2, ["Your","name","is",variable(name),",","silly","!"]).
+
+response(2, ["Aren","'","t","you",variable(name),"?"]).

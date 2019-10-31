@@ -1,1 +1,4 @@
-rsProg([trigger_block(trigger(2,[asterisk(1)])),response_block(response(2,[word(Hi),get(id(name))]))]) 
+
+trigger(2, [asterisk(1)]).
+
+response(2, ["Hi",variable(name)]).

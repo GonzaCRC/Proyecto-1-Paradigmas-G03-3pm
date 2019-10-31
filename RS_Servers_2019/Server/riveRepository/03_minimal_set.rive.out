@@ -1,1 +1,22 @@
-rsProg([define_block(var(version,[num(2)])),define_block(var(bot,master,[word(localuser)])),define_block(var(bot,name,[word(Aiden)])),define_block(var(bot,fullname,[word(Aiden),word(Rive)])),trigger_block(trigger(2,[asterisk(1)])),response_block(response(2,[word(You),word(say),star(1)])),define_block(var(bot,age,[num(5)])),define_block(var(bot,birthday,[word(October),num(15)])),trigger_block(trigger(3,[word(i),word(say),asterisk(1)])),response_block(response(3,[word(Don),word('),word(t),word(say),star(1),weight(20)])),define_block(var(bot,sex,[word(male)]))]) 
+
+variable(version,"2").
+
+botVariable(master, ["localuser"]).
+
+botVariable(name, ["Aiden"]).
+
+botVariable(fullname, ["Aiden","Rive"]).
+
+trigger(2, ["i","say",asterisk(1)]).
+
+response(2, ["Don","'","t","say",star(1),",",botVariable(master),",",botVariable(birthday),weight(20)]).
+
+trigger(3, [asterisk(1)]).
+
+response(3, ["You","say",star(1)]).
+
+botVariable(age, ["5"]).
+
+botVariable(birthday, ["October","15"]).
+
+botVariable(sex, ["male"]).
