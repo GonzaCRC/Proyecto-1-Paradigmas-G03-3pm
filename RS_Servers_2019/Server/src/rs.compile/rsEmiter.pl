@@ -55,11 +55,11 @@ genCode(Out, comment_block(T)) :- !,
 
 genCode(Out, word(N)) :- !, genCode(Out, atom(N))
 .
-genCode(Out, asterisk(N)) :- !, format(Out, 'star(~a)', [N])
+genCode(Out, asterisk(N)) :- !, format(Out, 'asterisk(~a)', [N])
 .
-genCode(Out, hash(N)) :- !, format(Out, 'star(~a)', [N])
+genCode(Out, hash(N)) :- !, format(Out, 'hash(~a)', [N])
 .
-genCode(Out, underscore(N)) :- !, format(Out, 'star(~a)', [N])
+genCode(Out, underscore(N)) :- !, format(Out, 'underscore(~a)', [N])
 .
 genCode(Out, star(N)) :- !, format(Out, 'star(~a)', [N])
 .
@@ -68,16 +68,16 @@ genCode(Out, array(M, id(N))) :- !, format(Out, 'array(~a, ~a)', [M, N])
 genCode(Out, bot(id(N))) :- !, format(Out, 'botVariable(~a)', [N])
 .
 genCode(Out, updateBotVariable(id(N), M)) :- !, 
-	format(Out, 'updateBotVariable(~a,', [N]),
-	genCodeList(Out, [M], ','),
-	format(Out, ')', [])
+	format(Out, 'updateBotVariable(~a, [', [N]),
+	genCodeList(Out, M, ','),
+	format(Out, '])', [])
 .
 genCode(Out, weight(N)) :- !, format(Out, 'weight(~a)', [N])
 .
 genCode(Out, formal(N)) :- !, 
-	format(Out, 'formal[', []),
+	format(Out, 'formal([', []),
 	genCodeList(Out, N, ','),
-	format(Out, ']', [])
+	format(Out, '])', [])
 .
 genCode(Out, get(id(N))) :- !, format(Out, 'variable(~a)', [N])
 .
@@ -114,7 +114,7 @@ genCode(Out, input(N)) :- !, format(Out, 'input(~a)', [N])
 genCode(Out, topic(N)) :- !, format(Out, 'topic(~a)', [N])
 .
 
-genCode(Out, optional(optional_asterisk(N))) :- !, format(Out, 'optional_asterisk(~a)', [N])
+genCode(Out, optional(optional_asterisk(N))) :- !, format(Out, 'optional_asterisk(optional(~a))', [N])
 .
 genCode(Out, optional(word(N))) :- !, format(Out, 'optional("~a")', [N])
 .
@@ -171,6 +171,16 @@ genCodeResponse(Out, response_condition(M, star(N), O, input(V), WL)) :- !,
      nl(Out)
 .
 
+genCodeResponse(Out, response_weight(M, WL, W)) :- !,
+     format(Out, 'response_weight(~a, [', [M]),
+     genCodeList(Out, WL, ','),
+	 format(Out, '],', []),
+	 genCodeList(Out, [W], ','),
+	 format(Out, ').', []),
+     nl(Out)
+.
+
+
 genCodeTrigger(Out, trigger(I, WL)) :- !,
      format(Out, 'trigger(~a, [', [I]),
      genCodeList(Out, WL, ','),
@@ -180,9 +190,9 @@ genCodeTrigger(Out, trigger(I, WL)) :- !,
 
 genCodeDefine(Out, var(B, V, WL)) :- !,
 	B = bot,
-     format(Out, 'botVariable(~a,', [V]),
+     format(Out, 'botVariable(~a, [', [V]),
      genCodeList(Out, WL, ','),
-	 format(Out, ').', []),
+	 format(Out, ']).', []),
      nl(Out)
 .
 

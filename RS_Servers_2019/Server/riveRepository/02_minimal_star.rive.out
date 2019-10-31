@@ -1,1 +1,8 @@
-rsProg([trigger_block(trigger(2,[asterisk(1)])),response_block(response(2,[word(Once),word(again),word(?),word(!)])),response_block(response(2,[word(What),word(do),word(you),word(mean),word(with),star(1)])),response_block(response(2,[star(1),word(?),word(Really),word(?)]))]) 
+
+trigger(2, [asterisk(1)]).
+
+response(2, ["Once","again","?","!"]).
+
+response(2, ["What","do","you","mean","with",star(1)]).
+
+response(2, [star(1),"?","Really","?"]).

@@ -1,1 +1,12 @@
-rsProg([trigger_block(trigger(2,[asterisk(1)])),response_block(response(2,[word(Once),word(again),word(?),word(!)])),response_block(response(2,[word(I),word(beg),word(you),word(pardon)])),trigger_block(trigger(3,[optional(word(i)),word(have),optional(word(just)),word(one),word(word),word(for),word(you),underscore(1)])),response_block(response(3,[set(id(opinion),star(1)),word(Is),word(this),word(your),get(id(opinion)),word(?),word(,),word(you),word('),word(re),word(not),word(alone),word(.)])),response_block(response(3,[word(Such),word(a),word(word),word(matters),word(a),word(lot),word(to),word(me),set(id(opinion),star(1)),word(.)]))]) 
+
+trigger(2, [optional("i"),"have",optional("just"),"one","word","for","you",underscore(1)]).
+
+response(2, [variable(opinion, star(1)),"Is","this","your",variable(opinion),"?",",","you","'","re","not","alone","."]).
+
+response(2, ["Such","a","word","matters","a","lot","to","me",variable(opinion, star(1)),"."]).
+
+trigger(3, [asterisk(1)]).
+
+response(3, ["Once","again","?","!"]).
+
+response(3, ["I","beg","you","pardon"]).

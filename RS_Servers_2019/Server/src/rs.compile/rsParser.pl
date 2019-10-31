@@ -183,6 +183,18 @@ trigger_tag(optional(W)) --> ['['], word(W), [']']
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%% Response Block/Commands %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+response_weight_token_list([]), ['{'] --> ['{'], {inc_line_number}
+.
+
+response_weight_token_list([T | TL])  --> response_token(T), response_weight_token_list(TL)
+.
+
+response_weight_tag(weight(I)) --> ['{'], [weight, '=', V], ['}'], 
+                                  {enforce_integer(V, I, 'Invalid weight'), !}
+.
+
+response_block(response_weight(ID, TL, W)) --> ['-'], response_weight_token_list(TL), response_weight_tag(W), {get_index(trigger, ID)}
+.
 
 response_block(response(ID, TL)) --> ['-'], response_token_list(TL), {get_index(trigger, ID)}
 .
@@ -206,6 +218,13 @@ response_token(T) --> response_tag(T)
 response_token(W) --> word(W)
 .
 
+% Generate updateBotVariable tree
+token_list_variable([]), ['>']  --> ['>']
+.
+
+token_list_variable([T | TL])  --> word(T), token_list_variable(TL)
+.
+
 % Generate formal tag tree
 token_list_formal([]) --> ['{'], ['/'], [formal], ['}']
 .
@@ -225,14 +244,10 @@ response_tag(get(W)) --> ['<', get], id(W), ['>']
 response_tag(set(W, V)) --> ['<', set], id(W), ['='], response_token(V), ['>']
 .
 
-response_tag(updateBotVariable(W, V)) --> ['<'], [bot], id(W), ['='], response_token(V), ['>']
+response_tag(updateBotVariable(W, V)) --> ['<'], [bot], id(W), ['='], token_list_variable(V), ['>']
 .
 
 response_tag(bot(V)) --> ['<'], [bot], id(V), ['>']
-.
-
-response_tag(weight(I)) --> ['{'], [weight, '=', V], ['}'], 
-                                  {enforce_integer(V, I, 'Invalid weight'), !}
 .
 
 response_tag(formal(I)) --> ['{'], [formal], ['}'], token_list_formal(I)

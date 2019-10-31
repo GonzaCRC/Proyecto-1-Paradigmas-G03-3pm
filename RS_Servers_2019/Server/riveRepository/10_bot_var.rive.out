@@ -1,1 +1,28 @@
-rsProg([define_block(var(bot,name,[word(betty)])),define_block(var(bot,master,[word(Daddy)])),define_block(var(bot,mood,[word(happy)])),trigger_block(trigger(2,[word(what),word(is),word(your),word(name)])),response_block(response(2,[word(You),word(can),word(call),word(me),formal([bot(id(name))])])),response_block(response(2,[word(I),word(am),formal([bot(id(name))])])),trigger_block(trigger(3,[word(tell),word(me),word(about),word(yourself)])),response_block(response(3,[word(I),word(am),formal([bot(id(name))]),word(,),word(a),word(chatterbot),word(written),word(by),bot(id(master)),word(.)])),trigger_block(trigger(4,[word(i),word(hate),word(you)])),response_block(response(4,[word(Aww),word(!),word(You),word('),word(ve),word(just),word(ruined),word(my),word(day),word(.),updateBotVariable(id(mood),word(depressed))])),trigger_block(trigger(5,[word(i),word(love),word(you)])),response_block(response(5,[word(Me),word(too),updateBotVariable(id(mood),word(happy))])),trigger_block(trigger(6,[optional(optional_asterisk(1)),word(feel),optional(optional_asterisk(2))])),response_block(response(6,[word(I),word(am),bot(id(mood)),word(now)]))]) 
+
+botVariable(name, ["betty"]).
+
+botVariable(master, ["Daddy"]).
+
+botVariable(mood, ["happy"]).
+
+trigger(2, ["what","is","your","name"]).
+
+response(2, ["You","can","call","me",formal([botVariable(name)])]).
+
+response(2, ["I","am",formal([botVariable(name)])]).
+
+trigger(3, ["tell","me","about","yourself"]).
+
+response(3, ["I","am",formal([botVariable(name)]),",","a","chatterbot","written","by",botVariable(master),"."]).
+
+trigger(4, ["i","hate","you"]).
+
+response(4, ["Aww","!","You","'","ve","just","ruined","my","day",".",updateBotVariable(mood, ["depressed"])]).
+
+trigger(5, ["i","love","you"]).
+
+response(5, ["Me","too",updateBotVariable(mood, ["happy"])]).
+
+trigger(6, [optional_asterisk(optional(1)),"feel",optional_asterisk(optional(2))]).
+
+response(6, ["I","am",botVariable(mood),"now"]).
