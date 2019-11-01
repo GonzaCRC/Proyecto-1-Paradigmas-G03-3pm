@@ -92,19 +92,22 @@ genCode(Out, set(id(N), M)) :- !,
 genCode(Out, trigger_topic(T, I, WL)) :- !,
      format(Out, 'trigger_topic(~a,~a, [', [T,I]),
      genCodeList(Out, WL, ','),
-	 format(Out, '])', [])
+	 format(Out, ']).', []),
+	 nl(Out)
 .
 
 genCode(Out, response_topic(T, I, WL)) :- !,
      format(Out, 'response_topic(~a,~a, [', [T,I]),
      genCodeList(Out, WL, ','),
-	 format(Out, '])', [])
+	 format(Out, ']).', []),
+	 nl(Out)
 .
 
 genCode(Out, comment_topic(N, V)) :- !,
      format(Out, 'comment(~a,[', [N]),
      genCodeList(Out, V, ','),
-	 format(Out, '])', [])
+	 format(Out, ']).', []),
+	 nl(Out)
 .
 
 genCode(Out, array(id(N))) :- !, format(Out, 'array(~a)', [N])
@@ -204,7 +207,7 @@ genCodeDefine(Out, var(B, V)) :- !,
 .
 
 genCodeDefine(Out, substitution(N, M)) :- !,
-     format(Out, 'substitution([', []),
+    format(Out, 'substitution([', []),
 	genCodeList(Out, N, ','),
 	format(Out, '], [', []),
 	genCodeList(Out, M, ','),
@@ -231,11 +234,8 @@ show_records([A|B]) :-
   writeln(A),
   show_records(B).
 
-genCodeTopic(Out, topic(V, N)) :- !,
-     format(Out, 'topic(~a,[', [V]),
-     genCodeList(Out, N, ','),
-	 format(Out, ']).', []),
-	 
+genCodeTopic(Out, V) :- !,
+     genCodeList(Out, V),
      nl(Out)
 .
 

@@ -1,1 +1,10 @@
-rsProg([trigger_block(trigger(2,[word(my),word(name),word(is),asterisk(1)])),response_block(response_condition(2,formal([star(1)]),eq,bot(id(name)),[word(Wow),word(,),word(we),word(have),word(the),word(same),word(name),word(!),set(id(name),formal([star(1)]))])),response_block(response_condition(2,id(name),eq,undefined,[set(id(name),formal([star(1)])),word(Nice),word(to),word(meet),word(you),word(!)])),response_block(response(2,[set(id(oldname),get(id(name))),set(id(name),formal([star(1)])),word(I),word(thought),word(your),word(name),word(was),get(id(oldname)),word(?)]))]) 
+
+botVariable(name, ["Erick"]).
+
+trigger(2, ["my","name","is",asterisk(1)]).
+
+response_condition(2,formal([star(1)]),eq,botVariable(name),["Wow",",","we","have","the","same","name","!",variable(name,formal([star(1)]))]).
+
+response_condition(2,variable(name),eq,undefined,[variable(name,formal([star(1)])),"Nice","to","meet","you","!"]).
+
+response(2, [variable(oldname,variable(name)),variable(name,formal([star(1)])),"I","thought","your","name","was",variable(oldname),"?"]).

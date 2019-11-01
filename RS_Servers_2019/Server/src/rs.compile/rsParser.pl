@@ -83,7 +83,7 @@ rsCommandList([sub_block(B) | R])  --> sub_block(B), !, rsCommandList(R)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% TOPIC BLOCK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-topic_block(topic(B, TL)) --> ['>'], ['topic'], [B], topic_token_list(B, TL), ['<'], ['topic']
+topic_block(TL) --> ['>'], ['topic'], [B], topic_token_list(B, TL), ['<'], ['topic']
 .
 
 topic_token_list(_, []), ['<'] --> ['<'], {inc_line_number}
@@ -193,16 +193,16 @@ response_weight_tag(weight(I)) --> ['{'], [weight, '=', V], ['}'],
                                   {enforce_integer(V, I, 'Invalid weight'), !}
 .
 
-response_block(response_weight(ID, TL, W)) --> ['-'], response_weight_token_list(TL), response_weight_tag(W), {get_index(trigger, ID)}
+response_block(response_weight(ID, TL, W)) --> ['-'], {reset_some_indexes([star])}, response_weight_token_list(TL), response_weight_tag(W), {get_index(trigger, ID)}
 .
 
 response_block(response(ID, TL)) --> ['-'], response_token_list(TL), {get_index(trigger, ID)}
 .
 
-response_block(response_condition(ID, V, OP , B, D)) --> ['*'],  ['<', get], id(V), ['>'], [O], [B], ['=', '>'], response_token_list(D), {(O == '==', OP = eq); (O == '!=', OP = ne)}, {get_index(trigger, ID)}
+response_block(response_condition(ID, V, OP , B, D)) --> ['*'], ['<', get], id(V), ['>'], [O], [B], ['=', '>'], response_token_list(D), {(O == '==', OP = eq); (O == '!=', OP = ne)}, {get_index(trigger, ID)}
 .
 
-response_block(response_condition(ID, V, OP , B, D)) --> ['*'],  response_tag(V), [O], response_tag(B), ['=', '>'], response_token_list(D), {(O == '==', OP = eq); (O == '!=', OP = ne)}, {get_index(trigger, ID)}
+response_block(response_condition(ID, V, OP , B, D)) --> ['*'], response_tag(V), [O], response_tag(B), ['=', '>'], response_token_list(D), {(O == '==', OP = eq); (O == '!=', OP = ne)}, {get_index(trigger, ID)}
 .
 
 response_token_list([])  --> ['\n'], {inc_line_number}
@@ -211,8 +211,7 @@ response_token_list([])  --> ['\n'], {inc_line_number}
 response_token_list([T | TL])  --> response_token(T), response_token_list(TL)
 .
 
-response_token(T) --> wild_card(T)
-.
+
 response_token(T) --> response_tag(T)
 .
 response_token(W) --> word(W)
@@ -303,6 +302,18 @@ token_list_define([])  --> ['\n']
 token_list_define([T | TL])  --> word(T), token_list_define(TL)
 .
 
+token_list_substitution([]), ['='] --> ['=']
+.
+
+token_list_substitution([])  --> ['\n']
+.
+
+token_list_substitution([T | TL])  --> word(T), ['\''], token_list_substitution(TL)
+.
+
+token_list_substitution([T | TL])  --> word(T), token_list_substitution(TL)
+.
+
 define_block(B) --> ['!'], define_command(B)
 .
 
@@ -318,7 +329,7 @@ define_command(var(version, [V])) --> [version], ['='], [T], {convert_value(T, V
 define_command(var(global, N, V)) --> [global], word(word(N)), {reserved_name(N)},
                                       ['='], [T], {convert_value(T, V)}
 .
-define_command(substitution(N, V)) --> ['sub'], token_list_define(N), ['='], token_list_define(V)
+define_command(substitution(N, V)) --> ['sub'], token_list_substitution(N), ['='], token_list_substitution(V)
 .
 
 define_command(array(B, N)) --> ['array'], id(B), ['='], token_list_define(N)
