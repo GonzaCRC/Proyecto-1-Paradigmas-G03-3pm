@@ -87,18 +87,15 @@ trigger_match(L, [X2|L2], A2) :- X2 = optional_asterisk(N), assert(star(N, undef
 trigger_match([X|L], L2, A2) :- re_replace('\'', ',', X, R), split_string(R, ",", "", Y), substitution(Y, N), flatten([N|L], L3), trigger_match(L3, L2, A2), !.
 trigger_match([X|L], [X2|L2], A2) :- X2 = optional(N), (X == N, trigger_match(L, L2, A2); trigger_match([X|L], L2, A2)), !.
 trigger_match([X|L], [X2|L2], A) :- X == X2, trigger_match(L, L2, A), !. 
-trigger_match([X|L], [X2|L2], A) :- X2 = hash(N), term_string(X3, X), number(X3), retract(star(N, _)), assert(star(N, X)), trigger_match(L, L2, A), !.
+trigger_match([X|L], [X2|L2], A) :- X2 = hash(N), atom_number(X, _), retract(star(N, _)), assert(star(N, X)), trigger_match(L, L2, A), !.
 trigger_match([X|L], [X2|L2], A) :- X2 = underscore(N), number_in_string(X), retract(star(N, _)), assert(star(N, X)), trigger_match(L, L2, A), !.
 trigger_match([X|L], [X2|[Y|L2]], A) :- X2 = asterisk(optional(_)), Y == X, trigger_match([X|L], [Y|L2], A), !.
 trigger_match([X|L], [X2|[Y|L2]], A) :- X2 = asterisk(N), Y = asterisk(_), star(N, M), M \= 'undefined', trigger_match([X|L], [Y|L2], A), !.
 trigger_match([X|L], [X2|[Y|L2]], A) :- X2 = asterisk(N), Y == X, star(N, M), M \= 'undefined', trigger_match([X|L], [Y|L2], A), !.
 trigger_match([X|L], [X2|[Y|[H|L2]]], A) :- X2 = asterisk(N), Y \= asterisk(_), trigger_match([X|L], [Y|[H|L2]], A), star(N, M), M \= 'undefined', (H = asterisk(_); trigger_match([X|L], [Y|[H|L2]], A)), !.
-trigger_match([X|L], [X2|L2], A) :- X2 = asterisk(N), retract(star(N, M)), ((M == 'undefined', P = []); P = M), assert(star(N, [X|P])), trigger_match(L, [asterisk(N)|L2], A), !.
+trigger_match([X|L], [X2|L2], A) :- X2 = asterisk(N), retract(star(N, M)), ((M == 'undefined', P = []); P = M), assert(star(N, [X|P])), !, trigger_match(L, [asterisk(N)|L2], A), !.
 trigger_match([X|L], [X2|L2], A) :- X2 = array(K, N), array(N, V), search_in_array(X, V, R), assert(star(K, R)), trigger_match(L, L2, A), !.
 trigger_match([X|L], [X2|L2], A) :- X2 = array(N), array(N, V), search_in_array(X, V, _), trigger_match(L, L2, A), !.
-
-% trigger_match([_|L], [X2|L2], A2) :- X2 = set(id(H),formal([star(P)])), star(P, N), capitalize(N,U), retract(variable(H, _)), assert(variable(H, U)), trigger_match(L, L2, A2), !.
-% trigger_match([_|L], [X2|L2], A2) :- X2 = set(id(H),star(P)), star(P, N), retract(variable(H, _)), assert(variable(H, N)), trigger_match(L, L2, A2), !.
 
 interpreter([], A, A) :- !.
 interpreter([X|L], A, R) :- X = input(N), input_value(N, V), interpreter(L, [V|A], R), !.
@@ -124,15 +121,6 @@ interpreter([X|L], A, R) :- X = variable(_), interpreter(L, [undefined|A], R), !
 interpreter([X|L], A, R) :- X = variable(H, variable(P)), variable(P, N), retractall(variable(H, _)), assert(variable(H, N)), interpreter(L, A, R), !.
 interpreter([X|L], A, R) :- X = variable(H, formal([star(P)])), star(P, N), capitalize(N,U), retractall(variable(H, _)), assert(variable(H, U)), interpreter(L, A, R), !.
 interpreter([X|L], A, R) :- interpreter(L, [X|A], R), !.
-
-% interpreter([X|L], A, R) :- X = set(id(H),get(id(P))), variable(P, N), retractall(variable(H, _)), assert(variable(H, N)), interpreter(L, A, R), !.
-% interpreter(L, A, R) :- response_condition(star(N), O, input(M), _), O == 'eq', !, star(N, [P]), return_input(M, K), K == P, interpreter(L, A, R), !.
-% interpreter(L, A, R) :- response_condition(star(N), O, input(_), _), O == 'eq', !, star(N, [P]), 'undefined' == P, interpreter(L, A, R), !.
-% interpreter(L, A, R) :- response_condition(star(N), O, input(M), _), O == 'ne', !, star(N, [P]), return_input(M, K), K \= P, interpreter(L, A, R), !.
-% interpreter(L, A, R) :- response_condition(star(N), O, input(_), _), O == 'ne', !, star(N, [P]), 'undefined' \= P, interpreter(L, A, R), !.
-% interpreter(L, A, R) :- response_condition(formal([star(N)]), O, bot(id(M)), _), O == 'ne', !, star(N, P), capitalize(P, [U]), botVariable(M, K), U \= K, interpreter(L, A, R), !.
-% interpreter(L, A, R) :- response_condition(formal([star(N)]), O, bot(id(M)), _), O == 'eq', !, star(N, P), capitalize(P, [U]), botVariable(M, K), U == K, interpreter(L, A, R), !.
-% interpreter(L, A, R) :- response_condition(formal([star(N)]), O, bot(id(M)), _), O == 'ne', !, star(N, P), capitalize(P, [U]), botVariable(M, K), U \= K, interpreter(L, A, R), !.
 
 condition([V|_], [O|_], [B|_], [A|_], A) :- V = variable(U), O == 'ne', once((variable(U, M); M = 'undefined')), B \= M.
 condition([V|_], [O|_], [B|_], [A|_], A) :- V = variable(U), O == 'eq', once((variable(U, M); M = 'undefined')), B == M.

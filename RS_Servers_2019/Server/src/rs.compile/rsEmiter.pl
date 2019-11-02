@@ -65,6 +65,11 @@ genCode(Out, star(N)) :- !, format(Out, 'star(~a)', [N])
 .
 genCode(Out, array(M, id(N))) :- !, format(Out, 'array(~a, ~a)', [M, N])
 .
+genCode(Out, array(inline, N)) :- !, 
+	format(Out, 'optionals(', []),
+	genCodeList(Out, N, ','),
+	format(Out, ')', [])
+.
 genCode(Out, bot(id(N))) :- !, format(Out, 'botVariable(~a)', [N])
 .
 genCode(Out, updateBotVariable(id(N), M)) :- !, 

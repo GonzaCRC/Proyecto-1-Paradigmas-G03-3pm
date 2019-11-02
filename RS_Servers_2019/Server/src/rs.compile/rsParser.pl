@@ -19,9 +19,10 @@ Gabriel Araya Ruiz
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 testParser(P) :-
-    File = '../../cases/60_topic.rive',
+    File = '../../cases/40_sort_triggers.rive',
     format('~n~n*** Parsing file: ~s ***~n~n', File),
     parse(File, P),
+	writeln(P),
     line_number(LN),
     format('File ~s parsed: ~d lines processed~n~n', [File, LN])
 .
@@ -183,17 +184,20 @@ trigger_tag(optional(W)) --> ['['], word(W), [']']
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%% Response Block/Commands %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+response_weight_token_list([]) --> ['\n'], {inc_line_number}
+.
+
 response_weight_token_list([]), ['{'] --> ['{'], {inc_line_number}
 .
 
-response_weight_token_list([T | TL])  --> response_token(T), response_weight_token_list(TL)
+response_weight_token_list([T | TL])  --> response_token(T), response_weight_token_list(TL), {!}
 .
 
 response_weight_tag(weight(I)) --> ['{'], [weight, '=', V], ['}'], 
                                   {enforce_integer(V, I, 'Invalid weight'), !}
 .
 
-response_block(response_weight(ID, TL, W)) --> ['-'], {reset_some_indexes([star])}, response_weight_token_list(TL), response_weight_tag(W), {get_index(trigger, ID)}
+response_block(response_weight(ID, TL, W)) --> ['-'], {reset_some_indexes([star])}, response_weight_token_list(TL), response_weight_tag(W), ['\n'], {get_index(trigger, ID)}
 .
 
 response_block(response(ID, TL)) --> ['-'], response_token_list(TL), {get_index(trigger, ID)}
