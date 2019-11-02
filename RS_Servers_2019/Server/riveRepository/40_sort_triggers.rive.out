@@ -1,5 +1,5 @@
 
-trigger(2, ["groovy",hash(1),weight(20)]).
+trigger(2, ["groovy",hash(1),weight(20),"hola"]).
 
 response(2, ["response","1"]).
 

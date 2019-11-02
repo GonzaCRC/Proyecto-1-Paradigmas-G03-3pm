@@ -82,10 +82,12 @@ trigger_match([], [], A) :- !, A = [].
 trigger_match(N, [], A) :- !, N \= [], A = N.
 trigger_match([], [asterisk(optional(_))], A) :- !, A = []. 
 trigger_match([], [asterisk(N)], A) :- !, star(N, M), M \= 'undefined', A = []. 
+trigger_match([], [asterisk(_), weight(_)], A) :- !, A = []. 
 trigger_match([], [asterisk(_)], A) :- !, A = [asterisk(_)]. 
-trigger_match(L, [X2|L2], A2) :- X2 = optional_asterisk(N), assert(star(N, undefined)), trigger_match(L, [asterisk(N)|L2], A2), !.
-trigger_match([X|L], L2, A2) :- re_replace('\'', ',', X, R), split_string(R, ",", "", Y), substitution(Y, N), flatten([N|L], L3), trigger_match(L3, L2, A2), !.
-trigger_match([X|L], [X2|L2], A2) :- X2 = optional(N), (X == N, trigger_match(L, L2, A2); trigger_match([X|L], L2, A2)), !.
+trigger_match(L, [X2|L2], A) :- X2 = optional_asterisk(N), assert(star(N, undefined)), trigger_match(L, [asterisk(N)|L2], A), !.
+trigger_match(L, [X2|L2], A) :- X2 = weight(_), trigger_match(L, L2, A), !.
+trigger_match([X|L], L2, A) :- re_replace('\'', ',', X, R), split_string(R, ",", "", Y), substitution(Y, N), flatten([N|L], L3), trigger_match(L3, L2, A), !.
+trigger_match([X|L], [X2|L2], A) :- X2 = optional(N), (X == N, trigger_match(L, L2, A); trigger_match([X|L], L2, A)), !.
 trigger_match([X|L], [X2|L2], A) :- X == X2, trigger_match(L, L2, A), !. 
 trigger_match([X|L], [X2|L2], A) :- X2 = hash(N), atom_number(X, _), retract(star(N, _)), assert(star(N, X)), trigger_match(L, L2, A), !.
 trigger_match([X|L], [X2|L2], A) :- X2 = underscore(N), number_in_string(X), retract(star(N, _)), assert(star(N, X)), trigger_match(L, L2, A), !.

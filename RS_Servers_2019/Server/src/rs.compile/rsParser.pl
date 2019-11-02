@@ -203,10 +203,10 @@ response_block(response_weight(ID, TL, W)) --> ['-'], {reset_some_indexes([star]
 response_block(response(ID, TL)) --> ['-'], response_token_list(TL), {get_index(trigger, ID)}
 .
 
-response_block(response_condition(ID, V, OP , B, D)) --> ['*'], ['<', get], id(V), ['>'], [O], [B], ['=', '>'], response_token_list(D), {(O == '==', OP = eq); (O == '!=', OP = ne)}, {get_index(trigger, ID)}
+response_block(response_condition(ID, V, O , B, D)) --> ['*'], ['<', get], id(V), ['>'], operator(O), [B], ['=', '>'], response_token_list(D), {get_index(trigger, ID)}
 .
 
-response_block(response_condition(ID, V, OP , B, D)) --> ['*'], response_tag(V), [O], response_tag(B), ['=', '>'], response_token_list(D), {(O == '==', OP = eq); (O == '!=', OP = ne)}, {get_index(trigger, ID)}
+response_block(response_condition(ID, V, O , B, D)) --> ['*'], response_tag(V), operator(O), response_tag(B), ['=', '>'], response_token_list(D), {get_index(trigger, ID)}
 .
 
 response_token_list([])  --> ['\n'], {inc_line_number}
@@ -373,6 +373,13 @@ idList([I, J | L]) --> id(I), [','], id(J), idList(L)
 
 id(id(I)) --> [I], {atomic(I)}
 .
+
+operator(oper(eq)) --> ['==']
+.
+
+operator(oper(ne)) --> ['!=']
+.
+
 operator(oper(O)) --> {member(O, ['+', '*', '-', '/']), !}
 .
 

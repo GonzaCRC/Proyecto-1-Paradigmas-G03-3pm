@@ -133,10 +133,6 @@ genCode(Out, oper(N)) :- !, genCode(Out, atom(N))
 genCode(Out, oper(N)) :- !, genCode(Out, atom(N))
 .
 
-% Internal Representations
-genCode(Out, operation(O, L, R)) :- !,
-    genCodeList(Out, [L, O, R])
-.
 genCode(Out, atom(N)) :- !, format(Out, '"~a"', [N])
 .
 genCode(Out, comment(C)):-
@@ -154,14 +150,14 @@ genCodeResponse(Out, response(I, WL)) :- !,
      nl(Out)
 .
 
-genCodeResponse(Out, response_condition(M, id(N), O, V, WL)) :- !,
+genCodeResponse(Out, response_condition(M, id(N), oper(O), V, WL)) :- !,
      format(Out, 'response_condition(~a,variable(~a),~a,~a,[', [M, N, O, V]),
      genCodeList(Out, WL, ','),
 	 format(Out, ']).', []),
      nl(Out)
 .
 
-genCodeResponse(Out, response_condition(M, formal(N), O, bot(id(V)), WL)) :- !,
+genCodeResponse(Out, response_condition(M, formal(N), oper(O), bot(id(V)), WL)) :- !,
      format(Out, 'response_condition(~a,', [M]),
 	 genCodeList(Out, [formal(N)], ','),
 	 format(Out, ',~a,', [O]),
@@ -172,7 +168,7 @@ genCodeResponse(Out, response_condition(M, formal(N), O, bot(id(V)), WL)) :- !,
      nl(Out)
 .
 
-genCodeResponse(Out, response_condition(M, star(N), O, input(V), WL)) :- !,
+genCodeResponse(Out, response_condition(M, star(N), oper(O), input(V), WL)) :- !,
      format(Out, 'response_condition(~a,star(~a),~a,input(~a),[', [M, N, O, V]),
      genCodeList(Out, WL, ','),
 	 format(Out, ']).', []),
