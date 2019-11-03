@@ -1,4 +1,23 @@
-! var name = Tutorial
++ * {weight=20}
+- response 4.1 {weight=60}
+- response 4.2 {weight=30}
 
-+ a * # _ 
-- <star1> <star3> <star2> <bot name>
++ groovy # {weight=20}
+- response 1
+
++ groovy # 
+- response 2
+
++ groovy #
+- response 3
+
++ uff uff
+- GG EASY
+
+
++ [*] este (hola|erick)
+- response 3
+
++ groovy [*]
+- response 3
+
