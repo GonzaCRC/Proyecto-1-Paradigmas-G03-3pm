@@ -29,13 +29,7 @@ compare_wl([X|L]) :-
 	compare_wl(L)
 	)
 .
-
-descompress(V) :- V = response(_,T). 
-
-%trigger(2, [asterisk(1),hash(2)])
-
-%response(2, [variable(name),star(1),star(3),variable(cosi)])
-
+ 
 verify([]).
 verify([X|L]) :- 
 	(
