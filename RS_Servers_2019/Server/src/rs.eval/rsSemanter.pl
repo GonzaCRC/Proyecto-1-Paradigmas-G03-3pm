@@ -6,31 +6,31 @@ chSeman(File) :-
 	atom_concat('../../riveRepository/', File, PathInFile),
     atom_concat(PathInFile, '.rive.out', RSOutFile),
 	open(RSOutFile, read, Str), read_file(Str, Lines), close(Str),assert(vars([])),assert(aux([])),save_vars(Lines),
-	compare_wl(Lines),
-	!
+	compare_wl(Lines),!
 .
 	
 save_vars([]).	
 save_vars([X|L]) :- 
 	(
 	X = botVariable(B, _), vars(V), append([B],V,O), retractall(vars(_)), assert(vars(O)), save_vars(L);
-	X = response(_,D),vars(V), cond_var(D,[],K), K \= [] ,writeln(K),append(K,V,O), retractall(vars(_)), assert(vars(O)), save_vars(L);
+	X = response(_,D),vars(V), cond_var(D,[],K), K \= [] ,append(K,V,O), retractall(vars(_)), assert(vars(O)), save_vars(L);
 	save_vars(L)
 	)
 .
-
 compare_wl([]).
 compare_wl([X|L]) :- 
 	(
-	 aux(M),M \= [],X = trigger(_,_),writeln(M),retractall(aux(_)), assert(aux([]));
+	 aux(M),M \= [],X = trigger(_,_),retractall(aux(_)), assert(aux([]));
 	 true
 	),
 	(
-	aux(V),V = [] ,X = trigger(_,U),trigs_v(U,[],UU),append(UU,V,O), retractall(aux(_)), assert(aux(O)),writeln('1'),compare_wl(L); 
-	X = response(_,T),writeln(T),resp_v(T,[],TT),(verify(TT),compare_wl(L),writeln('3'); writeln('fail44'),!,fail);
+	aux(V),V = [] ,X = trigger(_,U),trigs_v(U,[],UU),append(UU,V,O), retractall(aux(_)), assert(aux(O)),compare_wl(L); 
+	X = response(_,T),resp_v(T,[],TT),(verify(TT),compare_wl(L);throw(semanticError('One or more variables or <stars> calls does not exist on the rive', X)));
 	compare_wl(L)
 	)
 .
+
+descompress(V) :- V = response(_,T). 
 
 %trigger(2, [asterisk(1),hash(2)])
 
@@ -39,8 +39,8 @@ compare_wl([X|L]) :-
 verify([]).
 verify([X|L]) :- 
 	(
-	 X = variable(Val), vars(S), writeln(Val),sublist([Val],S),writeln(Val),verify(L);
-	 X = star(Val),aux(H),writeln('star') ,sublist([Val],H),verify(L); 
+	 X = variable(Val), vars(S),sublist([Val],S),verify(L);
+	 X = star(Val),aux(H) ,sublist([Val],H),verify(L); 
 	 false
 	),
 	!.

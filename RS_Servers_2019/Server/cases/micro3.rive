@@ -1,6 +1,6 @@
 ! var name = betty
 ! var master = Daddy
-! var mood = happy
+var mood = happy
 
 + * #
 - <set cox=<star1>> <star1> <star2> <get co>
