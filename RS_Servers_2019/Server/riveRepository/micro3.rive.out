@@ -1,30 +1,24 @@
-trigger(6,[uff,uff]).
 
-trigger(8,[groovy,optional_asterisk(optional(1))]).
+botVariable(name, ["betty"]).
 
-trigger(7,[optional_asterisk(optional(1)),este,optionals(hola,erick)]).
+botVariable(master, ["Daddy"]).
 
-trigger(5,[groovy,hash(1)]).
+botVariable(mood, ["happy"]).
 
-trigger(4,[groovy,hash(1)]).
+trigger(2, [asterisk(1),hash(2)]).
 
-trigger(3,[groovy,hash(1),weight(20)]).
+response(2, [variable(cox, star(1)),star(1),star(2),variable(cox)]).
 
-trigger(2,[asterisk(1),weight(20)]).
+response(2, ["ai"]).
 
-response_weight(2,[response,4,.,1],weight(60)).
+response(2, ["buuu"]).
 
-response_weight(2,[response,4,.,2],weight(30)).
+trigger(3, ["hola",asterisk(1)]).
 
-response(3,[response,1]).
+response(3, ["adios",variable(mood)]).
 
-response(4,[response,2]).
+response(3, ["me","lleva",star(1)]).
 
-response(5,[response,3]).
+trigger(4, ["xd"]).
 
-response(6,[GG,EASY]).
-
-response(7,[response,3]).
-
-response(8,[response,3]).
-
+response(4, ["erick"]).

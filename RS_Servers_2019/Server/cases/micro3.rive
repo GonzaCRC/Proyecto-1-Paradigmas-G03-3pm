@@ -1,23 +1,17 @@
-+ * {weight=20}
-- response 4.1 {weight=60}
-- response 4.2 {weight=30}
+! var name = betty
+! var master = Daddy
+! var mood = happy
 
-+ groovy # {weight=20}
-- response 1
++ * #
+- <set cox=<star1>> <star1> <star2> <get co>
+- ai
+- buuu
 
-+ groovy # 
-- response 2
++ hola *
+- adios <get mood>
+- me lleva <star1>
 
-+ groovy #
-- response 3
++ xd 
+- erick
 
-+ uff uff
-- GG EASY
-
-
-+ [*] este (hola|erick)
-- response 3
-
-+ groovy [*]
-- response 3
-
+ 
