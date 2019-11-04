@@ -1,3 +1,5 @@
+:- module(rsEval2, [get_response/3]).
+
 read_file(Stream, Lines) :-
     read(Stream, Line),               
     (  at_end_of_stream(Stream)       
@@ -50,10 +52,10 @@ save_input(I) :-
 	assert(inputs(V))
 .
 
-guardar(File, Lines) :- 
-	atom_concat('../../riveRepository/', File, PathInFile),
-    atom_concat(PathInFile, '.rive.out', RSOutFile),
-	open(RSOutFile, read, Str), read_file(Str, Lines), close(Str), write(Lines), nl,
+save_in_memory(File) :- 
+	atom_concat('./riveRepository/', File, PathInFile),
+    atom_concat(PathInFile, '.out', RSOutFile),
+	open(RSOutFile, read, Str), read_file(Str, Lines), close(Str),
 	assert_from_list(Lines)
 .
 
@@ -132,7 +134,8 @@ condition([V|_], [O|_], [B|_], [A|_], A) :- V = star(N), B = input(M), O == 'eq'
 condition([V|_], [O|_], [B|_], [A|_], A) :- V = star(N), B = input(M), O == 'ne', star(N, P), once((input_value(M, K); K = 'undefined')), reverse(P, I), I \= K.
 condition([_|L1], [_|L2], [_|L3], [_|L4], A) :- condition(L1, L2, L3, L4, A).
 
-get_response(Q, RL) :- 
+get_response(File, Q, RL) :- 
+	save_in_memory(File),
 	split_string(Q, " ", "", L),
 	!,
 	(inputs(_); assert(inputs([]))),
@@ -221,10 +224,6 @@ match_response_condition(I, RL) :-
 response_weight_list([], [], A, A).
 response_weight_list([X|L], [Y|P], A, R) :- length(K, Y), maplist(=(X), K), response_weight_list(L, P, [K|A], R).
 
-
-% [rsEval2].
-% guardar('02_star_match', L).
-% get_response('hola', R).
 
 
 

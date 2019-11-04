@@ -1,22 +1,22 @@
+trigger(3,[i,say,asterisk(1)]).
 
-variable(version,"2").
+trigger(2,[asterisk(1)]).
 
-botVariable(master, ["localuser"]).
+variable(version,2).
 
-botVariable(name, ["Aiden"]).
+botVariable(master,[localuser]).
 
-botVariable(fullname, ["Aiden","Rive"]).
+botVariable(name,[Aiden]).
 
-trigger(2, ["i","say",asterisk(1)]).
+botVariable(fullname,[Aiden,Rive]).
 
-response(2, ["Don","'","t","say",star(1),",",botVariable(master),",",botVariable(birthday),weight(20)]).
+response(2,[You,say,star(1)]).
 
-trigger(3, [asterisk(1)]).
+botVariable(age,[5]).
 
-response(3, ["You","say",star(1)]).
+botVariable(birthday,[October,15]).
 
-botVariable(age, ["5"]).
+response_weight(3,[Don,',t,say,star(1)],weight(20)).
 
-botVariable(birthday, ["October","15"]).
+botVariable(sex,[male]).
 
-botVariable(sex, ["male"]).

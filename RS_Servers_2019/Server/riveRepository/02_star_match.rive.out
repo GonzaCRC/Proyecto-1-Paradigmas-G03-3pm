@@ -1,8 +1,8 @@
+trigger(2,[a,asterisk(1),underscore(2),hash(3)]).
 
-trigger(2, ["a",asterisk(1),underscore(2),hash(3)]).
+trigger(3,[b,asterisk(1),asterisk(2)]).
 
-response(2, ["Case","a",":","star1","=",star(1),"|","underscore","=",star(2),"|","hash","=",star(3),"|"]).
+response(2,[Case,a,:,star1,=,star(1),|,underscore,=,star(2),|,hash,=,star(3),|]).
 
-trigger(3, ["b",asterisk(1),asterisk(2)]).
+response(3,[Case,b,:,star1,=,star(1),|,star2,=,star(2),|]).
 
-response(3, ["Case","b",":","star1","=",star(1),"|","star2","=",star(2),"|"]).

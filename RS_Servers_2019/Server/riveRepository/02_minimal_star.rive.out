@@ -1,8 +1,8 @@
+trigger(2,[asterisk(1)]).
 
-trigger(2, [asterisk(1)]).
+response(2,[Once,again,?,!]).
 
-response(2, ["Once","again","?","!"]).
+response(2,[What,do,you,mean,with,star(1)]).
 
-response(2, ["What","do","you","mean","with",star(1)]).
+response(2,[star(1),?,Really,?]).
 
-response(2, [star(1),"?","Really","?"]).

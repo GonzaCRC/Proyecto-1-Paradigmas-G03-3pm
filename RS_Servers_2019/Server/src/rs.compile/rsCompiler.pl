@@ -12,6 +12,8 @@ Gabriel Araya Ruiz
 
 :- use_module(rsParser).
 :- use_module(rsEmiter).
+:- use_module(rsSemanter).
+:- use_module(rsTriggerSort).
 
 compile(InPath, OutPath, Filename) :-
    atom_concat(InPath, Filename, PathInFile),
@@ -21,7 +23,9 @@ compile(InPath, OutPath, Filename) :-
    atom_concat(OutPath, Filename, PathOutFile),
    atom_concat(PathOutFile, '.out', RSOutFile),
    format('*** Writing   :"~a" *** ~n', [RSOutFile]),
-   rsEmiter:genCodeToFile(RSOutFile, P)
+   rsEmiter:genCodeToFile(RSOutFile, P),
+   rsSemanter:chSeman(Filename),
+   rsTriggerSort:striggers(Filename)
 .
 compile(InPath, _, Filename) :-
    atom_concat(InPath, Filename, PathInFile),

@@ -5,7 +5,7 @@
 :- use_module(library(http/http_client)).
 :- use_module(library(http/http_dispatch)).
 
-:- use_module(rsEval).
+:- use_module(rsEval2).
 
 :- initialization(start_server).
 
@@ -22,7 +22,7 @@ chat(WebSocket) :-
         arg(2,Message.data,Msg), %Mensaje
         arg(4,Message.data,NameFile), %Nombre del archivo
 
-        rsEval:genCodeToFile(NameFile, Msg, R),
+        rsEval2:get_response(NameFile, Msg, R),
     	ws_send(WebSocket, text(R)),
         chat(WebSocket)
     ).

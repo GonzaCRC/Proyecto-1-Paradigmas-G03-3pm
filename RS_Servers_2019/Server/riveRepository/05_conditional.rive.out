@@ -1,18 +1,18 @@
+trigger(3,[optional(do),you,know,my,name]).
 
-trigger(2, ["my","name","is",asterisk(1)]).
+trigger(2,[my,name,is,asterisk(1)]).
 
-response_condition(2,variable(name),eq,undefined,[variable(name, star(1)),"Nice","to","meet","you",variable(name)]).
+trigger(4,[asterisk(1)]).
 
-response(2, ["You","already","told","me","your","name",",",variable(name)]).
+response_condition(2,variable(name),eq,undefined,[variable(name,star(1)),Nice,to,meet,you,variable(name)]).
 
-trigger(3, [optional("do"),"you","know","my","name"]).
+response(2,[You,already,told,me,your,name]).
 
-response_condition(3,variable(name),ne,undefined,["Yes",",","your","name","is",variable(name),"."]).
+response_condition(3,variable(name),ne,undefined,[Yes,,,your,name,is,variable(name),.]).
 
-response(3, ["No",",","you","'","ve","never","told","me","your","name","before","."]).
+response(3,[No,,,you,',ve,never,told,me,your,name,before,.]).
 
-trigger(4, [asterisk(1)]).
+response(4,[Once,again,?,!]).
 
-response(4, ["Once","again","?","!"]).
+response(4,[I,beg,you,pardon]).
 
-response(4, ["I","beg","you","pardon"]).

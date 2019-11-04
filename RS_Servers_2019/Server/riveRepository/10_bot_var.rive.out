@@ -1,28 +1,28 @@
+trigger(3,[tell,me,about,yourself]).
 
-botVariable(name, ["betty"]).
+trigger(2,[what,is,your,name]).
 
-botVariable(master, ["Daddy"]).
+trigger(4,[i,hate,you]).
 
-botVariable(mood, ["happy"]).
+trigger(5,[i,love,you]).
 
-trigger(2, ["what","is","your","name"]).
+trigger(6,[optional_asterisk(optional(1)),feel,optional_asterisk(optional(2))]).
 
-response(2, ["You","can","call","me",formal([botVariable(name)])]).
+botVariable(name,[betty]).
 
-response(2, ["I","am",formal([botVariable(name)])]).
+botVariable(master,[Daddy]).
 
-trigger(3, ["tell","me","about","yourself"]).
+botVariable(mood,[happy]).
 
-response(3, ["I","am",formal([botVariable(name)]),",","a","chatterbot","written","by",botVariable(master),"."]).
+response(2,[You,can,call,me,formal([botVariable(name)])]).
 
-trigger(4, ["i","hate","you"]).
+response(2,[I,am,formal([botVariable(name)])]).
 
-response(4, ["Aww","!","You","'","ve","just","ruined","my","day",".",updateBotVariable(mood, ["depressed"])]).
+response(3,[I,am,formal([botVariable(name)]),,,a,chatterbot,written,by,botVariable(master),.]).
 
-trigger(5, ["i","love","you"]).
+response(4,[Aww,!,You,',ve,just,ruined,my,day,.,updateBotVariable(mood,[depressed])]).
 
-response(5, ["Me","too",updateBotVariable(mood, ["happy"])]).
+response(5,[Me,too,updateBotVariable(mood,[happy])]).
 
-trigger(6, [optional_asterisk(optional(1)),"feel",optional_asterisk(optional(2))]).
+response(6,[I,am,botVariable(mood),now]).
 
-response(6, ["I","am",botVariable(mood),"now"]).
