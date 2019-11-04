@@ -1,6 +1,6 @@
 ! array colors = red blue green yellow
 + i am wearing a (@colors) shirt *
-- Do you really like <star>?
+- Do you really like <star2>?
 
 + what color is my @colors *
 - I don't know what color your <star> is.

@@ -12,22 +12,19 @@ striggers(File) :-
 	append(MM,Tw,Tf), o_trigger(Vv),w_l(Vv,Mn),append(Tf,Mn,TT),others(O), append(TT,O,JJ),
 	retractall(o_trigger(_)),retractall(others(_)),retractall(trigs(_)),retractall(trigger_w(_)),retractall(trigger_s(_)),
 	retractall(s_trigger_w(_)),retractall(only_trigger_w(_)),retractall(op_trigger(_)),retractall(s_trigger_o(_)),
-
 	open(RSOutFile,write, OverW),
     forall(member(X,JJ),(write(OverW,X),write(OverW,'.'),write(OverW,'\n'),write(OverW,'\n'))),
     close(OverW),
 	!
 .
 
-
-
 save_triggers([]).
 
 save_triggers([X|L]):- 
 	(X = trigger(_,_) , trigs(M), append(M,[X],B) , retract(trigs(_)) , assert(trigs(B)), save_triggers(L) ; 
-	others(O), append(O,[X],K) , retract(others(_)) , assert(others(K)),save_triggers(L)).
+	others(O), append(O,[X],K) , retract(others(_)) , assert(others(K)),save_triggers(L))
+.
 
-																
 sort_trigers :- 
 	trigs(X),
 	assert(trigger_s([trigger(_,[])])),
@@ -44,7 +41,6 @@ sort_trigers :-
 	sort_trigers_w(D),
 	only_trigger_w(Ow),
 	sort_trigers_only_w(Ow)
-	
 .
 	
 
@@ -52,16 +48,14 @@ sort_trigers_s([]).
 sort_trigers_s([X|L]) :- 
 	X = trigger(_,L1), 
 	trigger_s(J),
-	(
-	only_wildcard(L1),only_trigger_w(T), append([X],T,F),retractall(only_trigger_w(_)),assert(only_trigger_w(F)),sort_trigers_s(L);
+	(only_wildcard(L1),only_trigger_w(T), append([X],T,F),retractall(only_trigger_w(_)),assert(only_trigger_w(F)),sort_trigers_s(L);
 	contain_opcional(L1), s_trigger_o(T),append([X],T,F),retractall(s_trigger_o(_)),assert(s_trigger_o(F)),sort_trigers_s(L);
 	contain_wildcard(L1),s_trigger_w(T), append([X],T,F),retractall(s_trigger_w(_)),assert(s_trigger_w(F)),sort_trigers_s(L);
 	special(J,X,0,I),
 	insertAt(X,I,J,J2),
 	retractall(trigger_s(_)),
 	assert(trigger_s(J2)),
-	sort_trigers_s(L)
-	)
+	sort_trigers_s(L))
 .
 
 sort_trigers_w([]) :- !.
@@ -84,7 +78,6 @@ sort_trigers_only_w([X|L]) :-
 	sort_trigers_only_w(L)
 .
 
-
 sort_trigers_op([]).
 sort_trigers_op([X|L]) :- 
 	op_trigger(J),
@@ -94,7 +87,6 @@ sort_trigers_op([X|L]) :-
 	assert(op_trigger(J2)),
 	sort_trigers_op(L)
 .
-
 
 insertAt(Element,0,L,[Element|L]). 
 insertAt(Element,Pos,[E|L],[E|ZL]):- 
@@ -108,17 +100,12 @@ special([T1|L],T,N,I):-
 	T = trigger(_,L2),
 	length(L1,Le1), 
 	length(L2,Le2),
-	(
-	 Le2>Le1, I = N ;  
+	(Le2>Le1, I = N ;  
 	 Le2=Le1, atomics_to_string(L1," ",L1s), atomics_to_string(L2," ",L2s),string_length(L1s,Xl), string_length(L2s,Pl),
-	 (
-	   Pl>Xl,I = N;
-	   Pl=Xl, compare(W, L1s,L2s), W = (>),I = N
-	 );
-	 N1 = N+1, special(L,T,N1,I)
-	)
+	 (Pl>Xl,I = N;
+	 Pl=Xl, compare(W, L1s,L2s), W = (>),I = N);
+	 N1 = N+1, special(L,T,N1,I))
 .
-
 
 special_op([],_,_,_).
 special_op([T1|L],T,N,I):- 
@@ -128,15 +115,11 @@ special_op([T1|L],T,N,I):-
 	string_list(Y2,[],L2),
 	length(L1,Le1), 
 	length(L2,Le2),
-	(
-	 Le2>Le1, I = N ;  
+	(Le2>Le1, I = N ;  
 	 Le2=Le1, atomics_to_string(L1," ",L1s), atomics_to_string(L2," ",L2s),string_length(L1s,Xl), string_length(L2s,Pl),
-	 (
-	   Pl>Xl,I = N;
-	   Pl=Xl, compare(W, L1s,L2s), (L1s= "",L2s = "", I = N ;W = (>),I = N)
-	 );
-	 N1 = N+1, special_op(L,T,N1,I)
-	)
+	 (Pl>Xl,I = N;
+	 Pl=Xl, compare(W, L1s,L2s), (L1s= "",L2s = "", I = N ;W = (>),I = N));
+	 N1 = N+1, special_op(L,T,N1,I))
 .
 
 special_w([],_,_,_).
@@ -147,46 +130,34 @@ special_w([T1|L],T,N,I):-
 	string_list(Y2,[],L2),
 	length(L1,Le1), 
 	length(L2,Le2),
-	(
-	 Le2>Le1, I = N ;  
+	(Le2>Le1, I = N ;  
 	 Le2=Le1, atomics_to_string(L1," ",L1s), atomics_to_string(L2," ",L2s),string_length(L1s,Xl), string_length(L2s,Pl),
-	 (
-	   Pl>Xl,I = N;
-	   Pl=Xl, compare(W, L1s,L2s), (L1s= "",L2s = "", I = N ;W = (>),I = N)
-	 );
-	 N1 = N+1, special_w(L,T,N1,I)
-	)
+	 (Pl>Xl,I = N;
+	 Pl=Xl, compare(W, L1s,L2s), (L1s= "",L2s = "", I = N ;W = (>),I = N));
+	 N1 = N+1, special_w(L,T,N1,I))
 .
-
 
 special_only_w([],_,_,_).
 special_only_w([T1|L],T,N,I):- 
 	T1 = trigger(_,[Y1|_]), 
 	T = trigger(_,[Y2|_]),
-	(
-	 Y2 = [], I = N;
+	(Y2 = [], I = N;
 	 Y2 = asterisk(_), Y1 = asterisk(_), I = N ;
 	 Y2 = underscore(_), Y1 = asterisk(_), I = N;
 	 Y2 = hash(_), Y1 = asterisk(_), I = N;
-	 
 	 Y2 = asterisk(_), Y1 = underscore(_), N1 = N+1, writeln(L),special_only_w(L,T,N1,I);
 	 Y2 = underscore(_), Y1 = underscore(_), I = N;
 	 Y2 = hash(_), Y1 = underscore(_), N1 = N+1, special_only_w(L,T,N1,I);
-	 
 	 Y2 = asterisk(_), Y1 = hash(_), N1 = N+1, special_only_w(L,T,N1,I);
 	 Y2 = underscore(_), Y1 = hash(_), I = N;
 	 Y2 = hash(_), Y1 = hash(_), I = N;
-	 N1 = N+1, special_only_w(L,T,N1,I)
-	)
+	 N1 = N+1, special_only_w(L,T,N1,I))
 .
 
 string_list([],V,V).
 string_list([X|L],V,A) :- 
-	(
-	string(X), append(V,[X],B), string_list(L,B,A);
-	string_list(L,V,A)
-	),
-	!.
+	(string(X), append(V,[X],B), string_list(L,B,A);
+	string_list(L,V,A)),!.
 	
 contain_wildcard([]) :- false.
 contain_wildcard([X|_]) :- X = asterisk(_), !.

@@ -1,4 +1,10 @@
+trigger(2,[i,am,wearing,a,array(1,colors),shirt,asterisk(2)]).
 
-trigger(2, [asterisk(1),underscore(2),hash(3)]).
+trigger(3,[what,color,is,my,array(colors),asterisk(1)]).
 
-response(2, [star(1)]).
+array(colors,[red,blue,green,yellow]).
+
+response(2,[Do,you,really,like,star(2),?]).
+
+response(3,[I,don,',t,know,what,color,your,star(1),is,.]).
+
