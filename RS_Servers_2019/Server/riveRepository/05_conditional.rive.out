@@ -1,20 +1,20 @@
-trigger(3,[optional(do),you,know,my,name]).
+trigger(3,[optional("do"),"you","know","my","name"]).
 
-trigger(2,[my,name,is,asterisk(1)]).
+trigger(2,["my","name","is",asterisk(1)]).
 
 trigger(4,[asterisk(1)]).
 
-botVariable(name,[tur]).
+botVariable(name,["tur"]).
 
-response_condition(2,variable(name),eq,undefined,[variable(name,star(1)),Nice,to,meet,you,variable(name)]).
+response_condition(2,variable(name),eq,undefined,[variable(name,star(1)),"Nice","to","meet","you",variable(name)]).
 
-response(2,[You,already,told,me,your,name,,,variable(name)]).
+response(2,["You","already","told","me","your","name",",",variable(name)]).
 
-response_condition(3,variable(name),ne,undefined,[Yes,,,your,name,is,variable(name),.]).
+response_condition(3,variable(name),ne,undefined,["Yes",",","your","name","is",variable(name),"."]).
 
-response(3,[No,,,you,',ve,never,told,me,your,name,before,botVariable(name)]).
+response(3,["No",",","you","'","ve","never","told","me","your","name","before",botVariable(name)]).
 
-response(4,[Once,again,?,!]).
+response(4,["Once","again","?","!"]).
 
-response(4,[I,beg,you,pardon]).
+response(4,["I","beg","you","pardon"]).
 

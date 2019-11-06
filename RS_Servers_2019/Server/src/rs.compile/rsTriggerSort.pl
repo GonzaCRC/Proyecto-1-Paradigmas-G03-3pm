@@ -10,10 +10,10 @@ striggers(File) :-
 	open(RSOutFile, read, Str), read_file(Str, Lines), close(Str),assert(trigs([])),assert(others([])),
 	save_triggers(Lines),sort_trigers,trigger_s(Ss),w_l(Ss,Ts),op_trigger(J2),w_l(J2,JJ2),append(Ts,JJ2,MM),trigger_w(Sw),w_l(Sw,Tw),
 	append(MM,Tw,Tf), o_trigger(Vv),w_l(Vv,Mn),append(Tf,Mn,TT),others(O), append(TT,O,JJ),
-	retractall(o_trigger(_)),retractall(others(_)),retractall(trigs(_)),retractall(trigger_w(_)),retractall(trigger_s(_)),
+	retractall(o_trigger(_)),retractall(others(_)),retractall(trigger_w(_)),retractall(trigger_s(_)),retractall(trigs(_)),
 	retractall(s_trigger_w(_)),retractall(only_trigger_w(_)),retractall(op_trigger(_)),retractall(s_trigger_o(_)),
 	open(RSOutFile,write, OverW),
-    forall(member(X,JJ),(write(OverW,X),write(OverW,'.'),write(OverW,'\n'),write(OverW,'\n'))),
+    forall(member(X,JJ),(write_canonical(OverW,X),write(OverW,'.'),write(OverW,'\n'),write(OverW,'\n'))),
     close(OverW),
 	!
 .
