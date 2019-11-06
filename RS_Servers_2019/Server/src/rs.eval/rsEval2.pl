@@ -53,8 +53,8 @@ save_input(I) :-
 .
 
 save_in_memory(File) :- 
-	atom_concat('./riveRepository/', File, PathInFile),
-    atom_concat(PathInFile, '.out', RSOutFile),
+	atom_concat('../../riveRepository/', File, PathInFile),
+    atom_concat(PathInFile, '.rive.out', RSOutFile),
 	open(RSOutFile, read, Str), read_file(Str, Lines), close(Str),
 	assert_from_list(Lines)
 .
