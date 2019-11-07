@@ -13,6 +13,10 @@
 :- use_module(library(http/http_cors)).
 :- use_module(library(http/http_json)).
 
+
+:- assert(file_search_path(lib, 'lib/')).
+:- use_module( lib(prosqlite) ).
+
 :- assert(file_search_path(rs_path, 'src/rs.compile/')).
 
 :- use_module(rs_path(rsCompiler)).
@@ -23,11 +27,13 @@
 
 :- http_handler(root(.),
                 http_reply_from_files('./AngularBuild', []),
-                [prefix])
+               [prefix])
 .
 
 :- http_handler(root(upload), upload, []).
 :- http_handler(root(getRiveFiles), getRiveFiles, [method(get)]).
+:- http_handler(root(validateUser), validateUser, [method(post)]).
+:- http_handler(root(getChat), listMessages, [method(post)]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%% Methods %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -57,24 +63,40 @@ getRiveFiles(_Request) :-
 
 listFiles(Path,FileList):- findall(File, directory_member(Path,File,[]), FileList). 
 
-/*riveResponse(Request) :-
-	http_read_json(Request, Data, []),
-    %arg(1,Data,Msg),
-	%post_msg(Msg,Reply),
-	%cors_enable,
-    reply_json(json([data(Data)]))
-.*/
+validateUser(Request) :-
+	http_read_json(Request, Data, [json_object(term)]),
+	arg(1,Data,UserInfo),
+	existUser(UserInfo.user,UserInfo.pass),
+	reply_json(json([msj(UserInfo.user)]));
+	reply_json(json([msj('Error')])).
 
-%%%%%%%%%%%%%%%%%%% Temp Server Node %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+existUser(User,Pass):-
+	getUsers(Users),
+	member(row(User,Pass),Users),!.
 
-node_endpoint('http://localhost:6000').
-
-post_msg(Msg, Reply) :-
-  node_endpoint(NodeEndPoint),
-  format(atom(AtomMsg), '{"msg":"~s"}', [Msg]), 
-  http_post(NodeEndPoint, atom(AtomMsg), Reply, [])
-.
-
+getUsers(Users) :-
+	%debug( sqlite ),
+	DataBase = 'dataBase/dataProyect.sqlite',
+    sqlite_connect( DataBase , dataProyect ),
+	Statement = 'Select user,pass from users',
+	findall( Data, sqlite_query(dataProyect,Statement,Data), Users ),
+	sqlite_disconnect( dataProyect ).
+		
+listMessages(Request):-
+	http_read_json(Request, Data, [json_object(term)]),
+	arg(1,Data,UserInfo),
+	getChat(UserInfo.user,UserInfo.bot,Chat),
+	reply_json(json([msj(Chat)])).
+		
+getChat(User,Bot,Chat):-
+	%debug( sqlite ),
+	DataBase = 'dataBase/dataProyect.sqlite',
+    sqlite_connect( DataBase , dataProyect ),
+	format(atom(Statement), "select message from chats where user='~s' and bot='~s'",[User,Bot]),
+	findall( Data, (sqlite_query(dataProyect,Statement,Result),arg(1,Result,Data)), Chat ),
+	sqlite_disconnect( dataProyect ).
+	
+	
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Server Control %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 start_server :-
     default_port(Port),
