@@ -52,13 +52,17 @@ save_input(I) :-
 	assert(inputs(V))
 .
 
+save_in_memory(_) :- savedMemory(_) , !.
+
 save_in_memory(File) :- 
 	atom_concat('../../riveRepository/', File, PathInFile),
     atom_concat(PathInFile, '.rive.out', RSOutFile),
 	open(RSOutFile, read, Str), read_file(Str, Lines), close(Str),
-	assert_from_list(Lines)
+	assert(savedMemory(true)),
+	assert_from_list(Lines), !
 .
 
+:- dynamic savedMemory/1.
 :- dynamic trigger/2.
 :- dynamic trigger_topic/3.
 :- dynamic response/2.
@@ -134,15 +138,14 @@ condition([V|_], [O|_], [B|_], [A|_], A) :- V = star(N), B = input(M), O == 'eq'
 condition([V|_], [O|_], [B|_], [A|_], A) :- V = star(N), B = input(M), O == 'ne', star(N, P), once((input_value(M, K); K = 'undefined')), reverse(P, I), I \= K.
 condition([_|L1], [_|L2], [_|L3], [_|L4], A) :- condition(L1, L2, L3, L4, A).
 
-get_response(File, Q, RL) :- 
+get_response(File, Q, RR) :- 
 	save_in_memory(File),
-	split_string(Q, " ", "", L),
-	!,
+	split_string(Q, " ", "", L), !,
 	(inputs(_); assert(inputs([]))),
-	findall(X, trigger(_, X), W),
-	!,
-	once(match_topic(L, RL);match_question(L, W, RL)),
-	save_input(Q)
+	findall(X, trigger(_, X), W), !,
+	once(match_topic(L, RL); match_question(L, W, RL)),
+	save_input(Q),
+	((var(RL), RR = "ERR: No Reply Matched"); RR = RL), !
 .
 
 match_topic(Q, RL) :-

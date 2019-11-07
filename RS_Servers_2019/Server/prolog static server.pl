@@ -14,8 +14,8 @@
 :- use_module(library(http/http_json)).
 
 
-:- assert(file_search_path(lib, 'lib/')).
-:- use_module( lib(prosqlite) ).
+% :- assert(file_search_path(lib, 'lib/')).
+% :- use_module( lib(prosqlite) ).
 
 :- assert(file_search_path(rs_path, 'src/rs.compile/')).
 
