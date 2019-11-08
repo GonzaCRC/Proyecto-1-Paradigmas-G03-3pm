@@ -1,4 +1,4 @@
-:- module(rsEval2, [get_response/3]).
+:- module(rsEval2, [get_response/4]).
 
 read_file(Stream, Lines) :-
     read(Stream, Line),               
@@ -9,8 +9,14 @@ read_file(Stream, Lines) :-
     )
 .
 	
-assert_from_list([]).	
-assert_from_list([X|L]) :- assert(X), assert_from_list(L).
+assert_from_list([]).
+
+assert_from_list([X|L]) :- 
+	current_user(User), 
+	current_file_name(File), 
+	assert(memory(User, File, X)), 
+	assert_from_list(L)
+.
 
 capitalize_optional(Word,UPword):- 
 	atom_chars(Word, [FirstLow|Rest]),
@@ -40,65 +46,56 @@ number_in_string_aux([_|L]) :- number_in_string_aux(L).
 number_in_string(X) :- atom_codes(A, X), atom_chars(A, C), number_in_string_aux(C).
 
 input_value(I, V) :- 
-	inputs(X), 
+	current_user(User), 
+	current_file_name(File),
+	inputs(User, File, X), 
 	nth1(I, X, V)
 .
 	
 save_input(I) :- 
-	inputs(X), 
+	current_user(User), 
+	current_file_name(File),
+	inputs(User, File, X), 
 	split_string(I, " ", "", L),
 	append([L], X, V), 
-	retract(inputs(_)), 
-	assert(inputs(V))
+	retract(inputs(User, File, _)), 
+	assert(inputs(User, File, V))
 .
 
-
-save_in_memory(File) :- savedMemory(_), previous_file(File), !.
+save_in_memory(File) :- current_user(User), savedMemory(User, File), !.
 
 save_in_memory(File) :- 
-	retractall(trigger(_, _)),
-	retractall(trigger_topic(_, _, _)),
-	retractall(response(_, _)),
-	retractall(response_topic(_, _, _)),
-	retractall(response_weight(_, _, _)),
-	retractall(response_condition(_, _, _, _, _)),
-	retractall(variable(_, _)),
-	retractall(topic(_, _)),
-	retractall(star(_, _)),
-	retractall(botVariable(_, _)),
-	retractall(substitution(_, _)),
-	retractall(inputs(_)),
-	retractall(topic(_)),
-	retractall(previous_file(_)),
 	atom_concat('../../riveRepository/', File, PathInFile),
     atom_concat(PathInFile, '.rive.out', RSOutFile),
 	open(RSOutFile, read, Str), read_file(Str, Lines), close(Str),
-	assert(savedMemory(true)),
-	assert(previous_file(File)),
+	current_user(User),
+	assert(savedMemory(User, File)),
 	assert_from_list(Lines), !
 .
 
-:- dynamic savedMemory/1.
+:- dynamic memory/3.
+:- dynamic savedMemory/2.
 :- dynamic trigger/2.
 :- dynamic trigger_topic/3.
 :- dynamic response/2.
 :- dynamic response_topic/3.
 :- dynamic response_weight/3.
 :- dynamic response_condition/5.
-:- dynamic variable/2.
+:- dynamic variable/4.
 :- dynamic topic/2.
 :- dynamic star/2.
 :- dynamic botVariable/2.
 :- dynamic substitution/2.
-:- dynamic inputs/1.
-:- dynamic topic/1.
-:- dynamic previous_file/1.
+:- dynamic inputs/3.
+:- dynamic topic/3.
+:- dynamic current_file_name/1.
+:- dynamic current_user/1.
 
 initializeVariables([]).
 initializeVariables([X|L]) :- X = hash(N), assert(star(N, undefined)), initializeVariables(L).
 initializeVariables([X|L]) :- X = underscore(N), assert(star(N, undefined)), initializeVariables(L).
 initializeVariables([X|L]) :- X = asterisk(N), assert(star(N, undefined)), initializeVariables(L).
-initializeVariables([X|L]) :- X = set(id(H),_), assert(variable(H, undefined)), initializeVariables(L).
+initializeVariables([X|L]) :- X = set(id(H),_), current_user(User), current_file_name(File), assert(variable(User, File, H, undefined)), initializeVariables(L).
 initializeVariables([_|L]) :- initializeVariables(L).
 
 trigger_match([], [], A) :- !, A = [].
@@ -125,7 +122,7 @@ trigger_match([X|L], [X2|L2], A) :- X2 = array(N), array(N, V), search_in_array(
 interpreter([], A, A) :- !.
 interpreter([X|L], A, R) :- X = input(N), input_value(N, V), interpreter(L, [V|A], R), !.
 interpreter([X|L], A, R) :- X = input(_), interpreter(L, [undefined|A], R), !.
-interpreter([X|L], A, R) :- X = topic(N), retractall(topic(_)), assert(topic(N)), interpreter(L, A, R), !.
+interpreter([X|L], A, R) :- X = topic(N), current_user(User), current_file_name(File), retractall(topic(User, File, _)), assert(topic(User, File, N)), interpreter(L, A, R), !.
 interpreter([X|L], A, R) :- X = underscore(_), interpreter(L, [undefined|A], R), !.
 interpreter([X|L], A, R) :- X = underscore(P), star(P, M), interpreter(L, [M|A], R), !.
 interpreter([X|L], A, R) :- X = underscore(_), interpreter(L, [undefined|A], R), !.
@@ -135,50 +132,56 @@ interpreter([X|L], A, R) :- X = weight(N), assert(probability(N)), interpreter(L
 interpreter([X|L], A, R) :- X = star(P), star(P, M), interpreter(L, [M|A], R), !.
 interpreter([X|L], A, R) :- X = star(_), interpreter(L, [undefined|A], R), !.
 interpreter([X|L], A, R) :- X = formal([]), interpreter(L, A, R), !.
-interpreter([X|L], A, R) :- X = formal([botVariable(P)|N]), botVariable(P, M), capitalize(M,U), interpreter([formal(N)|L], [U|A], R), !.
+interpreter([X|L], A, R) :- X = formal([botVariable(P)|N]), current_user(User), current_file_name(File), memory(User, File, botVariable(P, M)), capitalize(M,U), interpreter([formal(N)|L], [U|A], R), !.
 interpreter([X|L], A, R) :- X = formal([star(P)|N]), star(P, M), capitalize(M,U), interpreter([formal(N)|L], [U|A], R), !.
-interpreter([X|L], A, R) :- X = formal([variable(P)|N]), variable(P, M), capitalize(M,K), interpreter([formal(N)|L], [K|A], R), !.
-interpreter([X|L], A, R) :- X = updateBotVariable(N, M), retractall(botVariable(N, _)), assert(botVariable(N, M)), interpreter(L, A, R), !.
-interpreter([X|L], A, R) :- X = botVariable(N), botVariable(N, M), atomic_list_concat(M, ' ', RL), interpreter(L, [RL|A], R), !.
+interpreter([X|L], A, R) :- X = formal([variable(P)|N]), current_user(User), current_file_name(File), memory(User, File, variable(P, M)), capitalize(M,K), interpreter([formal(N)|L], [K|A], R), !.
+interpreter([X|L], A, R) :- X = updateBotVariable(N, M), current_user(User), current_file_name(File), retractall(memory(User, File, botVariable(N, _))), assert(memory(User, File, botVariable(N, M))), interpreter(L, A, R), !.
+interpreter([X|L], A, R) :- X = botVariable(N), current_user(User), current_file_name(File), memory(User, File, botVariable(N, M)), atomic_list_concat(M, ' ', RL), interpreter(L, [RL|A], R), !.
 interpreter([X|L], A, R) :- X = botVariable(_), interpreter(L, [undefined|A], R), !.
-interpreter([X|L], A, R) :- X = variable(P), variable(P, M), interpreter(L, [M|A], R), !.
+interpreter([X|L], A, R) :- X = variable(P), current_user(User), current_file_name(File), memory(User, File, variable(P, M)), interpreter(L, [M|A], R), !.
 interpreter([X|L], A, R) :- X = variable(_), interpreter(L, [undefined|A], R), !.
-interpreter([X|L], A, R) :- X = variable(H, variable(P)), variable(P, N), retractall(variable(H, _)), assert(variable(H, N)), interpreter(L, A, R), !.
-interpreter([X|L], A, R) :- X = variable(H, formal([star(P)])), star(P, N), capitalize(N,U), retractall(variable(H, _)), assert(variable(H, U)), interpreter(L, A, R), !.
+interpreter([X|L], A, R) :- X = variable(H, variable(P)), memory(User, File, variable(P, N)), retractall(memory(User, File, variable(H, _))), assert(memory(User, File, variable(H, N))), interpreter(L, A, R), !.
+interpreter([X|L], A, R) :- X = variable(H, formal([star(P)])), star(P, N), capitalize(N,U), retractall(memory(User, File, variable(H, _))), assert(memory(User, File, variable(H, U))), interpreter(L, A, R), !.
 interpreter([X|L], A, R) :- interpreter(L, [X|A], R), !.
 
-condition([V|_], [O|_], [B|_], [A|_], A) :- V = variable(U), O == 'ne', once((variable(U, M); M = 'undefined')), B \= M.
-condition([V|_], [O|_], [B|_], [A|_], A) :- V = variable(U), O == 'eq', once((variable(U, M); M = 'undefined')), B == M.
-condition([V|_], [O|_], [B|_], [A|_], A) :- V = formal([star(N)]), B = botVariable(M), O == 'eq', star(N, P), capitalize(P, U), once((botVariable(M, K); K = 'undefined')), U == K.
-condition([V|_], [O|_], [B|_], [A|_], A) :- V = formal([star(N)]), B = botVariable(M), O == 'ne', star(N, P), capitalize(P, U), once((botVariable(M, K); K = 'undefined')), U \= K.
+condition([V|_], [O|_], [B|_], [A|_], A) :- V = variable(U), O == 'ne', current_user(User), current_file_name(File), once((memory(User, File, variable(U, M)); M = 'undefined')), B \= M.
+condition([V|_], [O|_], [B|_], [A|_], A) :- V = variable(U), O == 'eq', current_user(User), current_file_name(File), once((memory(User, File, variable(U, M)); M = 'undefined')), B == M.
+condition([V|_], [O|_], [B|_], [A|_], A) :- V = formal([star(N)]), B = botVariable(M), O == 'eq', star(N, P), capitalize(P, U), current_user(User), current_file_name(File), once((memory(User, File, botVariable(M, K)); K = 'undefined')), U == K.
+condition([V|_], [O|_], [B|_], [A|_], A) :- V = formal([star(N)]), B = botVariable(M), O == 'ne', star(N, P), capitalize(P, U), current_user(User), current_file_name(File), once((memory(User, File, botVariable(M, K)); K = 'undefined')), U \= K.
 condition([V|_], [O|_], [B|_], [A|_], A) :- V = star(N), B = input(M), O == 'eq', star(N, P), once((input_value(M, K); K = 'undefined')), reverse(P, I), I == K.
 condition([V|_], [O|_], [B|_], [A|_], A) :- V = star(N), B = input(M), O == 'ne', star(N, P), once((input_value(M, K); K = 'undefined')), reverse(P, I), I \= K.
 condition([_|L1], [_|L2], [_|L3], [_|L4], A) :- condition(L1, L2, L3, L4, A).
 
-get_response(File, Q, RR) :- 
+get_response(User, File, Q, RR) :- 
+	retractall(current_user(_)), assert(current_user(User)),
+	retractall(current_file_name(_)), assert(current_file_name(File)),
 	save_in_memory(File),
 	split_string(Q, " ", "", L), !,
-	(inputs(_); assert(inputs([]))),
-	findall(X, trigger(_, X), W), !,
+	(inputs(User, File, _); assert(inputs(User, File, []))),
+	findall(X, memory(User, File, trigger(_, X)), W), !,
 	once(match_topic(L, RL); match_question(L, W, RL)),
 	save_input(Q),
 	((var(RL), RR = "ERR: No Reply Matched"); RR = RL), !
 .
 
 match_topic(Q, RL) :-
-	topic(N),
-	findall(X, trigger_topic(N,_, X), W),
+	current_user(User), 
+	current_file_name(File),
+	topic(User, File, N),
+	findall(X, memory(User, File, trigger_topic(N,_, X)), W),
 	match_question_topic(Q, W, RL)
 .
 
 match_question_topic(_, [], _).
 
 match_question_topic(Q, [X|_], RL) :- 
+	current_user(User), 
+	current_file_name(File),
 	retractall(star(_,_)),
 	initializeVariables(X), 
 	trigger_match(Q, X, A),
 	A == [],
-	trigger_topic(_, V, X),
+	memory(User, File, trigger_topic(_, V, X)),
 	match_response_topic(V, RL), !
 .
 
@@ -191,11 +194,13 @@ match_question_topic(Q, [X|L], RL) :-
 match_question(_, [], _).
 
 match_question(Q, [X|_], RL) :- 
+	current_user(User), 
+	current_file_name(File),
 	retractall(star(_,_)),
 	initializeVariables(X), 
 	trigger_match(Q, X, A),
 	A == [],
-	trigger(V, X),
+	memory(User, File, trigger(V, X)),
 	(match_response_condition(V, RL); match_response(V, RL)), !
 .
 
@@ -206,9 +211,11 @@ match_question(Q, [X|L], RL) :-
 .
 
 match_response(V, RL) :- 
-	findall(Y, response(V, Y), L), 
-	findall(YY, response_weight(V, YY, _), LL), 
-	findall(N, response_weight(V, _, weight(N)), W), 
+	current_user(User), 
+	current_file_name(File),
+	findall(Y, memory(User, File, response(V, Y)), L), 
+	findall(YY, memory(User, File, response_weight(V, YY, _)), LL), 
+	findall(N, memory(User, File, response_weight(V, _, weight(N))), W), 
 	response_weight_list(LL, W, [], F),
 	append_lists([L|F], E),
 	random_member(A, E), 
@@ -220,7 +227,9 @@ match_response(V, RL) :-
 .
 
 match_response_topic(V, RL) :- 
-	findall(Y, response_topic(_, V, Y), L), 
+	current_user(User), 
+	current_file_name(File),
+	findall(Y, memory(User, File, response_topic(_, V, Y)), L), 
 	random_member(A, L), 
 	initializeVariables(A), 
 	interpreter(A, [], R),
@@ -230,10 +239,10 @@ match_response_topic(V, RL) :-
 .
 
 match_response_condition(I, RL) :- 
-	findall(V, response_condition(I, V, _, _, _), VL), 
-	findall(O, response_condition(I, _, O, _, _), OL), 
-	findall(B, response_condition(I, _, _, B, _), BL), 
-	findall(L, response_condition(I, _, _, _, L), LL), 
+	findall(V, memory(User, File, response_condition(I, V, _, _, _)), VL), 
+	findall(O, memory(User, File, response_condition(I, _, O, _, _)), OL), 
+	findall(B, memory(User, File, response_condition(I, _, _, B, _)), BL), 
+	findall(L, memory(User, File, response_condition(I, _, _, _, L)), LL), 
 	condition(VL, OL, BL, LL, M),
 	interpreter(M, [], R),
 	flatten(R, RF), 

@@ -26,7 +26,7 @@ chat(WebSocket) :-
         arg(4,Message.data,NameFile), %Nombre del archivo
 		%arg(6,Message.data,User), %Usuario
 		%saveMessage('User',NameFile,Msg),
-        rsEval2:get_response(NameFile, Msg, R),
+        rsEval2:get_response('User', NameFile, Msg, R),
 		%saveMessage('User', NameFile,R),
     	ws_send(WebSocket, text(R)),
         chat(WebSocket)
