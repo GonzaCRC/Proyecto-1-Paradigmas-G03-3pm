@@ -1,0 +1,16 @@
+trigger(4,[optional("do"),"you","know","my","name"]).
+
+trigger(3,["my","name","is",asterisk(1)]).
+
+trigger(2,[asterisk(1)]).
+
+response(2,["Once","again","?","!"]).
+
+response(2,["I","beg","you","pardon"]).
+
+response(3,[variable(name,formal([star(1)])),"I","will","call","you",variable(name),"from","now","on","."]).
+
+response_condition(4,variable(name),ne,undefined,["Yes",",","your","name","is",variable(name),"."]).
+
+response(4,["No",",","you","'","ve","never","told","me","your","name","before","."]).
+

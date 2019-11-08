@@ -52,29 +52,13 @@ save_input(I) :-
 	assert(inputs(V))
 .
 
-
-save_in_memory(File) :- savedMemory(_), previous_file(File), !.
+save_in_memory(_) :- savedMemory(_) , !.
 
 save_in_memory(File) :- 
-	retractall(trigger(_, _)),
-	retractall(trigger_topic(_, _, _)),
-	retractall(response(_, _)),
-	retractall(response_topic(_, _, _)),
-	retractall(response_weight(_, _, _)),
-	retractall(response_condition(_, _, _, _, _)),
-	retractall(variable(_, _)),
-	retractall(topic(_, _)),
-	retractall(star(_, _)),
-	retractall(botVariable(_, _)),
-	retractall(substitution(_, _)),
-	retractall(inputs(_)),
-	retractall(topic(_)),
-	retractall(previous_file(_)),
 	atom_concat('../../riveRepository/', File, PathInFile),
     atom_concat(PathInFile, '.rive.out', RSOutFile),
 	open(RSOutFile, read, Str), read_file(Str, Lines), close(Str),
 	assert(savedMemory(true)),
-	assert(previous_file(File)),
 	assert_from_list(Lines), !
 .
 
@@ -92,7 +76,6 @@ save_in_memory(File) :-
 :- dynamic substitution/2.
 :- dynamic inputs/1.
 :- dynamic topic/1.
-:- dynamic previous_file/1.
 
 initializeVariables([]).
 initializeVariables([X|L]) :- X = hash(N), assert(star(N, undefined)), initializeVariables(L).
