@@ -9,13 +9,14 @@ import { ChatService } from "../chat.service";
 import { Subscription } from "rxjs";
 import { Message } from "src/models/Message";
 import { RivescriptFilesService } from "../rivescript-files.service";
+import { ActivatedRoute } from "@angular/router";
 
 @Component({
   selector: "app-chatter",
   templateUrl: "./chatter.component.html",
   styleUrls: ["./chatter.component.scss"]
 })
-export class ChatterComponent implements OnInit, OnDestroy {
+export class ChatterComponent implements OnInit {
   @ViewChild("messagesDiv", { static: false }) messagesDiv: ElementRef;
   @ViewChild("messageInput", { static: false }) messageInput: ElementRef;
 
@@ -24,6 +25,7 @@ export class ChatterComponent implements OnInit, OnDestroy {
   botPicture: String = "assets/img/brain.png";
   messageBeingSent: boolean;
   chatSubscription: Subscription;
+  filesSubscription: Subscription;
   botsNames: String[];
   selectedBot: String;
 
@@ -33,9 +35,7 @@ export class ChatterComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    console.log("Subscribe");
-
-    this.rivescriptFilesService
+    this.filesSubscription = this.rivescriptFilesService
       .getRivescriptFilesNames()
       .subscribe((res: String[]) => {
         this.botsNames = res;
@@ -43,16 +43,23 @@ export class ChatterComponent implements OnInit, OnDestroy {
         this.selectedBot = this.botsNames[0];
       });
 
-    this.chatSubscription = this.chatService.messages.subscribe(msg => {
-      this.messages.push(msg);
-      this.scrollChat();
-    });
+    this.subscribeToWebSocket();
   }
 
-  ngOnDestroy() {
-    console.log("Unsubscribe");
+  subscribeToWebSocket() {
+    this.chatSubscription = this.chatService.messages.subscribe(
+      msg => {
+        this.messages.push(msg);
 
-    this.chatSubscription.unsubscribe();
+        this.scrollChat();
+      },
+      err => {
+        console.log(err);
+      },
+      () => {
+        setTimeout(this.subscribeToWebSocket, 1000);
+      }
+    );
   }
 
   onSendMessage(message) {

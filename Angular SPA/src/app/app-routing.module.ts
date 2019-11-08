@@ -7,6 +7,7 @@ const routes: Routes = [
   {
     path: "",
     children: [
+      { path: "", redirectTo: "chatter", pathMatch: "full" },
       { path: "admin", component: AdminComponent },
       { path: "chatter", component: ChatterComponent }
     ]

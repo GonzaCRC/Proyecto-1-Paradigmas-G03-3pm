@@ -21,7 +21,7 @@
     <h1 class="brain-manager__title">Nuevo brain</h1>
     <div class="brain-manager__script">
       <div class="script__file-upload">
-        <button type="button" class="btn--action" (click)="fileInput.click()">
+        <button type="button" class="button--action" (click)="fileInput.click()">
           Seleccione un archivo .rive
         </button>
         <input
@@ -64,13 +64,13 @@
       </div>
     </div>
     <div class="brain-manager__buttons">
-      <!-- <button type="button" class="btn--delete">Eliminar</button>
-      <button type="button" class="btn--update">Acualizar</button> -->
+      <!-- <button type="button" class="button--delete">Eliminar</button>
+      <button type="button" class="button--update">Acualizar</button> -->
       <button
         (click)="onFileUpload()"
         type="button"
         [disabled]="!selectedFile"
-        class="btn--create"
+        class="button--create"
       >
         Crear brain
       </button>

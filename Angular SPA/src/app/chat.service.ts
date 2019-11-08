@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
-import { Subject } from "rxjs";
-import { map } from "rxjs/operators";
+import { Subject, throwError } from "rxjs";
+import { map, catchError } from "rxjs/operators";
 import { WebsocketService } from "./websocket.service";
 import { Message } from "src/models/Message";
 import { environment } from "src/environments/environment";
