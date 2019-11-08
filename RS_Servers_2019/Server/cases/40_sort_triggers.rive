@@ -1,4 +1,4 @@
-+ groovy # {weight=20} hola
++ groovy # {weight=20}
 - response 1
 
 + groovy # 
