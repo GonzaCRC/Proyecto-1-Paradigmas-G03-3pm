@@ -1,0 +1,10 @@
+trigger(2,["select"]).
+
+response(2,["1",".","Hi","there","!"]).
+
+response(2,["2",".","Hello","!"]).
+
+response(2,["3",".","Hi","you","doing","!"]).
+
+response(2,["4",".","daah"]).
+

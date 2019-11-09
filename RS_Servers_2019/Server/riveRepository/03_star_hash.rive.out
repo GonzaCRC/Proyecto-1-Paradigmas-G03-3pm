@@ -1,0 +1,14 @@
+trigger(3,["i","am",hash(1),"years","old"]).
+
+trigger(2,[asterisk(1)]).
+
+botVariable(age,["61"]).
+
+response(2,["Once","again","?","!"]).
+
+response_weight(2,["I","beg","you","pardon"],weight(70)).
+
+response(3,[variable(age,star(1)),"A","lot","of","people","are",variable(age),",","you","'","re","not","alone","."]).
+
+response_weight(3,[variable(age,star(1)),"Cool",",","I","'","m",botVariable(age),"myself","."],weight(49)).
+

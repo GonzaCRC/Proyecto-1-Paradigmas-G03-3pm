@@ -18,17 +18,18 @@ assert_from_list([X|L]) :-
 	assert_from_list(L)
 .
 
-capitalize_optional(Word,UPword):- 
+capitalize_optional(Word, K):- 
 	atom_chars(Word, [FirstLow|Rest]),
-	upcase_atom(FirstLow,R),
-	atom_chars(UPword, [R|Rest])
+	string_upper(FirstLow,R),
+	string_chars(R, M),
+	append(M, Rest, K)
 .
 
 capitalize([], []).
 
 capitalize([H1|T1], [S|T2]):- 
 	capitalize_optional(H1,H2),
-	atom_string(H2, S),
+	string_chars(S, H2), 
 	capitalize(T1,T2)
 .
 
@@ -75,17 +76,7 @@ save_in_memory(File) :-
 
 :- dynamic memory/3.
 :- dynamic savedMemory/2.
-:- dynamic trigger/2.
-:- dynamic trigger_topic/3.
-:- dynamic response/2.
-:- dynamic response_topic/3.
-:- dynamic response_weight/3.
-:- dynamic response_condition/5.
-:- dynamic variable/4.
-:- dynamic topic/2.
 :- dynamic star/2.
-:- dynamic botVariable/2.
-:- dynamic substitution/2.
 :- dynamic inputs/3.
 :- dynamic topic/3.
 :- dynamic current_file_name/1.
@@ -95,7 +86,7 @@ initializeVariables([]).
 initializeVariables([X|L]) :- X = hash(N), assert(star(N, undefined)), initializeVariables(L).
 initializeVariables([X|L]) :- X = underscore(N), assert(star(N, undefined)), initializeVariables(L).
 initializeVariables([X|L]) :- X = asterisk(N), assert(star(N, undefined)), initializeVariables(L).
-initializeVariables([X|L]) :- X = set(id(H),_), current_user(User), current_file_name(File), assert(variable(User, File, H, undefined)), initializeVariables(L).
+initializeVariables([X|L]) :- X = variable(H), current_user(User), current_file_name(File), assert(memory(User, File, variable(H, undefined))), initializeVariables(L).
 initializeVariables([_|L]) :- initializeVariables(L).
 
 trigger_match([], [], A) :- !, A = [].
@@ -106,7 +97,7 @@ trigger_match([], [asterisk(_), weight(_)], A) :- !, A = [].
 trigger_match([], [asterisk(_)], A) :- !, A = [asterisk(_)]. 
 trigger_match(L, [X2|L2], A) :- X2 = optional_asterisk(N), assert(star(N, undefined)), trigger_match(L, [asterisk(N)|L2], A), !.
 trigger_match(L, [X2|L2], A) :- X2 = weight(_), trigger_match(L, L2, A), !.
-trigger_match([X|L], L2, A) :- re_replace('\'', ',', X, R), split_string(R, ",", "", Y), substitution(Y, N), flatten([N|L], L3), trigger_match(L3, L2, A), !.
+trigger_match([X|L], L2, A) :- re_replace('\'', ',', X, R), split_string(R, ",", "", Y), current_user(User), current_file_name(File), memory(User, File, substitution(Y, N)), flatten([N|L], L3), trigger_match(L3, L2, A), !.
 trigger_match([X|L], [X2|L2], A) :- X2 = optional(N), (X == N, trigger_match(L, L2, A); trigger_match([X|L], L2, A)), !.
 trigger_match([X|L], [X2|L2], A) :- X == X2, trigger_match(L, L2, A), !. 
 trigger_match([X|L], [X2|L2], A) :- X2 = hash(N), atom_number(X, _), retract(star(N, _)), assert(star(N, X)), trigger_match(L, L2, A), !.
@@ -116,8 +107,8 @@ trigger_match([X|L], [X2|[Y|L2]], A) :- X2 = asterisk(N), Y = asterisk(_), star(
 trigger_match([X|L], [X2|[Y|L2]], A) :- X2 = asterisk(N), Y == X, star(N, M), M \= 'undefined', trigger_match([X|L], [Y|L2], A), !.
 trigger_match([X|L], [X2|[Y|[H|L2]]], A) :- X2 = asterisk(N), Y \= asterisk(_), trigger_match([X|L], [Y|[H|L2]], A), star(N, M), M \= 'undefined', (H = asterisk(_); trigger_match([X|L], [Y|[H|L2]], A)), !.
 trigger_match([X|L], [X2|L2], A) :- X2 = asterisk(N), retract(star(N, M)), ((M == 'undefined', P = []); P = M), assert(star(N, [X|P])), !, trigger_match(L, [asterisk(N)|L2], A), !.
-trigger_match([X|L], [X2|L2], A) :- X2 = array(K, N), array(N, V), search_in_array(X, V, R), assert(star(K, R)), trigger_match(L, L2, A), !.
-trigger_match([X|L], [X2|L2], A) :- X2 = array(N), array(N, V), search_in_array(X, V, _), trigger_match(L, L2, A), !.
+trigger_match([X|L], [X2|L2], A) :- X2 = array(K, N), current_user(User), current_file_name(File), memory(User, File, array(N, V)), search_in_array(X, V, R), assert(star(K, R)), trigger_match(L, L2, A), !.
+trigger_match([X|L], [X2|L2], A) :- X2 = array(N), current_user(User), current_file_name(File), memory(User, File, array(N, V)), search_in_array(X, V, _), trigger_match(L, L2, A), !.
 
 interpreter([], A, A) :- !.
 interpreter([X|L], A, R) :- X = input(N), input_value(N, V), interpreter(L, [V|A], R), !.
@@ -135,14 +126,15 @@ interpreter([X|L], A, R) :- X = formal([]), interpreter(L, A, R), !.
 interpreter([X|L], A, R) :- X = formal([botVariable(P)|N]), current_user(User), current_file_name(File), memory(User, File, botVariable(P, M)), capitalize(M,U), interpreter([formal(N)|L], [U|A], R), !.
 interpreter([X|L], A, R) :- X = formal([star(P)|N]), star(P, M), capitalize(M,U), interpreter([formal(N)|L], [U|A], R), !.
 interpreter([X|L], A, R) :- X = formal([variable(P)|N]), current_user(User), current_file_name(File), memory(User, File, variable(P, M)), capitalize(M,K), interpreter([formal(N)|L], [K|A], R), !.
+interpreter([X|L], A, R) :- X = formal([N|M]), capitalize([N], K), interpreter([formal(M)|L], [K|A], R), !.
 interpreter([X|L], A, R) :- X = updateBotVariable(N, M), current_user(User), current_file_name(File), retractall(memory(User, File, botVariable(N, _))), assert(memory(User, File, botVariable(N, M))), interpreter(L, A, R), !.
 interpreter([X|L], A, R) :- X = botVariable(N), current_user(User), current_file_name(File), memory(User, File, botVariable(N, M)), atomic_list_concat(M, ' ', RL), interpreter(L, [RL|A], R), !.
 interpreter([X|L], A, R) :- X = botVariable(_), interpreter(L, [undefined|A], R), !.
 interpreter([X|L], A, R) :- X = variable(P), current_user(User), current_file_name(File), memory(User, File, variable(P, M)), interpreter(L, [M|A], R), !.
 interpreter([X|L], A, R) :- X = variable(_), interpreter(L, [undefined|A], R), !.
-interpreter([X|L], A, R) :- X = variable(H, star(P)), retractall(memory(User, File, variable(H, _))), star(P, N), assert(memory(User, File, variable(H, N))), interpreter(L, A, R), !.
-interpreter([X|L], A, R) :- X = variable(H, variable(P)), memory(User, File, variable(P, N)), retractall(memory(User, File, variable(H, _))), assert(memory(User, File, variable(H, N))), interpreter(L, A, R), !.
-interpreter([X|L], A, R) :- X = variable(H, formal([star(P)])), star(P, N), capitalize(N,U), retractall(memory(User, File, variable(H, _))), assert(memory(User, File, variable(H, U))), interpreter(L, A, R), !.
+interpreter([X|L], A, R) :- X = variable(H, star(P)), current_user(User), current_file_name(File), retractall(memory(User, File, variable(H, _))), star(P, N), assert(memory(User, File, variable(H, N))), interpreter(L, A, R), !.
+interpreter([X|L], A, R) :- X = variable(H, variable(P)), current_user(User), current_file_name(File), memory(User, File, variable(P, N)), retractall(memory(User, File, variable(H, _))), assert(memory(User, File, variable(H, N))), interpreter(L, A, R), !.
+interpreter([X|L], A, R) :- X = variable(H, formal([star(P)])), star(P, N), capitalize(N,U), current_user(User), current_file_name(File), retractall(memory(User, File, variable(H, _))), assert(memory(User, File, variable(H, U))), interpreter(L, A, R), !.
 interpreter([X|L], A, R) :- interpreter(L, [X|A], R), !.
 
 condition([V|_], [O|_], [B|_], [A|_], A) :- V = variable(U), O == 'ne', current_user(User), current_file_name(File), once((memory(User, File, variable(U, M)); M = 'undefined')), B \= M.

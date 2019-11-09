@@ -1,0 +1,8 @@
+
+trigger(2, [asterisk(1)]).
+
+response_condition(2,star(1),eq,input(2),["2",".","star","=",star(1),"input1","=",input(1),"input2","=",input(2),"input3","=",input(3)]).
+
+response_condition(2,star(1),eq,input(3),["3",".","star","=",star(1),"input1","=",input(1),"input2","=",input(2),"input3","=",input(3)]).
+
+response(2, ["1",".","star","=",star(1),"input1","=",input(1),"input2","=",input(2),"input3","=",input(3)]).

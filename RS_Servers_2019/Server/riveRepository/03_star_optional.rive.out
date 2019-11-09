@@ -1,0 +1,8 @@
+trigger(2,[optional_asterisk(optional(1)),"i","dreamed",asterisk(1)]).
+
+response(2,["Really",",",star(1),"?"]).
+
+response(2,["Have","you","ever","fantasized",star(1),"while","you","were","awake","?"]).
+
+response(2,["Have","you","ever","dreamed",star(1),"before","?"]).
+

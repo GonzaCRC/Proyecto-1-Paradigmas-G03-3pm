@@ -1,0 +1,8 @@
+trigger(2,[asterisk(1)]).
+
+comment("This","is","a","comment").
+
+comment("One","response","only").
+
+response(2,[star(1)]).
+

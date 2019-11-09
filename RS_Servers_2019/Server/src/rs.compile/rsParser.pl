@@ -19,7 +19,7 @@ Gabriel Araya Ruiz
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 testParser(P) :-
-    File = '../../cases/40_sort_triggers.rive',
+    File = '../../cases/20_ERR_no_response.rive',
     format('~n~n*** Parsing file: ~s ***~n~n', File),
     parse(File, P),
 	writeln(P),
@@ -32,6 +32,10 @@ testParser(P) :-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Main Parse predicate %%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+:- dynamic triggerBlock/1.
+:- dynamic responseBlock/1.
+
 parse(_, _) :- reset_line_number, 
                reset_some_indexes([star, optional, trigger]),
                fail
@@ -40,14 +44,41 @@ parse(File, ProgAst) :-
     tokenize(File, Tokens),
 	append(Tokens, ['\n'], FTokens),
     rsProgram(ProgAst, FTokens, []),
+	retractall(triggerBlock(_)),
+	retractall(responseBlock(_)),
     !
 .
+
+parse(File, _) :-
+	triggerBlock(false),
+	Msg = 'Parsing fails. File: ~s. Response needs one trigger. Last Seen Line Number: ~d',
+    line_number(N),
+    format(atom(A), Msg, [File, N]),
+	retractall(triggerBlock(_)),
+	retractall(responseBlock(_)),
+    throw(syntaxError(A, ''))    
+.
+
+parse(File, _) :-
+	responseBlock(false),
+	Msg = 'Parsing fails. File: ~s. Trigger needs at least one response. Last Seen Line Number: ~d',
+    line_number(N),
+    format(atom(A), Msg, [File, N]),
+	retractall(triggerBlock(_)),
+	retractall(responseBlock(_)),
+    throw(syntaxError(A, ''))   
+	
+.
+
 parse(File, _) :-
     Msg = 'Parsing fails. File: ~s. Last Seen Line Number: ~d',
     line_number(N),
     format(atom(A), Msg, [File, N]),
+	retractall(triggerBlock(_)),
+	retractall(responseBlock(_)),
     throw(syntaxError(A, ''))    
 .
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -55,27 +86,24 @@ parse(File, _) :-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Rs Program Grammar %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-:- dynamic triggerBlock/1.
-:- dynamic responseBlock/1.
-
-rsProgram(rsProg(FL)) --> rsCommandList(FL)
+rsProgram(rsProg(FL)) --> {assert(triggerBlock(false)), assert(responseBlock(false))}, rsCommandList(FL)
 .
 rsCommandList([]) --> [], {triggerBlock(true)}, {responseBlock(true)}
 .
 rsCommandList(L) --> ['\n'], {inc_line_number}, rsCommandList(L)
 .
-rsCommandList([trigger_block(B) | R]) --> trigger_block(B), !, {reset_some_indexes([star, optional])}, {assert(triggerBlock(true))}, rsCommandList(R)
+rsCommandList([trigger_block(B) | R]) --> trigger_block(B), !, 
+	{reset_some_indexes([star, optional])}, 
+	{retractall(triggerBlock(_)), assert(triggerBlock(true))}, 
+	{retractall(responseBlock(_)), assert(responseBlock(false))}, rsCommandList(R)
 .
-rsCommandList([response_block(B) | R]) --> {assert(responseBlock(true))}, response_block(B), !, rsCommandList(R)
+rsCommandList([response_block(B) | R]) --> {triggerBlock(true)}, response_block(B), !, {retractall(responseBlock(_)), assert(responseBlock(true))}, rsCommandList(R)
 .
 rsCommandList([define_block(B) | R])  --> define_block(B), !, rsCommandList(R)
 .
 rsCommandList([comment_block(B) | R])  --> comment_block(B), !, rsCommandList(R)
 .
 rsCommandList([topic_block(B) | R])  --> topic_block(B), !, rsCommandList(R)
-.
-
-rsCommandList([sub_block(B) | R])  --> sub_block(B), !, rsCommandList(R)
 .
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -152,7 +180,9 @@ trigger_tag(I) --> ['<'], input_ref(I),  ['>']
 trigger_tag(I) --> ['<'], reply_ref(I),  ['>']
 .
 
-trigger_tag(I) --> ['<'], star_ref(I),  ['>'], fail
+trigger_tag(I) --> ['<'], star_ref(I),  ['>'], !, 
+	{ Msg = 'Parsing fails. Trigger with an invalid tag. Last Seen Line Number: ~d', line_number(N),
+    format(atom(A), Msg, [N]), throw(syntaxError(A, '')) }
 .
 
 trigger_tag(weight(I)) --> ['{'], [weight, '=', V], ['}'], 

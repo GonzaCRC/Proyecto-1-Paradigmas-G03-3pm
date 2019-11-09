@@ -1,0 +1,8 @@
+trigger(2,["say"]).
+
+response_weight(2,["1",".","Hi","there","!"],weight(60)).
+
+response_weight(2,["2",".","Hello","!"],weight(30)).
+
+response(2,["3",".","Seldom"]).
+
