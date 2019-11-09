@@ -1,11 +1,28 @@
 .admin-grid {
   display: grid;
-  grid-template-columns: 17.5rem 95rem;
+  grid-template-columns: auto 1fr;
 }
 
 .brains {
   background-color: #434c57;
   color: #fff;
+
+  max-height: 599px;
+  overflow-y: auto;
+
+  min-width: 17.5rem;
+
+  &::-webkit-scrollbar {
+    width: 0.8rem;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: #babac0;
+  }
+
+  &::-webkit-scrollbar-button {
+    display: none;
+  }
 
   &__title {
     text-align: center;
@@ -79,19 +96,19 @@ button {
   box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
   padding: 1rem;
 
-  &.btn--action {
+  &.button--action {
     background-color: #172b4d;
   }
 
-  &.btn--delete {
+  &.button--delete {
     background-color: #f5365c;
   }
 
-  &.btn--update {
+  &.button--update {
     background-color: #5e72e4;
   }
 
-  &.btn--create {
+  &.button--create {
     background-color: #2dce89;
   }
 }

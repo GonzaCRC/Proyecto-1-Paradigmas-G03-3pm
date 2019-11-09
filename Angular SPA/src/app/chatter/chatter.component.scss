@@ -1,11 +1,28 @@
 .chatter-grid {
   display: grid;
-  grid-template-columns: 27.5rem 85rem;
+  grid-template-columns: auto 1fr;
 }
 
 .chats {
   background-color: #434c57;
   color: #fff;
+
+  max-height: 599px;
+  overflow-y: auto;
+
+  min-width: 17.5rem;
+
+  &::-webkit-scrollbar {
+    width: 0.8rem;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: #babac0;
+  }
+
+  &::-webkit-scrollbar-button {
+    display: none;
+  }
 
   &__title {
     text-align: center;
