@@ -140,6 +140,7 @@ interpreter([X|L], A, R) :- X = botVariable(N), current_user(User), current_file
 interpreter([X|L], A, R) :- X = botVariable(_), interpreter(L, [undefined|A], R), !.
 interpreter([X|L], A, R) :- X = variable(P), current_user(User), current_file_name(File), memory(User, File, variable(P, M)), interpreter(L, [M|A], R), !.
 interpreter([X|L], A, R) :- X = variable(_), interpreter(L, [undefined|A], R), !.
+interpreter([X|L], A, R) :- X = variable(H, star(P)), retractall(memory(User, File, variable(H, _))), star(P, N), assert(memory(User, File, variable(H, N))), interpreter(L, A, R), !.
 interpreter([X|L], A, R) :- X = variable(H, variable(P)), memory(User, File, variable(P, N)), retractall(memory(User, File, variable(H, _))), assert(memory(User, File, variable(H, N))), interpreter(L, A, R), !.
 interpreter([X|L], A, R) :- X = variable(H, formal([star(P)])), star(P, N), capitalize(N,U), retractall(memory(User, File, variable(H, _))), assert(memory(User, File, variable(H, U))), interpreter(L, A, R), !.
 interpreter([X|L], A, R) :- interpreter(L, [X|A], R), !.
