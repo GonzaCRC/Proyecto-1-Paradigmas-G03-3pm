@@ -103,7 +103,8 @@ special([T1|L],T,N,I):-
 	(Le2>Le1, I = N ;  
 	 Le2=Le1, atomics_to_string(L1," ",L1s), atomics_to_string(L2," ",L2s),string_length(L1s,Xl), string_length(L2s,Pl),
 	 (Pl>Xl,I = N;
-	 Pl=Xl, compare(W, L1s,L2s), W = (>),I = N);
+	 Pl=Xl, compare(W, L1s,L2s), W = (>),I = N,
+	 W = (=),I = N);
 	 N1 = N+1, special(L,T,N1,I))
 .
 
@@ -133,7 +134,7 @@ special_w([T1|L],T,N,I):-
 	(Le2>Le1, I = N ;  
 	 Le2=Le1, atomics_to_string(L1," ",L1s), atomics_to_string(L2," ",L2s),string_length(L1s,Xl), string_length(L2s,Pl),
 	 (Pl>Xl,I = N;
-	 Pl=Xl, compare(W, L1s,L2s), (L1s= "",L2s = "", I = N ;W = (>),I = N));
+	 Pl=Xl, compare(W, L1s,L2s), (L1s= "",L2s = "", I = N ;W = (>),I = N; W = (=),I = N));
 	 N1 = N+1, special_w(L,T,N1,I))
 .
 

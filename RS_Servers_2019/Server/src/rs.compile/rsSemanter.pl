@@ -29,9 +29,10 @@ compare_wl([X|L]) :-
 	(aux(V),V = [] ,X = trigger(_,U),verify_trigs(U),trigs_v(U,[],UU),append(UU,V,O), retractall(aux(_)), assert(aux(O)),compare_wl(L); 
 	X = response(_,T),resp_v(T,[],TT),(verify(TT),compare_wl(L);throw(semanticError('One or more variables or <stars> calls does not exist on the rive', X)));
 	X = response_condition(_,V,_,Z,K),vars(Var),dinamic_vars(DV),
-	((V = variable(Val),sublist([Val],DV);V = botVariable(Val),sublist([Val],Var);Z = variable(Val),sublist([Val],DV);Z = botVariable(Val),sublist([Val],Var));
+	((V = variable(Val),sublist([Val],DV);V = botVariable(Val),sublist([Val],Var);Z = variable(Val),sublist([Val],DV);Z = botVariable(Val),sublist([Val],Var);
+	V = star(Val),aux(Vtt) ,sublist([Val],Vtt));
 	throw(semanticError('One or more variables or <stars> calls does not exist on the rive', X)))
-	,resp_v(K,[],TT),(verify(TT),compare_wl(L);throw(semanticError('cagada',X)));
+	,resp_v(K,[],TT),(verify(TT),compare_wl(L);throw(semanticError('undetermined error',X)));
 	compare_wl(L))
 .
  
@@ -46,6 +47,8 @@ verify_trigs([]).
 verify_trigs([X|L]) :- 
 	((X = array(Val); X = array(_,Val)),vars(S),(sublist([Val],S),verify_trigs(L);throw(semanticError('One or more array calls does not exist on the rive', X)));
 	  verify_trigs(L)),!.
+	  
+	 
 	
 sublist([],_).
 sublist([X|Xs],Y) :- member(X,Y) , sublist(Xs,Y),!.
