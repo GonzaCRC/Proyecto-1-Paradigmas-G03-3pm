@@ -157,6 +157,12 @@ comment_token(W) --> wild_card(W)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Trigger Block %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+trigger_block([]) --> ['+'], ['\n'],
+	{ Msg = 'Parsing fails. Empty trigger. Last Seen Line Number: ~d', line_number(N),
+    format(atom(A), Msg, [N]), throw(syntaxError(A, '')) }
+.
+
 trigger_block(trigger(ID, TL)) --> ['+'], trigger_token_list(TL), {get_index(trigger, ID)}
 .
 
@@ -299,6 +305,20 @@ response_tag(topic(T)) --> ['{'], ['topic'], ['='], [T], ['}']
 .
 
 response_tag(M) --> ['<'], input_ref(M), ['>']
+.
+
+response_tag(_) --> ['<'], token_list_response(_),
+	{ Msg = 'Parsing fails. Syntax star call error. Last Seen Line Number: ~d', line_number(N),
+    format(atom(A), Msg, [N]), throw(syntaxError(A, '')) }
+.
+
+token_list_response([]) --> ['\n']
+.
+
+token_list_response([]) --> ['>']	
+.
+
+token_list_response([T | TL])  --> word(T), token_list_response(TL)
 .
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

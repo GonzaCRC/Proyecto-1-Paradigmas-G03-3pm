@@ -1,0 +1,4 @@
+trigger(2,["hola",asterisk(1),underscore(2)]).
+
+response(2,["hola",star(2)]).
+
