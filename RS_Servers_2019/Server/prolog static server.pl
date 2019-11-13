@@ -66,13 +66,13 @@ listFiles(Path,FileList):- findall(File, directory_member(Path,File,[]), FileLis
 validateUser(Request) :-
 	http_read_json(Request, Data, [json_object(term)]),
 	arg(1,Data,UserInfo),
-	existUser(UserInfo.user,UserInfo.pass),
-	reply_json(json([success('True')]));
+	existUser(UserInfo.user,UserInfo.pass, Role),
+	reply_json(json([success('True'), role(Role)]));
 	reply_json(json([success('False')])).
 
-existUser(User,Pass):-
+existUser(User,Pass,Role):-
 	getUsers(Users),
-	member(row(User,Pass),Users),!.
+	member(row(User,Pass,Role),Users),!.
 
 getUsers(Users) :-
 	%debug( sqlite ),
