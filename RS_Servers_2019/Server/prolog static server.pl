@@ -78,7 +78,7 @@ getUsers(Users) :-
 	%debug( sqlite ),
 	DataBase = 'dataBase/dataProyect.sqlite',
     sqlite_connect( DataBase , dataProyect ),
-	Statement = 'Select user,pass from users',
+	Statement = 'Select user,pass,role from users',
 	findall( Data, sqlite_query(dataProyect,Statement,Data), Users ),
 	sqlite_disconnect( dataProyect ).
 		
