@@ -14,8 +14,8 @@
 :- use_module(library(http/http_json)).
 
 
-% :- assert(file_search_path(lib, 'lib/')).
-% :- use_module( lib(prosqlite) ).
+:- assert(file_search_path(lib, 'lib/')).
+:- use_module( lib(prosqlite) ).
 
 :- assert(file_search_path(rs_path, 'src/rs.compile/')).
 
@@ -56,7 +56,7 @@ upload(Request) :-
 prolog:message(bad_file_upload) --> [ 'Error' ].
 
 getRiveFiles(_Request) :- 
-	listFiles('riveRepository/',Files),
+	listFiles('riveRepository/', Files),
 	cors_enable,
     reply_json(json([data(Files)]))
 .
@@ -67,8 +67,8 @@ validateUser(Request) :-
 	http_read_json(Request, Data, [json_object(term)]),
 	arg(1,Data,UserInfo),
 	existUser(UserInfo.user,UserInfo.pass),
-	reply_json(json([msj(UserInfo.user)]));
-	reply_json(json([msj('Error')])).
+	reply_json(json([success('True')]));
+	reply_json(json([success('False')])).
 
 existUser(User,Pass):-
 	getUsers(Users),
@@ -86,7 +86,7 @@ listMessages(Request):-
 	http_read_json(Request, Data, [json_object(term)]),
 	arg(1,Data,UserInfo),
 	getChat(UserInfo.user,UserInfo.bot,Chat),
-	reply_json(json([msj(Chat)])).
+	reply_json(json([chat(Chat)])).
 		
 getChat(User,Bot,Chat):-
 	%debug( sqlite ),

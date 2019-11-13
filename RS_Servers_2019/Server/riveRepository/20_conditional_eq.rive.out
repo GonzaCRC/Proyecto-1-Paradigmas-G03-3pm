@@ -1,8 +1,8 @@
-trigger(2,["what","is","my","name"]).
+
+trigger(2, ["what","is","my","name"]).
 
 response_condition(2,variable(name),eq,undefined,["You","never","told","me","your","name","."]).
 
-response(2,["Your","name","is",variable(name),",","silly","!"]).
+response(2, ["Your","name","is",variable(name),",","silly","!"]).
 
-response(2,["Aren","'","t","you",variable(name),"?"]).
-
+response(2, ["Aren","'","t","you",variable(name),"?"]).

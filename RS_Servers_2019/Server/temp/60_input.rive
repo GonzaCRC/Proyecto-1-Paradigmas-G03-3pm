@@ -1,4 +1,0 @@
-+ *
-* <star> == <input2> => 2. star=<star> input1=<input1> input2=<input2> input3=<input3>
-* <star> == <input3> => 3. star=<star> input1=<input1> input2=<input2> input3=<input3>
-- 1. star=<star> input1=<input1> input2=<input2> input3=<input3>

@@ -1,0 +1,14 @@
++ a b c
+- caso 0
++ a * b c
+- caso 1
++ a [*] b c
+- caso 2
++ a [_] b c
+- caso 3
++ a [#] b c
+- caso 4
++ a b c
+- caso 5 : no deberia pasar
++ *
+- caso 6 : ninguno pega

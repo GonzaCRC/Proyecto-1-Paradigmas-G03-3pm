@@ -7,8 +7,8 @@
 
 :- use_module(rsEval2).
 
-% :- assert(file_search_path(lib, '../../lib/')).
-% :- use_module( lib(prosqlite) ).
+:- assert(file_search_path(lib, '../../lib/')).
+:- use_module( lib(prosqlite) ).
 
 :- initialization(start_server).
 
@@ -25,9 +25,9 @@ chat(WebSocket) :-
         arg(2,Message.data,Msg), %Mensaje
         arg(4,Message.data,NameFile), %Nombre del archivo
 		%arg(6,Message.data,User), %Usuario
-		%saveMessage('User',NameFile,Msg),
+		saveMessage('User',NameFile,Msg),
         rsEval2:get_response('User', NameFile, Msg, R),
-		%saveMessage('User', NameFile,R),
+		saveMessage('User', NameFile,R),
     	ws_send(WebSocket, text(R)),
         chat(WebSocket)
     ).

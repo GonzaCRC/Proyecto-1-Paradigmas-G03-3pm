@@ -1,0 +1,9 @@
++ caso #
+* <star> == 2 => caso 2
+* <star> == 3 => caso 3
+* <star> == 1 => caso 1
+* <star> == undefined => caso indefinido
+- <star> no es 1 2 3 
+
++ *
+- caso no aceptado
