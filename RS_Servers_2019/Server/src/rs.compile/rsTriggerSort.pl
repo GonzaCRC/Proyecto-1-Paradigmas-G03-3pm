@@ -168,6 +168,8 @@ contain_wildcard([_|L]) :- contain_wildcard(L).
 
 contain_opcional([]) :- false.
 contain_opcional([X|_]) :- X = optionals(_), !.
+contain_opcional([X|_]) :- X = optional_hash(_), !.
+contain_opcional([X|_]) :- X = optional_underscore(_), !.
 contain_opcional([X|_]) :- X = optional_asterisk(_), !.
 contain_opcional([_|L]) :- contain_opcional(L).
 
