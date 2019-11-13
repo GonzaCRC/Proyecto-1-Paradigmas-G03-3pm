@@ -18,7 +18,7 @@ export class RivescriptFilesService {
           return botName.slice(15, botName.indexOf(".rive.out"));
         });
 
-        return filteredArray.slice(1, filteredArray.length);
+        return filteredArray.slice(2, filteredArray.length);
       })
     );
   }
