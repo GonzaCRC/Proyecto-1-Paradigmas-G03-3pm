@@ -204,6 +204,12 @@ trigger_tag(W) --> ['{'], word_list(W), ['}']
 trigger_tag(optional(optional_asterisk(N))) --> ['['], ['*'], [']'], {next_index(optional, N)}
 .
 
+trigger_tag(optional(optional_underscore(N))) --> ['['], ['_'], [']'], {next_index(optional, N)}
+.
+
+trigger_tag(optional(optional_hash(N))) --> ['['], ['#'], [']'], {next_index(optional, N)}
+.
+
 trigger_tag(optional(W)) --> ['['], word(W), [']']
 .
 

@@ -99,6 +99,8 @@ trigger_match(L, [X2|L2], A) :- X2 = optional_asterisk(N), assert(star(N, undefi
 trigger_match(L, [X2|L2], A) :- X2 = weight(_), trigger_match(L, L2, A), !.
 trigger_match([X|L], L2, A) :- re_replace('\'', ',', X, R), split_string(R, ",", "", Y), current_user(User), current_file_name(File), memory(User, File, substitution(Y, N)), flatten([N|L], L3), trigger_match(L3, L2, A), !.
 trigger_match([X|L], [X2|L2], A) :- X2 = optional(N), (X == N, trigger_match(L, L2, A); trigger_match([X|L], L2, A)), !.
+trigger_match([X|L], [X2|L2], A) :- X2 = optional_underscore(_), (number_in_string(X), trigger_match(L, L2, A); trigger_match([X|L], L2, A)), !.
+trigger_match([X|L], [X2|L2], A) :- X2 = optional_hash(_), (atom_number(X, _), trigger_match(L, L2, A); trigger_match([X|L], L2, A)), !.
 trigger_match([X|L], [X2|L2], A) :- X == X2, trigger_match(L, L2, A), !. 
 trigger_match([X|L], [X2|L2], A) :- X2 = hash(N), atom_number(X, _), retract(star(N, _)), assert(star(N, X)), trigger_match(L, L2, A), !.
 trigger_match([X|L], [X2|L2], A) :- X2 = underscore(N), number_in_string(X), retract(star(N, _)), assert(star(N, X)), trigger_match(L, L2, A), !.

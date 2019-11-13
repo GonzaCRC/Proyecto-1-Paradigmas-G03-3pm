@@ -124,6 +124,12 @@ genCode(Out, topic(N)) :- !, format(Out, 'topic(~a)', [N])
 
 genCode(Out, optional(optional_asterisk(N))) :- !, format(Out, 'optional_asterisk(optional(~a))', [N])
 .
+
+genCode(Out, optional(optional_underscore(N))) :- !, format(Out, 'optional_underscore(optional(~a))', [N])
+.
+
+genCode(Out, optional(optional_hash(N))) :- !, format(Out, 'optional_hash(optional(~a))', [N])
+.
 genCode(Out, optional(word(N))) :- !, format(Out, 'optional("~a")', [N])
 .
 genCode(Out, num(N))  :- !, genCode(Out, atom(N))
