@@ -2,9 +2,9 @@ trigger(2,["a","b","c"]).
 
 trigger(7,["a","b","c"]).
 
-trigger(6,["a",optional_hash(optional(1)),"b","c"]).
-
 trigger(5,["a",optional_underscore(optional(1)),"b","c"]).
+
+trigger(6,["a",optional_hash(optional(1)),"b","c"]).
 
 trigger(4,["a",optional_asterisk(optional(1)),"b","c"]).
 

@@ -1,4 +1,0 @@
-
-trigger(2, [asterisk(1)]).
-
-response(2, ["Hi",variable(name)]).

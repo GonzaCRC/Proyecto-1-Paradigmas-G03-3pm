@@ -1,8 +1,0 @@
-trigger(2,["my","name","is",asterisk(1)]).
-
-response_condition(2,formal([star(1)]),eq,botVariable(name),["Wow",",","we","have","the","same","name","!",variable(name,formal([star(1)]))]).
-
-response_condition(2,variable(name),eq,undefined,[variable(name,formal([star(1)])),"Nice","to","meet","you","!"]).
-
-response(2,[variable(oldname,variable(name)),variable(name,formal([star(1)])),"I","thought","your","name","was",variable(oldname),"?"]).
-
