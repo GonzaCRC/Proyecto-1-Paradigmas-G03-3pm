@@ -128,7 +128,6 @@ interpreter([], A, A) :- !.
 interpreter([X|L], A, R) :- X = input(N), input_value(N, V), interpreter(L, [V|A], R), !.
 interpreter([X|L], A, R) :- X = input(_), interpreter(L, [undefined|A], R), !.
 interpreter([X|L], A, R) :- X = topic(N), current_user(User), current_file_name(File), retractall(topic(User, File, _)), assert(topic(User, File, N)), interpreter(L, A, R), !.
-interpreter([X|L], A, R) :- X = underscore(_), interpreter(L, [undefined|A], R), !.
 interpreter([X|L], A, R) :- X = underscore(P), star(P, M), interpreter(L, [M|A], R), !.
 interpreter([X|L], A, R) :- X = underscore(_), interpreter(L, [undefined|A], R), !.
 interpreter([X|L], A, R) :- X = hash(P), star(P, M), interpreter(L, [M|A], R), !. 
