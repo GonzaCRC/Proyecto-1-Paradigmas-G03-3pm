@@ -3,4 +3,5 @@ export interface Message {
   owner?: String;
   body: String;
   brainName?: String;
+  user: String;
 }

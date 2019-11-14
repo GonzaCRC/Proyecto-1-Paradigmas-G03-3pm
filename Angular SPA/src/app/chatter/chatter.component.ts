@@ -95,7 +95,8 @@ export class ChatterComponent implements OnInit {
 
       this.chatService.messages.next({
         body: message,
-        brainName: this.selectedBot
+        brainName: this.selectedBot,
+        user: localStorage.getItem("username")
       });
 
       this.messageBeingSent = false;

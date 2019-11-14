@@ -18,7 +18,8 @@ export class ChatService {
           (response: MessageEvent): Message => {
             return {
               owner: "Bot",
-              body: response.data
+              body: response.data,
+              user: localStorage.getItem("username")
             };
           }
         )
