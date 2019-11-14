@@ -19,7 +19,7 @@ Gabriel Araya Ruiz
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 testParser(P) :-
-    File = '../../cases/20_ERR_no_response.rive',
+    File = '../../cases/65_response_order.rive',
     format('~n~n*** Parsing file: ~s ***~n~n', File),
     parse(File, P),
 	writeln(P),
@@ -248,7 +248,7 @@ response_block(response(ID, TL)) --> ['-'], response_token_list(TL), {get_index(
 response_block(response_condition(ID, V, O , B, D)) --> ['*'], ['<', get], id(V), ['>'], operator(O), [B], ['=', '>'], response_token_list(D), {get_index(trigger, ID)}
 .
 
-response_block(response_condition(ID, V, O , B, D)) --> ['*'], response_tag(V), operator(O), response_tag(B), ['=', '>'], response_token_list(D), {get_index(trigger, ID)}
+response_block(response_condition(ID, V, O , B, D)) --> ['*'], response_token(V), operator(O), response_token(B), ['=', '>'], response_token_list(D), {get_index(trigger, ID)}
 .
 
 response_token_list([])  --> ['\n'], {inc_line_number}
@@ -277,7 +277,7 @@ token_list_formal([]) --> ['{'], ['/'], [formal], ['}']
 token_list_formal([T | TL])  --> response_token(T), token_list_formal(TL)
 .
 
-response_tag(star(1)) --> ['<'], [star],  ['>']
+response_tag(star(1)) --> ['<'], ['star'],  ['>']
 .
 
 response_tag(I) --> ['<'], star_ref(I),  ['>']

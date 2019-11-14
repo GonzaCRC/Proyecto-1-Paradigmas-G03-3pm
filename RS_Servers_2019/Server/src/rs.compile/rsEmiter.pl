@@ -156,12 +156,6 @@ genCodeResponse(Out, response(I, WL)) :- !,
      nl(Out)
 .
 
-genCodeResponse(Out, response_condition(M, id(N), oper(O), V, WL)) :- !,
-     format(Out, 'response_condition(~a,variable(~a),~a,~a,[', [M, N, O, V]),
-     genCodeList(Out, WL, ','),
-	 format(Out, ']).', []),
-     nl(Out)
-.
 
 genCodeResponse(Out, response_condition(M, formal(N), oper(O), bot(id(V)), WL)) :- !,
      format(Out, 'response_condition(~a,', [M]),
@@ -173,6 +167,21 @@ genCodeResponse(Out, response_condition(M, formal(N), oper(O), bot(id(V)), WL)) 
 	 format(Out, ']).', []),
      nl(Out)
 .
+
+genCodeResponse(Out, response_condition(M, star(N), oper(O), word(V), WL)) :- !,
+     format(Out, 'response_condition(~a,star(~a),~a,"~a",[', [M, N, O, V]),
+     genCodeList(Out, WL, ','),
+	 format(Out, ']).', []),
+     nl(Out)
+.
+
+genCodeResponse(Out, response_condition(M, star(N), oper(O), num(V), WL)) :- !,
+     format(Out, 'response_condition(~a,star(~a),~a,"~d",[', [M, N, O, V]),
+     genCodeList(Out, WL, ','),
+	 format(Out, ']).', []),
+     nl(Out)
+.
+
 
 genCodeResponse(Out, response_condition(M, star(N), oper(O), input(V), WL)) :- !,
      format(Out, 'response_condition(~a,star(~a),~a,input(~a),[', [M, N, O, V]),

@@ -145,6 +145,8 @@ condition([V|_], [O|_], [B|_], [A|_], A) :- V = formal([star(N)]), B = botVariab
 condition([V|_], [O|_], [B|_], [A|_], A) :- V = formal([star(N)]), B = botVariable(M), O == 'ne', star(N, P), capitalize(P, U), current_user(User), current_file_name(File), once((memory(User, File, botVariable(M, K)); K = 'undefined')), U \= K.
 condition([V|_], [O|_], [B|_], [A|_], A) :- V = star(N), B = input(M), O == 'eq', star(N, P), once((input_value(M, K); K = 'undefined')), reverse(P, I), I == K.
 condition([V|_], [O|_], [B|_], [A|_], A) :- V = star(N), B = input(M), O == 'ne', star(N, P), once((input_value(M, K); K = 'undefined')), reverse(P, I), I \= K.
+condition([V|_], [O|_], [B|_], [A|_], A) :- V = star(N), O == 'eq', star(N, P), P == B.
+condition([V|_], [O|_], [B|_], [A|_], A) :- V = star(N), O == 'ne', star(N, P), P \= B.
 condition([_|L1], [_|L2], [_|L3], [_|L4], A) :- condition(L1, L2, L3, L4, A).
 
 get_response(User, File, Q, RR) :- 

@@ -36,6 +36,9 @@ handle_error(genCode(Msg, T)) :- !,
 handle_error(syntaxError(Msg, T)) :- !,
     format('\n*** Parsing ERROR: ~s >>> ~w ***', [Msg, T])
 .
+handle_error(semanticError(Msg, T)) :- !,
+    format('\n*** Semantic ERROR: ~s >>> ~w ***', [Msg, T])
+.
 handle_error(Any) :- writeln(Any),
     format('\n*** Undetermined ERROR: >>> ~w ***', [Any])
 .
