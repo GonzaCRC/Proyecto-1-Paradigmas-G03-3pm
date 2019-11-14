@@ -29,7 +29,31 @@
     &uarr;
   </a>
 </div>
-<div class="application-grid">
+
+<div [ngClass]="{ 'login-modal': true, 'login-modal--visible': !userSignedIn }">
+  <h1 class="login-modal__title">Ingresar a RS-Prolog</h1>
+  <input
+    class="login-modal__input"
+    type="text"
+    #user
+    placeholder="Nombre de usuario"
+  />
+  <input
+    class="login-modal__input"
+    type="text"
+    #password
+    placeholder="Contraseña"
+  />
+  <button
+    class="login-modal__button"
+    (click)="signUserIn(user, password)"
+    type="button"
+  >
+    Ingresar
+  </button>
+</div>
+
+<div *ngIf="userSignedIn" class="application-grid">
   <nav class="sidebar">
     <div class="user-box">
       <img
@@ -37,7 +61,7 @@
         alt="User picture"
         class="user-box__avatar"
       />
-      <span class="user-box__username">User's name</span>
+      <span class="user-box__username">{{ username }}</span>
     </div>
     <a class="time">
       {{ time | date: "hh:mm:ss a" }}
@@ -45,7 +69,7 @@
     <a (click)="aboutIsShown = !aboutIsShown" class="option">
       About
     </a>
-    <a class="option">
+    <a (click)="signUserOut()" class="option">
       <svg class="option__icon">
         <use xlink:href="assets/img/SVG/sprite.svg#icon-exit"></use>
       </svg>

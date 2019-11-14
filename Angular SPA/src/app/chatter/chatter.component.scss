@@ -61,6 +61,14 @@
 
     &__message {
       font-size: 1.5rem;
+
+      &--loading {
+        color: yellow;
+      }
+
+      &--send-one {
+        color: springgreen;
+      }
     }
   }
 }

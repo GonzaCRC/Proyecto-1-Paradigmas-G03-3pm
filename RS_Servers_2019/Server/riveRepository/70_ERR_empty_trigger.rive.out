@@ -1,0 +1,4 @@
+trigger(2,[]).
+
+response(2,["hello"]).
+
