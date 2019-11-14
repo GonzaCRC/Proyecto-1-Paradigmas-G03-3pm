@@ -22,7 +22,7 @@ checkSemantic(File) :-
 	atom_concat('./riveRepository/', File, PathInFile),
     atom_concat(PathInFile, '.out', RSOutFile),
 	open(RSOutFile, read, Str), read_file(Str, Lines), close(Str),assert(vars([])),assert(dinamic_vars([])),assert(aux([])),save_bot_user_variables(Lines),
-	verify_semantic(Lines),!
+	verify_semantic(Lines),retractall(vars(_)),retractall(dinamic_vars(_)), retractall(aux(_)),!
 .
 	
 %save_bot_user_variables(+List)	
