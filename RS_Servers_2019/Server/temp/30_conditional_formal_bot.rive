@@ -1,0 +1,4 @@
++ my name is *
+* <formal>   == <bot name> => Wow, we have the same name!<set name=<formal>>
+* <get name> == undefined  => <set name=<formal>>Nice to meet you!
+- <set oldname=<get name>><set name=<formal>> I thought your name was <get oldname>?

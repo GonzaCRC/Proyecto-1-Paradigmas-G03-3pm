@@ -1,0 +1,16 @@
+trigger(2,["caso",hash(1)]).
+
+trigger(3,[asterisk(1)]).
+
+response_condition(2,star(1),eq,"2",["caso","2"]).
+
+response_condition(2,star(1),eq,"3",["caso","3"]).
+
+response_condition(2,star(1),eq,"1",["caso","1"]).
+
+response_condition(2,star(1),eq,undefined,["caso","indefinido"]).
+
+response(2,[star(1),"no","es","1","2","3"]).
+
+response(3,["caso","no","aceptado"]).
+
