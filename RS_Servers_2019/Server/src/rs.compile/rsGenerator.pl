@@ -10,7 +10,7 @@ Gonzalo Gonzalez Garro
 Gabriel Araya Ruiz
 */
 
-:- module(rsEmiter, [
+:- module(rsGenerator, [
                        genCodeToFile/2,
                        genCode/1,
                        genCode/2,

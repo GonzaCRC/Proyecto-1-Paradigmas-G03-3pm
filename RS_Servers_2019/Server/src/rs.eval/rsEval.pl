@@ -1,85 +1,133 @@
 /*
-loriacarlos@gmail.com
-EIF400 II-2019
-Colaboradores:
-
+Creadores:
 Erick Vargas Arias 
 Esteban Zúñiga Cruz
 Gonzalo Gonzalez Garro
 Gabriel Araya Ruiz
 
+Colaboradores:
+Carlos Loría Saenz
+EIF400 loriacarlos@gmail.com
 */
 
-:- module(rsEval, [
-                       genCodeToFile/3,
-                       genCode/1
-                    ]).
+:- module(rsEval, [get_response/4]).
 
-
-capitalize_optional(Word,UPword):- 
-atom_chars(Word, [FirstLow|Rest]),
-upcase_atom(FirstLow,R),
-atom_chars(UPword, [R|Rest]).
-
-capitalize([], []).
-capitalize([word(H1)|T1], [H2|T2]):- 
-capitalize_optional(H1,H2),
-capitalize(T1,T2).
-capitalize([H1|T1], [H2|T2]):- 
-capitalize_optional(H1,H2),
-capitalize(T1,T2).
-
-not_member(_, []) :- !.
-not_member(X, [H|T]) :-
-     X \= H,
-    not_member(X, T).
-
-% input_value
-return_input(I, V) :- 
-	inputs(X), 
-	nth1(I, X, V)
+read_file(Stream, Lines) :-
+    read(Stream, Line),               
+    (  at_end_of_stream(Stream)       
+    -> Lines = []                    
+    ;  Lines = [Line|NewLines],
+       read_file(Stream, NewLines)
+    )
 .
 	
-save_input(I) :- 
-	inputs(X), 
-	append([I], X, V), 
-	retract(inputs(_)), 
-	assert(inputs(V))
+assert_from_list([]).
+
+assert_from_list([X|L]) :- 
+	current_user(User), 
+	current_file_name(File), 
+	assert(memory(User, File, X)), 
+	assert_from_list(L)
+.
+
+capitalize_optional(Word, K):- 
+	atom_chars(Word, [FirstLow|Rest]),
+	string_upper(FirstLow,R),
+	string_chars(R, M),
+	append(M, Rest, K)
+.
+
+capitalize([], []).
+
+capitalize([H1|T1], [S|T2]):- 
+	capitalize_optional(H1,H2),
+	string_chars(S, H2), 
+	capitalize(T1,T2)
 .
 
 append_lists([], R, R) :- !.
 append_lists([X|L], A, R) :- append(A, X, K), append_lists(L, K, R), !.
 append_lists(L, R) :- append_lists(L, [], R), !.
 
+search_in_array(_, [], _) :- false.
+search_in_array(Y, [X|_], R) :- Y == X, R = Y.
+search_in_array(Y, [_|L], R) :- search_in_array(Y, L, R).
+
+string_with_no_numbers_aux([]).
+string_with_no_numbers_aux([X|_]) :- atom_number(X, _), !, false.
+string_with_no_numbers_aux([_|L]) :- string_with_no_numbers_aux(L).
+string_with_no_numbers(X) :- atom_codes(A, X), atom_chars(A, C), string_with_no_numbers_aux(C).
+
+input_value(I, V) :- 
+	current_user(User), 
+	current_file_name(File),
+	inputs(User, File, X), 
+	nth1(I, X, V)
+.
+	
+save_input(I) :- 
+	current_user(User), 
+	current_file_name(File),
+	inputs(User, File, X), 
+	split_string(I, " ", "", L),
+	append([L], X, V), 
+	retract(inputs(User, File, _)), 
+	assert(inputs(User, File, V))
+.
+
+save_in_memory(File) :- current_user(User), savedMemory(User, File), !.
+
+save_in_memory(File) :- 
+	atom_concat('../../riveRepository/', File, PathInFile),
+    atom_concat(PathInFile, '.rive.out', RSOutFile),
+	open(RSOutFile, read, Str), read_file(Str, Lines), close(Str),
+	current_user(User),
+	assert(savedMemory(User, File)),
+	assert_from_list(Lines), !
+.
+
+:- dynamic memory/3.
+:- dynamic savedMemory/2.
+:- dynamic star/2.
+:- dynamic inputs/3.
+:- dynamic topic/3.
+:- dynamic current_file_name/1.
+:- dynamic current_user/1.
+
 initializeVariables([]).
 initializeVariables([X|L]) :- X = hash(N), assert(star(N, undefined)), initializeVariables(L).
 initializeVariables([X|L]) :- X = underscore(N), assert(star(N, undefined)), initializeVariables(L).
 initializeVariables([X|L]) :- X = asterisk(N), assert(star(N, undefined)), initializeVariables(L).
-initializeVariables([X|L]) :- X = set(id(H),_), assert(variable(H, undefined)), initializeVariables(L).
+initializeVariables([X|L]) :- X = variable(H), current_user(User), current_file_name(File), assert(memory(User, File, variable(H, undefined))), initializeVariables(L).
 initializeVariables([_|L]) :- initializeVariables(L).
 
-symbolTable([], [], _) :- !.
-symbolTable(N, [], _) :- N \= [], false.
-symbolTable([], [asterisk(_)], _) :- !. 
-symbolTable(L, [X2|L2], A2) :- X2 = optional(N), N = asterisk(M), assert(star(M, undefined)), symbolTable(L, [asterisk(M)|L2], A2), !.
-symbolTable([X|L], L2, A2) :- atom_string(X, S), re_replace('\'', ' ', S, R), atom_string(Z, R), substitution(Z, N), atomic_list_concat(M, ' ', N), flatten([M|L], L3), symbolTable(L3, L2, A2), !.
-symbolTable([X|L], [X2|L2], A2) :- term_string(X3, X), X2 = optional(N), (X3 == N, symbolTable(L, L2, A2); symbolTable([X|L], L2, A2)), !.
-symbolTable([X|L], [X2|L2], A2) :- term_string(X3, X), X3 == X2, symbolTable(L, L2, A2), !. 
-symbolTable([X|L], [X2|L2], A2) :- term_string(X3, X), X2 = hash(N), number(X3), retract(star(N, _)), assert(star(N, X3)), symbolTable(L, L2, A2), !.
-symbolTable([X|L], [X2|L2], A2) :- term_string(X3, X), X2 = underscore(N), retract(star(N, _)), assert(star(N, X3)), symbolTable(L, L2, A2), !.
-symbolTable([X|L], [X2|[Y|L2]], A2) :- X2 = asterisk(N), Y = asterisk(_), star(N, M), M \= 'undefined', symbolTable([X|L], [Y|L2], A2), !.
-symbolTable([X|L], [X2|[Y|L2]], A2) :- X2 = asterisk(N), term_string(X3, X), Y == X3, star(N, M), M \= 'undefined', symbolTable([X|L], [Y|L2], A2), !.
-symbolTable([X|L], [X2|[Y|[H|L2]]], A2) :- X2 = asterisk(N), Y \= asterisk(_), symbolTable([X|L], [Y|[H|L2]], A2), star(N, M), M \= 'undefined', (H = asterisk(_); symbolTable([X|L], [Y|[H|L2]], A2)), !.
-symbolTable([X|L], [X2|L2], A2) :- X2 = asterisk(N), term_string(X3, X), retract(star(N, M)), ((M == 'undefined', P = []); P = M), assert(star(N, [X3|P])), symbolTable(L, [asterisk(N)|L2], A2), !.
-symbolTable([_|L], [X2|L2], A2) :- X2 = set(id(H),formal([star(P)])), star(P, N), capitalize(N,U), retract(variable(H, _)), assert(variable(H, U)), symbolTable(L, L2, A2), !.
-symbolTable([_|L], [X2|L2], A2) :- X2 = set(id(H),star(P)), star(P, N), retract(variable(H, _)), assert(variable(H, N)), symbolTable(L, L2, A2), !.
-symbolTable([X|L], [X2|L2], A2) :- X2 = array(K, word(N)), retract(array(N, [Y|V])), assert(array(N, V)), term_string(X3, X), (X3 == Y; symbolTable([X|L], [X2|L2], A2)), assert(star(K, X)), symbolTable(L, L2, A2), !.
-symbolTable([X|L], [X2|L2], A2) :- X2 = array(word(N)), retract(array(N, [Y|V])), assert(array(N, V)), term_string(X3, X), ((X3 == Y, symbolTable(L, L2, A2)); symbolTable([X|L], [X2|L2], A2)), !.
+trigger_match([], [], A) :- !, A = [].
+trigger_match(N, [], A) :- !, N \= [], A = N.
+trigger_match([], [asterisk(optional(_))], A) :- !, A = []. 
+trigger_match([], [asterisk(N)], A) :- !, star(N, M), M \= 'undefined', A = []. 
+trigger_match([], [asterisk(_), weight(_)], A) :- !, A = []. 
+trigger_match([], [asterisk(_)], A) :- !, A = [asterisk(_)]. 
+trigger_match(L, [X2|L2], A) :- X2 = optional_asterisk(N), assert(star(N, undefined)), trigger_match(L, [asterisk(N)|L2], A), !.
+trigger_match(L, [X2|L2], A) :- X2 = weight(_), trigger_match(L, L2, A), !.
+trigger_match([X|L], L2, A) :- re_replace('\'', ',', X, R), split_string(R, ",", "", Y), current_user(User), current_file_name(File), memory(User, File, substitution(Y, N)), flatten([N|L], L3), trigger_match(L3, L2, A), !.
+trigger_match([X|L], [X2|L2], A) :- X2 = optional(N), (X == N, trigger_match(L, L2, A); trigger_match([X|L], L2, A)), !.
+trigger_match([X|L], [X2|L2], A) :- X2 = optional_underscore(_), (string_with_no_numbers(X), trigger_match(L, L2, A); trigger_match([X|L], L2, A)), !.
+trigger_match([X|L], [X2|L2], A) :- X2 = optional_hash(_), (atom_number(X, _), trigger_match(L, L2, A); trigger_match([X|L], L2, A)), !.
+trigger_match([X|L], [X2|L2], A) :- X == X2, trigger_match(L, L2, A), !. 
+trigger_match([X|L], [X2|L2], A) :- X2 = hash(N), atom_number(X, _), retract(star(N, _)), assert(star(N, X)), trigger_match(L, L2, A), !.
+trigger_match([X|L], [X2|L2], A) :- X2 = underscore(N), string_with_no_numbers(X), retract(star(N, _)), assert(star(N, X)), trigger_match(L, L2, A), !.
+trigger_match([X|L], [X2|[Y|L2]], A) :- X2 = asterisk(optional(_)), Y == X, trigger_match([X|L], [Y|L2], A), !.
+trigger_match([X|L], [X2|[Y|L2]], A) :- X2 = asterisk(N), Y = asterisk(_), star(N, M), M \= 'undefined', trigger_match([X|L], [Y|L2], A), !.
+trigger_match([X|L], [X2|[Y|L2]], A) :- X2 = asterisk(N), Y == X, star(N, M), M \= 'undefined', trigger_match([X|L], [Y|L2], A), !.
+trigger_match([X|L], [X2|[Y|[H|L2]]], A) :- X2 = asterisk(N), Y \= asterisk(_), trigger_match([X|L], [Y|[H|L2]], A), star(N, M), M \= 'undefined', (H = asterisk(_); trigger_match([X|L], [Y|[H|L2]], A)), !.
+trigger_match([X|L], [X2|L2], A) :- X2 = asterisk(N), retract(star(N, M)), ((M == 'undefined', P = []); P = M), assert(star(N, [X|P])), !, trigger_match(L, [asterisk(N)|L2], A), !.
+trigger_match([X|L], [X2|L2], A) :- X2 = array(K, N), current_user(User), current_file_name(File), memory(User, File, array(N, V)), search_in_array(X, V, R), assert(star(K, R)), trigger_match(L, L2, A), !.
+trigger_match([X|L], [X2|L2], A) :- X2 = array(N), current_user(User), current_file_name(File), memory(User, File, array(N, V)), search_in_array(X, V, _), trigger_match(L, L2, A), !.
 
 interpreter([], A, A) :- !.
-interpreter([X|L], A, R) :- X = input(N), return_input(N, V), interpreter(L, [V|A], R), !.
+interpreter([X|L], A, R) :- X = input(N), input_value(N, V), interpreter(L, [V|A], R), !.
 interpreter([X|L], A, R) :- X = input(_), interpreter(L, [undefined|A], R), !.
-interpreter([X|L], A, R) :- X = topic(N), retractall(topic(_, _)), assert(topic(N, true)), interpreter(L, A, R), !.
+interpreter([X|L], A, R) :- X = topic(N), current_user(User), current_file_name(File), retractall(topic(User, File, _)), assert(topic(User, File, N)), interpreter(L, A, R), !.
 interpreter([X|L], A, R) :- X = underscore(_), interpreter(L, [undefined|A], R), !.
 interpreter([X|L], A, R) :- X = underscore(P), star(P, M), interpreter(L, [M|A], R), !.
 interpreter([X|L], A, R) :- X = underscore(_), interpreter(L, [undefined|A], R), !.
@@ -89,234 +137,139 @@ interpreter([X|L], A, R) :- X = weight(N), assert(probability(N)), interpreter(L
 interpreter([X|L], A, R) :- X = star(P), star(P, M), interpreter(L, [M|A], R), !.
 interpreter([X|L], A, R) :- X = star(_), interpreter(L, [undefined|A], R), !.
 interpreter([X|L], A, R) :- X = formal([]), interpreter(L, A, R), !.
-interpreter([X|L], A, R) :- X = formal([word(P)|N]), capitalize([P],U), interpreter([formal(N)|L], [U|A], R), !.
-interpreter([X|L], A, R) :- X = formal([get(id(P))|N]), variable(P, M), capitalize(M,U), interpreter([formal(N)|L], [U|A], R), !.
-interpreter([X|L], A, R) :- X = formal([bot(id(P))|N]), botVariable(P, M), capitalize(M,U), interpreter([formal(N)|L], [U|A], R), !.
+interpreter([X|L], A, R) :- X = formal([botVariable(P)|N]), current_user(User), current_file_name(File), memory(User, File, botVariable(P, M)), capitalize(M,U), interpreter([formal(N)|L], [U|A], R), !.
 interpreter([X|L], A, R) :- X = formal([star(P)|N]), star(P, M), capitalize(M,U), interpreter([formal(N)|L], [U|A], R), !.
-interpreter([X|L], A, R) :- X = formal([bot(id(P))]), botVariable(P, M),capitalize([M],K),interpreter(L, [K|A], R), !.
-interpreter([X|L], A, R) :- X = formal(star(P)), star(P, M), capitalize(M,U),interpreter(L, [U|A], R), !.
-interpreter([X|L], A, R) :- X = formal(bot(id(P))), botVariable(P, M),capitalize([M],K),interpreter(L, [K|A], R), !.
-interpreter([X|L], A, R) :- X = bot(N), botVariable(N, M), interpreter(L, [M|A], R), !.
-interpreter([X|L], A, R) :- X = bot(id(N), word(M)), retractall(botVariable(N, _)), assert(botVariable(N, M)), interpreter(L, A, R), !.
-interpreter([X|L], A, R) :- X = bot(_), interpreter(L, [undefined|A], R), !.
-interpreter([X|L], A, R) :- X = get(P), variable(P, M), interpreter(L, [M|A], R), !.
-interpreter([X|L], A, R) :- X = get(_), interpreter(L, [undefined|A], R), !.
-interpreter([X|L], A, R) :- X = set(id(H),formal([star(P)])), star(P, N), capitalize(N,U), retractall(variable(H, _)), assert(variable(H, U)), interpreter(L, A, R), !.
-interpreter([X|L], A, R) :- X = set(id(H),star(P)), star(P, N), retractall(variable(H, _)), assert(variable(H, N)), interpreter(L, A, R), !.
-interpreter([X|L], A, R) :- X = set(id(H),get(id(P))), variable(P, N), retractall(variable(H, _)), assert(variable(H, N)), interpreter(L, A, R), !.
-interpreter([X|L], A, R) :- X = response_condition(star(N), O, input(M), _), O == 'eq', !, star(N, [P]), return_input(M, K), K == P, interpreter(L, A, R), !.
-interpreter([X|L], A, R) :- X = response_condition(star(N), O, input(_), _), O == 'eq', !, star(N, [P]), 'undefined' == P, interpreter(L, A, R), !.
-interpreter([X|L], A, R) :- X = response_condition(star(N), O, input(M), _), O == 'ne', !, star(N, [P]), return_input(M, K), K \= P, interpreter(L, A, R), !.
-interpreter([X|L], A, R) :- X = response_condition(star(N), O, input(_), _), O == 'ne', !, star(N, [P]), 'undefined' \= P, interpreter(L, A, R), !.
-interpreter([X|L], A, R) :- X = response_condition(formal([star(N)]), O, bot(id(M)), _), O == 'ne', !, star(N, P), capitalize(P, [U]), botVariable(M, K), U \= K, interpreter(L, A, R), !.
-interpreter([X|L], A, R) :- X = response_condition(formal([star(N)]), O, bot(id(M)), _), O == 'eq', !, star(N, P), capitalize(P, [U]), botVariable(M, K), U == K, interpreter(L, A, R), !.
-interpreter([X|L], A, R) :- X = response_condition(formal([star(N)]), O, bot(id(M)), _), O == 'ne', !, star(N, P), capitalize(P, [U]), botVariable(M, K), U \= K, interpreter(L, A, R), !.
-interpreter([X|L], A, R) :- X = response_condition(formal([star(N)]), O, get(id(M)), _), O == 'eq', !, star(N, P), capitalize(P, U), variable(M, K), U == K, interpreter(L, A, R), !.
-interpreter([X|L], A, R) :- X = response_condition(formal([star(N)]), O, get(id(M)), _), O == 'ne', !, star(N, P), capitalize(P, U), variable(M, K), U \= K, interpreter(L, A, R), !.
-interpreter([X|L], A, R) :- X = response_condition(id(V), O, B, _), O == 'eq', (variable(V, M); M = 'undefined'), !, B == M, interpreter(L, A, R), !.
-interpreter([X|L], A, R) :- X = response_condition(id(V), O, B, _), O == 'ne', (variable(V, M); M = 'undefined'), !, B \= M, interpreter(L, A, R), !.
-interpreter([X|_], _, _) :- X = response_condition(id(_), _, _, _), !, interpreter(_, _, []), fail.
+interpreter([X|L], A, R) :- X = formal([variable(P)|N]), current_user(User), current_file_name(File), memory(User, File, variable(P, M)), capitalize(M,K), interpreter([formal(N)|L], [K|A], R), !.
+interpreter([X|L], A, R) :- X = formal([N|M]), capitalize([N], K), interpreter([formal(M)|L], [K|A], R), !.
+interpreter([X|L], A, R) :- X = updateBotVariable(N, M), current_user(User), current_file_name(File), retractall(memory(User, File, botVariable(N, _))), assert(memory(User, File, botVariable(N, M))), interpreter(L, A, R), !.
+interpreter([X|L], A, R) :- X = botVariable(N), current_user(User), current_file_name(File), memory(User, File, botVariable(N, M)), atomic_list_concat(M, ' ', RL), interpreter(L, [RL|A], R), !.
+interpreter([X|L], A, R) :- X = botVariable(_), interpreter(L, [undefined|A], R), !.
+interpreter([X|L], A, R) :- X = variable(P), current_user(User), current_file_name(File), memory(User, File, variable(P, M)), interpreter(L, [M|A], R), !.
+interpreter([X|L], A, R) :- X = variable(_), interpreter(L, [undefined|A], R), !.
+interpreter([X|L], A, R) :- X = variable(H, star(P)), current_user(User), current_file_name(File), retractall(memory(User, File, variable(H, _))), star(P, N), assert(memory(User, File, variable(H, N))), interpreter(L, A, R), !.
+interpreter([X|L], A, R) :- X = variable(H, variable(P)), current_user(User), current_file_name(File), memory(User, File, variable(P, N)), retractall(memory(User, File, variable(H, _))), assert(memory(User, File, variable(H, N))), interpreter(L, A, R), !.
+interpreter([X|L], A, R) :- X = variable(H, formal([star(P)])), star(P, N), capitalize(N,U), current_user(User), current_file_name(File), retractall(memory(User, File, variable(H, _))), assert(memory(User, File, variable(H, U))), interpreter(L, A, R), !.
 interpreter([X|L], A, R) :- interpreter(L, [X|A], R), !.
 
-:- dynamic probability/1.
-:- dynamic inputs/1.
-:- dynamic topics/1.
-:- dynamic topic/2.
-:- dynamic answer/1.
-:- dynamic triggerFlag/1.
-:- dynamic responseFlag/1.
-:- dynamic variable/2.
-:- dynamic botVariable/2.
-:- dynamic substitution/2.
+condition([V|_], [O|_], [B|_], [A|_], A) :- V = variable(U), O == 'ne', current_user(User), current_file_name(File), once((memory(User, File, variable(U, M)); M = 'undefined')), B \= M.
+condition([V|_], [O|_], [B|_], [A|_], A) :- V = variable(U), O == 'eq', current_user(User), current_file_name(File), once((memory(User, File, variable(U, M)); M = 'undefined')), B == M.
+condition([V|_], [O|_], [B|_], [A|_], A) :- V = formal([star(N)]), B = botVariable(M), O == 'eq', star(N, P), capitalize(P, U), current_user(User), current_file_name(File), once((memory(User, File, botVariable(M, K)); K = 'undefined')), U == K.
+condition([V|_], [O|_], [B|_], [A|_], A) :- V = formal([star(N)]), B = botVariable(M), O == 'ne', star(N, P), capitalize(P, U), current_user(User), current_file_name(File), once((memory(User, File, botVariable(M, K)); K = 'undefined')), U \= K.
+condition([V|_], [O|_], [B|_], [A|_], A) :- V = star(N), B = input(M), O == 'eq', star(N, P), once((input_value(M, K); K = 'undefined')), reverse(P, I), I == K.
+condition([V|_], [O|_], [B|_], [A|_], A) :- V = star(N), B = input(M), O == 'ne', star(N, P), once((input_value(M, K); K = 'undefined')), reverse(P, I), I \= K.
+condition([V|_], [O|_], [B|_], [A|_], A) :- V = star(N), O == 'eq', star(N, P), P == B.
+condition([V|_], [O|_], [B|_], [A|_], A) :- V = star(N), O == 'ne', star(N, P), P \= B.
+condition([_|L1], [_|L2], [_|L3], [_|L4], A) :- condition(L1, L2, L3, L4, A).
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-% generate_response
-genCodeToFile(File,Ques, R) :- !,
-    atom_concat('../../riveRepository/', File, PathInFile),
-    atom_concat(PathInFile, '.rive.out', RSOutFile),
-    split_string(Ques, " ", "", L),
-    assert(question(L)), assert(responseFlag(false)), assert(triggerFlag(false)), assert(condition(false)),
-    open(RSOutFile, read, Str),
-    read_string(Str, '\n', '\t', _, String), !,
-    close(Str),
-	(inputs(_); assert(inputs([]))), 
-    term_string(Atom, String, [var_prefix(true)]),
-	genCode(Atom), !,
-	findall(X, answer(X), L2),
-	save_input(Ques),
-	append_lists(L2, J),
-	((random_member(A, J)); (A = ["ERR: No Reply Matched"])), !,
-	((topic(N, _), findall(X2, topics(X2), L3), not_member(N, L3), retractall(topic(_, _))); (true)), !,
-	atomic_list_concat(A, ' ', R),
-	retractall(question(_)), retractall(condition(_)), retractall(answer(_)), retractall(star(_,_)),
-    retractall(memory(_,_)), retractall(responseFlag(_)), retractall(triggerFlag(_)), retractall(topics(_))
+get_response(User, File, Q, RR) :- 
+	retractall(current_user(_)), assert(current_user(User)),
+	retractall(current_file_name(_)), assert(current_file_name(File)),
+	save_in_memory(File),
+	split_string(Q, " ", "", L), !,
+	(inputs(User, File, _); assert(inputs(User, File, []))),
+	findall(X, memory(User, File, trigger(_, X)), W), !,
+	once(match_topic(L, RL); match_question(L, W, RL)),
+	save_input(Q),
+	((var(RL), RR = "ERR: No Reply Matched"); RR = RL), !
 .
 
-walkTree(L) :- walkTree(L, ''). 
-walkTree([], _).
-walkTree([C], _) :- genCode(C).
-walkTree([X, Y | L], Sep) :- genCode(X), 
-                             walkTree([Y | L], Sep)
-. 
-
-genCode(rsProg(L)) :- !,
-    walkTree(L)
-. 
-
-genCode(trigger_block(T)) :- !,
-	((topic(_, true), retractall(responseFlag(_)), assert(responseFlag(true)));
-	((triggerFlag(false),
-    genCodeTrigger(T));
-	(retractall(responseFlag(_)), assert(responseFlag(true)))))
+match_topic(Q, RL) :-
+	current_user(User), 
+	current_file_name(File),
+	topic(User, File, N),
+	findall(X, memory(User, File, trigger_topic(N,_, X)), W),
+	match_question_topic(Q, W, RL)
 .
 
-genCode(comment_block(_)) :- !
+match_question_topic(_, [], _).
+
+match_question_topic(Q, [X|_], RL) :- 
+	current_user(User), 
+	current_file_name(File),
+	retractall(star(_,_)),
+	initializeVariables(X), 
+	trigger_match(Q, X, A),
+	A == [],
+	memory(User, File, trigger_topic(_, V, X)),
+	match_response_topic(V, RL), !
 .
 
-genCode(response_block(T)) :- !,
-	((responseFlag(false), condition(false),
-    genCodeResponse(T)); true)
+match_question_topic(Q, [X|L], RL) :- 
+	retractall(star(_,_)),
+	initializeVariables(X), 
+	match_question_topic(Q, L, RL), !
 .
 
-genCode(define_block(T)) :- !,
-    genCodeDefine(T) 
+match_question(_, [], _).
+
+match_question(Q, [X|_], RL) :- 
+	current_user(User), 
+	current_file_name(File),
+	retractall(star(_,_)),
+	initializeVariables(X), 
+	trigger_match(Q, X, A),
+	A == [],
+	memory(User, File, trigger(V, X)),
+	(match_response_condition(V, RL); match_response(V, RL)), !
 .
 
-genCode(topic_block(T)) :- !,
-    genCodeTopic(T)
+match_question(Q, [X|L], RL) :- 
+	retractall(star(_,_)),
+	initializeVariables(X), 
+	match_question(Q, L, RL), !
 .
 
-genCode(word(''))
+match_response(V, RL) :- 
+	current_user(User), 
+	current_file_name(File),
+	findall(Y, memory(User, File, response(V, Y)), L), 
+	findall(YY, memory(User, File, response_weight(V, YY, _)), LL), 
+	findall(N, memory(User, File, response_weight(V, _, weight(N))), W), 
+	response_weight_list(LL, W, [], F),
+	append_lists([L|F], E),
+	random_member(A, E), 
+	initializeVariables(A), 
+	interpreter(A, [], R),
+	flatten(R, RF), 
+	reverse(RF, RR), 
+	atomic_list_concat(RR, ' ', RL)
 .
 
-genCode(word('\''))
+match_response_topic(V, RL) :- 
+	current_user(User), 
+	current_file_name(File),
+	findall(Y, memory(User, File, response_topic(_, V, Y)), L), 
+	random_member(A, L), 
+	initializeVariables(A), 
+	interpreter(A, [], R),
+	flatten(R, RF), 
+	reverse(RF, RR), 
+	atomic_list_concat(RR, ' ', RL)
 .
 
-genCode(word(''''))
+match_response_condition(I, RL) :- 
+	findall(V, memory(User, File, response_condition(I, V, _, _, _)), VL), 
+	findall(O, memory(User, File, response_condition(I, _, O, _, _)), OL), 
+	findall(B, memory(User, File, response_condition(I, _, _, B, _)), BL), 
+	findall(L, memory(User, File, response_condition(I, _, _, _, L)), LL), 
+	condition(VL, OL, BL, LL, M),
+	interpreter(M, [], R),
+	flatten(R, RF), 
+	reverse(RF, RR), 
+	atomic_list_concat(RR, ' ', RL)
 .
 
-genCode(set(I, E)) :-  !, assert(memory(set(I, E)))
-.
-
-genCode(optional(word(N))) :- !, assert(memory(optional(N)))
-.
-
-genCode(get(id(N))) :- !, assert(memory(get(N)))
-.
-
-genCode(bot(id(N))) :- !, assert(memory(bot(N)))
-.
-
-genCode(word(N)) :- !, genCode(atom(N))
-.
-
-genCode(id(N)) :- !, genCode(atom(N))
-.
-genCode(num(N))  :- !, genCode(atom(N))
-.
-genCode(oper(N)) :- !, genCode(atom(N))
-.
-
-% Internal Representations
-genCode(operation(O, L, R)) :- !, walkTree([L, O, R])
-.
-
-genCode(atom(N)) :- !, assert(memory(N))
-.
-
-genCode(N) :- !, assert(memory(N))
-.
-
-%%%% Error case %%%%%%%%%%%%%%%%%%%%%%%%%%
-% genCode(E) :- close(Out),!,
-%                    throw(genCode('genCode unhandled Tree', E))
-% .
-
-genCode(E) :- writeln(E) %  throw('genCode unhandled Tree', E)
-.
+response_weight_list([], [], A, A).
+response_weight_list([X|L], [Y|P], A, R) :- length(K, Y), maplist(=(X), K), response_weight_list(L, P, [K|A], R).
 
 
-genCodeResponse(response(WL)) :- !,
-    initializeVariables(WL),
-    ((triggerFlag(true),
-    walkTree(WL),
-	findall(X, memory(X), L),
-	retractall(memory(_)),
-	interpreter(L, [], R), 
-	flatten(R, R2),
-	reverse(R2, R3),
-	((probability(N), length(K, N), maplist(=(R3), K), assert(answer(K)), retractall(probability(_))); assert(answer([R3])))); 
-	(retractall(memory(_)), true))
-.
 
-genCodeResponse(response_condition(V, O, B, D)) :- !,
-    assert(memory(response_condition(V, O, B, _))),
-    ((triggerFlag(true),
-    walkTree(D),
-	findall(X, memory(X), L),
-	retractall(memory(_)),
-	!,
-	interpreter(L, [], R),
-	flatten(R, R2),
-	reverse(R2, R3),
-	retractall(answer(_)), assert(answer(R3)), retractall(condition(_)),
-	assert(condition(true))); (retractall(memory(_)), true))
-.
 
-genCodeTrigger(trigger(WL)) :- !,
-    retractall(star(_,_)),
-    initializeVariables(WL),
-    walkTree(WL),
-    findall(X, memory(X), L),
-    question(M),
-    (symbolTable(M, L, []), retractall(triggerFlag(_)), assert(triggerFlag(true)); (true)),
-    retractall(memory(_))
-.
 
-genCodeDefine(var(B, V, L)) :- !,
-	B = bot,
-    walkTree(L),
-	findall(X, memory(X), L2),
-	retractall(memory(_)),
-	reverse(L2, L3),
-    assert(botVariable(V, L3))
-.
 
-genCodeDefine(var(B, _)) :- !,
-	B = version
-.
 
-genCodeDefine(substitution(B, V)) :- !,
-    walkTree(B),
-	findall(X, memory(X), L),
-	retractall(memory(_)),
-	!,
-	walkTree(V),
-	findall(X2, memory(X2), L2),
-	atomic_list_concat(L, ' ', A),
-	atomic_list_concat(L2, ' ', C),
-	retractall(memory(_)),
-	assert(substitution(A, C))
-.
 
-genCodeDefine(array(N, V)) :- !,
-	walkTree(V),
-	findall(X, memory(X), L),
-	retractall(memory(_)),
-	assert(array(N, L))
-.
 
-genCodeTopic(topic(N, L)) :- !,
-	assert(topics(N)),
-	(answer(_); 
-	(topic(M, _), !,
-	((M == N,
-	retractall(topic(_, _)), assert(topic(M, false)),
-	retractall(responseFlag(_)), assert(responseFlag(false)),
-	walkTree(L), retract(topic(K, _)), assert(topic(K, true))); true)
-	))
-.
 
 
 

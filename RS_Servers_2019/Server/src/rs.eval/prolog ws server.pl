@@ -17,7 +17,7 @@ EIF400 loriacarlos@gmail.com
 :- use_module(library(http/http_client)).
 :- use_module(library(http/http_dispatch)).
 
-:- use_module(rsEval2).
+:- use_module(rsEval).
 
 :- assert(file_search_path(lib, '../../lib/')).
 :- use_module( lib(prosqlite) ).
@@ -38,7 +38,7 @@ chat(WebSocket) :-
         arg(4,Message.data,Msg), %Mensaje
 		arg(6,Message.data,NameFile), %Nombre del archivo
 		saveMessage(User,NameFile,Msg),
-        rsEval2:get_response(User, NameFile, Msg, R),
+        rsEval:get_response(User, NameFile, Msg, R),
 		saveMessage(User, NameFile,R),
     	ws_send(WebSocket, text(R)),
         chat(WebSocket)
