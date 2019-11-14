@@ -1,14 +1,13 @@
 /*
+Creador:
+Carlos Loría Saenz
 EIF400 loriacarlos@gmail.com
-Simple recursive lexer
-II-2019
-Colaboradores:
 
+Colaboradores:
 Erick Vargas Arias 
 Esteban Zúñiga Cruz
 Gonzalo Gonzalez Garro
 Gabriel Araya Ruiz
-
 */
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Line number %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 :- module(rsLexer, [tokenize/2, 

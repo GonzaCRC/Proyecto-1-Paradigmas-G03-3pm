@@ -1,7 +1,9 @@
 ﻿/*
+Creador:
+Carlos Loría Saenz
 EIF400 loriacarlos@gmail.com
-Colaboradores:
 
+Colaboradores:
 Erick Vargas Arias 
 Esteban Zúñiga Cruz
 Gonzalo Gonzalez Garro
