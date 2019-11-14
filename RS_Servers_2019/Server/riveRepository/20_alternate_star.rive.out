@@ -1,4 +1,0 @@
-trigger(2,["i","will",optional("not"),asterisk(1)]).
-
-response(2,["It","doesn","'","t","matter","to","me","whether","you",star(1),"or","not","."]).
-
