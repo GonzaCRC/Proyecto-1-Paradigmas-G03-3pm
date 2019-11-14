@@ -24,14 +24,14 @@ compile(InPath, OutPath, Filename) :-
    atom_concat(PathOutFile, '.out', RSOutFile),
    format('*** Writing   :"~a" *** ~n', [RSOutFile]),
    rsEmiter:genCodeToFile(RSOutFile, P),
-   catch(rsSemanter:chSeman(Filename), 
+   catch(rsSemanter:checkSemantic(Filename), 
         Err, (
 		atom_concat(OutPath, Filename, FailFile), 
 		atom_concat(FailFile, '.out', FailFile2),
 		delete_file(FailFile2),
 		throw(Err))
 	),
-   rsTriggerSort:striggers(Filename)
+   rsTriggerSort:sortTriggers(Filename)
 .
 
 compile(InPath, _, Filename) :-

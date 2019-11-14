@@ -1,70 +1,70 @@
-:- module(rsSemanter, [chSeman/1]).
+:- module(rsSemanter, [checkSemantic/1]).
 
 read_file(Stream, Lines) :-
     read(Stream, Line),    
    (at_end_of_stream(Stream) -> Lines = [] ;  Lines = [Line|NewLines],  read_file(Stream, NewLines)).
 	
-chSeman(File) :- 
+checkSemantic(File) :- 
 	atom_concat('./riveRepository/', File, PathInFile),
     atom_concat(PathInFile, '.out', RSOutFile),
-	open(RSOutFile, read, Str), read_file(Str, Lines), close(Str),assert(vars([])),assert(dinamic_vars([])),assert(aux([])),save_vars(Lines),
-	compare_wl(Lines),!
+	open(RSOutFile, read, Str), read_file(Str, Lines), close(Str),assert(vars([])),assert(dinamic_vars([])),assert(aux([])),save_bot_user_variables(Lines),
+	verify_semantic(Lines),!
 .
 		
-save_vars([]).	
-save_vars([X|L]) :- 
-	(X = botVariable(B, _), vars(V), append([B],V,O), retractall(vars(_)), assert(vars(O)), save_vars(L);
-	(X = response(_,D);X = response_condition(_,_,_,_,D)),dinamic_vars(V), cond_var(D,[],K), K \= [] ,append(K,V,O), retractall(dinamic_vars(_)), assert(dinamic_vars(O)), save_vars(L);
-	X = array(B, _), vars(V), append([B],V,O), retractall(vars(_)), assert(vars(O)), save_vars(L);
-	save_vars(L))
+save_bot_user_variables([]).	
+save_bot_user_variables([X|L]) :- 
+	(X = botVariable(B, _), vars(V), append([B],V,O), retractall(vars(_)), assert(vars(O)), save_bot_user_variables(L);
+	(X = response(_,D);X = response_condition(_,_,_,_,D)),dinamic_vars(V), response_set_variables_list(D,[],K), K \= [] ,append(K,V,O), retractall(dinamic_vars(_)), assert(dinamic_vars(O)), save_bot_user_variables(L);
+	X = array(B, _), vars(V), append([B],V,O), retractall(vars(_)), assert(vars(O)), save_bot_user_variables(L);
+	save_bot_user_variables(L))
 .
 
 %((V = variable(Val),Z = botVariable(Val2);Z = variable(Val), V = botVariable(Val2);Z = variable(Val), V = variable(Val2);Z = botVariable(Val), V = botVariable(Val2)),
-%(sublist([Val],Var),sublist([Val2],Var)   ;throw(semanticError('One or more variables or <stars> calls does not exist on the rive', X))),compare_wl(L);
+%(element_in_list([Val],Var),element_in_list([Val2],Var)   ;throw(semanticError('One or more variables or <stars> calls does not exist on the rive', X))),verify_semantic(L);
 
-compare_wl([]).
-compare_wl([X|L]) :- 
+verify_semantic([]).
+verify_semantic([X|L]) :- 
 	(aux(M),M \= [],X = trigger(_,_),retractall(aux(_)), assert(aux([]));
 	 true),
-	(aux(V),V = [] ,X = trigger(_,U),verify_trigs(U),trigs_v(U,[],UU),append(UU,V,O), retractall(aux(_)), assert(aux(O)),compare_wl(L); 
-	X = response(_,T),resp_v(T,[],TT),(verify(TT),compare_wl(L);throw(semanticError('One or more variables or <stars> calls does not exist on the rive', X)));
+	(aux(V),V = [] ,X = trigger(_,U),verify_valid_arrays(U),trigger_id_keywords_list(U,[],UU),append(UU,V,O), retractall(aux(_)), assert(aux(O)),verify_semantic(L); 
+	X = response(_,T),response_id_keywords_list(T,[],TT),(verify_valid_variables(TT),verify_semantic(L);throw(semanticError('One or more variables or <stars> calls does not exist on the rive', X)));
 	X = response_condition(_,V,_,Z,K),vars(Var),dinamic_vars(DV),
-	((V = variable(Val),sublist([Val],DV);V = botVariable(Val),sublist([Val],Var);Z = variable(Val),sublist([Val],DV);Z = botVariable(Val),sublist([Val],Var);
-	V = star(Val),aux(Vtt) ,sublist([Val],Vtt));
+	((V = variable(Val),element_in_list([Val],DV);V = botVariable(Val),element_in_list([Val],Var);Z = variable(Val),element_in_list([Val],DV);Z = botVariable(Val),element_in_list([Val],Var);
+	V = star(Val),aux(Vtt) ,element_in_list([Val],Vtt));
 	throw(semanticError('One or more variables or <stars> calls does not exist on the rive', X)))
-	,resp_v(K,[],TT),(verify(TT),compare_wl(L);throw(semanticError('undetermined error',X)));
-	compare_wl(L))
+	,response_id_keywords_list(K,[],TT),(verify_valid_variables(TT),verify_semantic(L);throw(semanticError('undetermined error',X)));
+	verify_semantic(L))
 .
  
-verify([]).
-verify([X|L]) :- 
-	(X = variable(Val), dinamic_vars(S),sublist([Val],S),verify(L);
-	 X = botVariable(Val),vars(S),sublist([Val],S),verify(L);
-	 X = star(Val),aux(H) ,sublist([Val],H),verify(L); 
+verify_valid_variables([]).
+verify_valid_variables([X|L]) :- 
+	(X = variable(Val), dinamic_vars(S),element_in_list([Val],S),verify_valid_variables(L);
+	 X = botVariable(Val),vars(S),element_in_list([Val],S),verify_valid_variables(L);
+	 X = star(Val),aux(H) ,element_in_list([Val],H),verify_valid_variables(L); 
 	 false),!.
 	
-verify_trigs([]).
-verify_trigs([X|L]) :- 
-	((X = array(Val); X = array(_,Val)),vars(S),(sublist([Val],S),verify_trigs(L);throw(semanticError('One or more array calls does not exist on the rive', X)));
-	  verify_trigs(L)),!.
+verify_valid_arrays([]).
+verify_valid_arrays([X|L]) :- 
+	((X = array(Val); X = array(_,Val)),vars(S),(element_in_list([Val],S),verify_valid_arrays(L);throw(semanticError('One or more array calls does not exist on the rive', X)));
+	  verify_valid_arrays(L)),!.
 	  
 	 
 	
-sublist([],_).
-sublist([X|Xs],Y) :- member(X,Y) , sublist(Xs,Y),!.
+element_in_list([],_).
+element_in_list([X|Xs],Y) :- member(X,Y) , element_in_list(Xs,Y),!.
 
-trigs_v([],V,V).
-trigs_v([X|L],V,A) :- 
-	((X = asterisk(Val);X = hash(Val);X = underscore(Val);X = array(Val,_)), append(V,[Val],B), trigs_v(L,B,A);
-	trigs_v(L,V,A)),!.
+trigger_id_keywords_list([],V,V).
+trigger_id_keywords_list([X|L],V,A) :- 
+	((X = asterisk(Val);X = hash(Val);X = underscore(Val);X = array(Val,_)), append(V,[Val],B), trigger_id_keywords_list(L,B,A);
+	trigger_id_keywords_list(L,V,A)),!.
 	
-resp_v([],V,V).
-resp_v([X|L],V,A) :- 
-	((X = variable(_);X = star(_);X = botVariable(_)), append(V,[X],B), resp_v(L,B,A);
-	resp_v(L,V,A)),!.
+response_id_keywords_list([],V,V).
+response_id_keywords_list([X|L],V,A) :- 
+	((X = variable(_);X = star(_);X = botVariable(_)), append(V,[X],B), response_id_keywords_list(L,B,A);
+	response_id_keywords_list(L,V,A)),!.
 	
-cond_var([],V,V).
-cond_var([X|L],V,A) :- 
-	((X = variable(Y,_);X = botVariable(Y,_)), append(V,[Y],B), cond_var(L,B,A);
-	cond_var(L,V,A)),!.
+response_set_variables_list([],V,V).
+response_set_variables_list([X|L],V,A) :- 
+	((X = variable(Y,_);X = botVariable(Y,_)), append(V,[Y],B), response_set_variables_list(L,B,A);
+	response_set_variables_list(L,V,A)),!.
 
