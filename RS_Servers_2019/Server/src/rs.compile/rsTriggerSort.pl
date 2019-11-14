@@ -1,3 +1,15 @@
+/*
+Creadores:
+Erick Vargas Arias 
+Esteban Zúñiga Cruz
+Gonzalo Gonzalez Garro
+Gabriel Araya Ruiz
+
+Colaboradores:
+Carlos Loría Saenz
+EIF400 loriacarlos@gmail.com
+*/
+
 :- module(rsTriggerSort, [sortTriggers/1]).
 
 read_file(Stream, Lines) :-
