@@ -119,7 +119,7 @@ special_op([T1|L],T,N,I):-
 	(Le2>Le1, I = N ;  
 	 Le2=Le1, atomics_to_string(L1," ",L1s), atomics_to_string(L2," ",L2s),string_length(L1s,Xl), string_length(L2s,Pl),
 	 (Pl>Xl,I = N;
-	 Pl=Xl, compare(W, L1s,L2s), (L1s= "",L2s = "", I = N ;W = (>),I = N));
+	 Pl=Xl, compare(W, L1s,L2s), (L1s= "",L2s = "", I = N ;W = (>),I = N ;find_opcional(Y1,R1),find_opcional(Y2,R2),writeln(R2),R1>=R2, I = N));
 	 N1 = N+1, special_op(L,T,N1,I))
 .
 
@@ -134,7 +134,7 @@ special_w([T1|L],T,N,I):-
 	(Le2>Le1, I = N ;  
 	 Le2=Le1, atomics_to_string(L1," ",L1s), atomics_to_string(L2," ",L2s),string_length(L1s,Xl), string_length(L2s,Pl),
 	 (Pl>Xl,I = N;
-	 Pl=Xl, compare(W, L1s,L2s), (L1s= "",L2s = "", I = N ;W = (>),I = N; W = (=),I = N));
+	 Pl=Xl, compare(W, L1s,L2s), (L1s= "",L2s = "", I = N ;W = (>),I = N; find_wildcard(Y1,R1),find_wildcard(Y2,R2),R1>=R2, I = N ));
 	 N1 = N+1, special_w(L,T,N1,I))
 .
 
@@ -183,5 +183,18 @@ w_l([X|Xs], Ys) :-
 
 w_l_a([], [], _).
 w_l_a([X1|Xs], [X0|Ys], X0) :-  
-   w_l_a(Xs, Ys, X1).         
+   w_l_a(Xs, Ys, X1).       
+
+find_opcional([],_) :- false.
+find_opcional([X|_],N) :- X = optionals(_),N is 0,!.
+find_opcional([X|_],N) :- X = optional_hash(_), N is 2,!.
+find_opcional([X|_],N) :- X = optional_underscore(_), N is 1,!.
+find_opcional([X|_],N) :- X = optional_asterisk(_), N is 3,!.
+find_opcional([_|L],N) :- find_opcional(L,N).
+
+find_wildcard([],_) :- false.
+find_wildcard([X|_],N) :- X = asterisk(_),N is 3,!.
+find_wildcard([X|_],N) :- X = hash(_), N is 2,!.
+find_wildcard([X|_],N) :- X = underscore(_), N is 1,!.
+find_wildcard([_|L],N) :- find_wildcard(L,N).
 
