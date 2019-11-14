@@ -22,12 +22,12 @@ chat(WebSocket) :-
     ws_receive(WebSocket, Message, [format(json)]),
     (   Message.opcode == close ->  true;
         cors_enable,
-        arg(2,Message.data,Msg), %Mensaje
-        arg(4,Message.data,NameFile), %Nombre del archivo
-		%arg(6,Message.data,User), %Usuario
-		saveMessage('User',NameFile,Msg),
-        rsEval2:get_response('User', NameFile, Msg, R),
-		saveMessage('User', NameFile,R),
+        arg(2,Message.data,User), %Usuario 
+        arg(4,Message.data,Msg), %Mensaje
+		arg(6,Message.data,NameFile), %Nombre del archivo
+		saveMessage(User,NameFile,Msg),
+        rsEval2:get_response(User, NameFile, Msg, R),
+		saveMessage(User, NameFile,R),
     	ws_send(WebSocket, text(R)),
         chat(WebSocket)
     ).
@@ -36,7 +36,7 @@ saveMessage(User,Bot,Message):-
 	%debug( sqlite ),
 	DataBase = '../../dataBase/dataProyect.sqlite',
     sqlite_connect( DataBase , dataProyect ),
-	format(atom(Statement), "insert into chats (user,bot,message) values ('~s','~s','~s')",[User,Bot,Message]),
+	format(atom(Statement), 'insert into chats (user,bot,message) values ("~s","~s","~s")',[User,Bot,Message]),
 	sqlite_query(dataProyect,Statement,_),
 	sqlite_disconnect( dataProyect ).
 

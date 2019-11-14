@@ -245,9 +245,6 @@ response_block(response_weight(ID, TL, W)) --> ['-'], {reset_some_indexes([star]
 response_block(response(ID, TL)) --> ['-'], response_token_list(TL), {get_index(trigger, ID)}
 .
 
-response_block(response_condition(ID, V, O , B, D)) --> ['*'], ['<', get], id(V), ['>'], operator(O), [B], ['=', '>'], response_token_list(D), {get_index(trigger, ID)}
-.
-
 response_block(response_condition(ID, V, O , B, D)) --> ['*'], response_token(V), operator(O), response_token(B), ['=', '>'], response_token_list(D), {get_index(trigger, ID)}
 .
 

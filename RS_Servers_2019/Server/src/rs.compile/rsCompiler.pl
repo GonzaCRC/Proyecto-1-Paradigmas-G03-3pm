@@ -24,9 +24,16 @@ compile(InPath, OutPath, Filename) :-
    atom_concat(PathOutFile, '.out', RSOutFile),
    format('*** Writing   :"~a" *** ~n', [RSOutFile]),
    rsEmiter:genCodeToFile(RSOutFile, P),
-   rsSemanter:chSeman(Filename),
+   catch(rsSemanter:chSeman(Filename), 
+        Err, (
+		atom_concat(OutPath, Filename, FailFile), 
+		atom_concat(FailFile, '.out', FailFile2),
+		delete_file(FailFile2),
+		throw(Err))
+	),
    rsTriggerSort:striggers(Filename)
 .
+
 compile(InPath, _, Filename) :-
    atom_concat(InPath, Filename, PathInFile),
    format('*** RSCompiler: File Not found :"~a" *** ~n', [PathInFile]),
