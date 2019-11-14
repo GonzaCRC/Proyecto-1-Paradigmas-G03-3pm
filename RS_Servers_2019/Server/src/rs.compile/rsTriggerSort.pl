@@ -12,10 +12,12 @@ EIF400 loriacarlos@gmail.com
 
 :- module(rsTriggerSort, [sortTriggers/1]).
 
+%read_file(+Stream, -List)
 read_file(Stream, Lines) :-
     read(Stream, Line),    
    (at_end_of_stream(Stream) -> Lines = [] ;  Lines = [Line|NewLines],  read_file(Stream, NewLines)).
-	
+   
+%sortTriggers(+File)	
 sortTriggers(File) :- 
 	atom_concat('./riveRepository/', File, PathInFile),
     atom_concat(PathInFile, '.out', RSOutFile),
@@ -30,12 +32,13 @@ sortTriggers(File) :-
 	!
 .
 
+%save_triggers(+List)
 save_triggers([]).
 save_triggers([X|L]):- 
 	(X = trigger(_,_) , trigs(M), append(M,[X],B) , retract(trigs(_)) , assert(trigs(B)), save_triggers(L) ; 
 	others(O), append(O,[X],K) , retract(others(_)) , assert(others(K)),save_triggers(L))
 .
-
+%sort_trigers
 sort_trigers :- 
 	trigs(X),
 	assert(trigger_s([trigger(_,[])])),
@@ -54,7 +57,7 @@ sort_trigers :-
 	sort_triggers_only_wildcard(Ow)
 .
 	
-
+%sort_triggers_atomics(+triggers)
 sort_triggers_atomics([]).
 sort_triggers_atomics([X|L]) :- 
 	X = trigger(_,L1), 
@@ -69,6 +72,7 @@ sort_triggers_atomics([X|L]) :-
 	sort_triggers_atomics(L))
 .
 
+%sort_triggers_wildcards(+triggers)
 sort_triggers_wildcards([]) :- !.
 sort_triggers_wildcards([X|L]) :- 
 	trigger_w(J),
@@ -78,7 +82,7 @@ sort_triggers_wildcards([X|L]) :-
 	assert(trigger_w(J2)),
 	sort_triggers_wildcards(L)
 .
-
+%sort_triggers_only_wildcard(+triggers)
 sort_triggers_only_wildcard([]).
 sort_triggers_only_wildcard([X|L]) :- 
 	o_trigger(J),
@@ -89,6 +93,7 @@ sort_triggers_only_wildcard([X|L]) :-
 	sort_triggers_only_wildcard(L)
 .
 
+%sort_triggers_opcionals(+triggers)
 sort_triggers_opcionals([]).
 sort_triggers_opcionals([X|L]) :- 
 	op_trigger(J),
@@ -99,12 +104,14 @@ sort_triggers_opcionals([X|L]) :-
 	sort_triggers_opcionals(L)
 .
 
+%insert_at_index(+Element, +Index, +List, -List2)
 insert_at_index(Element,0,L,[Element|L]). 
 insert_at_index(Element,Pos,[E|L],[E|ZL]):- 
     Pos1 is Pos-1,
     insert_at_index(Element,Pos1,L,ZL)
 . 
 	
+%index_atomic_trigger_priority(+List, +trigger, +contador, -Index)
 index_atomic_trigger_priority([],_,_,_).
 index_atomic_trigger_priority([T1|L],T,N,I):- 
 	T1 = trigger(_,L1), 
@@ -118,7 +125,7 @@ index_atomic_trigger_priority([T1|L],T,N,I):-
 	 W = (=),I = N);
 	 N1 = N+1, index_atomic_trigger_priority(L,T,N1,I))
 .
-
+%index_opcional_trigger_priority(+List, +trigger, +contador, -Index)
 index_opcional_trigger_priority([],_,_,_).
 index_opcional_trigger_priority([T1|L],T,N,I):- 
 	T1 = trigger(_,Y1), 
@@ -133,7 +140,7 @@ index_opcional_trigger_priority([T1|L],T,N,I):-
 	 Pl=Xl, compare(W, L1s,L2s), (L1s= "",L2s = "", I = N ;W = (>),I = N ;find_opcional(Y1,R1),find_opcional(Y2,R2),R1>=R2, I = N));
 	 N1 = N+1, index_opcional_trigger_priority(L,T,N1,I))
 .
-
+%index_wildcards_trigger_priority(+List, +trigger, +contador, -Index)
 index_wildcards_trigger_priority([],_,_,_).
 index_wildcards_trigger_priority([T1|L],T,N,I):- 
 	T1 = trigger(_,Y1), 
@@ -149,6 +156,7 @@ index_wildcards_trigger_priority([T1|L],T,N,I):-
 	 N1 = N+1, index_wildcards_trigger_priority(L,T,N1,I))
 .
 
+%index_only_wildcards_trigger_priority(+List, +trigger, +contador, -Index)
 index_only_wildcards_trigger_priority([],_,_,_).
 index_only_wildcards_trigger_priority([T1|L],T,N,I):- 
 	T1 = trigger(_,[Y1|_]), 
@@ -166,17 +174,20 @@ index_only_wildcards_trigger_priority([T1|L],T,N,I):-
 	 N1 = N+1, index_only_wildcards_trigger_priority(L,T,N1,I))
 .
 
+%list_only_words(+List, +List2, -List2)
 list_only_words([],V,V).
 list_only_words([X|L],V,A) :- 
 	(string(X), append(V,[X],B), list_only_words(L,B,A);
 	list_only_words(L,V,A)),!.
 	
+%contain_wildcard(+List)
 contain_wildcard([]) :- false.
 contain_wildcard([X|_]) :- X = asterisk(_), !.
 contain_wildcard([X|_]) :- X = hash(_), !.
 contain_wildcard([X|_]) :- X = underscore(_), !.
 contain_wildcard([_|L]) :- contain_wildcard(L).
 
+%contain_opcional(+List)
 contain_opcional([]) :- false.
 contain_opcional([X|_]) :- X = optionals(_), !.
 contain_opcional([X|_]) :- X = optional_hash(_), !.
@@ -184,16 +195,20 @@ contain_opcional([X|_]) :- X = optional_underscore(_), !.
 contain_opcional([X|_]) :- X = optional_asterisk(_), !.
 contain_opcional([_|L]) :- contain_opcional(L).
 
+%contain_only_wildcard(+List)
 contain_only_wildcard([X|Y]) :- X = asterisk(_),(Y = [weight(_)];Y = []), !.
 contain_only_wildcard([X|Y]) :- X = hash(_), (Y = [weight(_)];Y = []), !.
 contain_only_wildcard([X|Y]) :- X = underscore(_), (Y = [weight(_)];Y = []), !.
 contain_only_wildcard([_]) :- false.
 
-list_without_last_element([X|Xs], Ys) :- list_without_last_element_aux(Xs, Ys, X).            
-
+%list_without_last_element(+List, -List2)
+list_without_last_element([X|Xs], Ys) :- list_without_last_element_aux(Xs, Ys, X).   
+         
+%list_without_last_element_aux(+List, -List2, +Element)
 list_without_last_element_aux([], [], _).
 list_without_last_element_aux([X1|Xs], [X0|Ys], X0) :- list_without_last_element_aux(Xs, Ys, X1).       
 
+%find_opcional(+List, -Number)
 find_opcional([],_) :- false.
 find_opcional([X|_],N) :- X = optionals(_),N is 0,!.
 find_opcional([X|_],N) :- X = optional_hash(_), N is 2,!.
@@ -201,6 +216,7 @@ find_opcional([X|_],N) :- X = optional_underscore(_), N is 1,!.
 find_opcional([X|_],N) :- X = optional_asterisk(_), N is 3,!.
 find_opcional([_|L],N) :- find_opcional(L,N).
 
+%find_wildcard(+List, -Number)
 find_wildcard([],_) :- false.
 find_wildcard([X|_],N) :- X = asterisk(_),N is 3,!.
 find_wildcard([X|_],N) :- X = hash(_), N is 2,!.
