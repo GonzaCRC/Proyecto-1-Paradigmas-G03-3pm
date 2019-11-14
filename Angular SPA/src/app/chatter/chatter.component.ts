@@ -56,8 +56,7 @@ export class ChatterComponent implements OnInit {
   getBotsMessages(botIndex = 0) {
     this.http
       .post(environment.staticServerUrl + "/getChat", {
-        user: "User",
-        // user: localStorage.getItem("username"),
+        user: localStorage.getItem("username"),
         bot: this.botsNames[botIndex]
       })
       .subscribe((res: any) => {
