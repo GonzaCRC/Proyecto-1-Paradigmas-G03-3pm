@@ -28,7 +28,12 @@
             messages[botName] == undefined
               ? "Cargando.."
               : messages[botName].length == 0
-              ? "Envia un mensaje!"
+              ? "Envie un mensaje!"
+              : messages[botName][messages[botName].length - 1].body.length > 25
+              ? messages[botName][messages[botName].length - 1].body.slice(
+                  0,
+                  25
+                ) + "..."
               : messages[botName][messages[botName].length - 1].body
           }}
         </p>

@@ -43,28 +43,32 @@ export class ChatterComponent implements OnInit {
       .subscribe((res: string[]) => {
         this.botsNames = res;
 
-        this.selectedBot = this.botsNames[0];
+        if (this.botsNames.length) {
+          this.selectedBot = this.botsNames[0];
 
-        for (let botName of this.botsNames) {
-          setTimeout(() => this.getBotMessages(botName), 250);
+          this.getBotsMessages();
         }
       });
 
     this.subscribeToWebSocket();
   }
 
-  getBotMessages(botName) {
+  getBotsMessages(botIndex = 0) {
     this.http
       .post(environment.staticServerUrl + "/getChat", {
         user: "User",
         // user: localStorage.getItem("username"),
-        bot: botName
+        bot: this.botsNames[botIndex]
       })
       .subscribe((res: any) => {
-        this.messages[botName] = res.chat.map((message, i) => {
+        this.messages[this.botsNames[botIndex]] = res.chat.map((message, i) => {
           if (i % 2 == 0) return { owner: "User", body: message };
           else return { owner: "Bot", body: message };
         });
+
+        if (botIndex < this.botsNames.length - 1) {
+          this.getBotsMessages(botIndex + 1);
+        }
       });
   }
 

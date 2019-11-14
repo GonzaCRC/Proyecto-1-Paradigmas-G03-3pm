@@ -31,9 +31,24 @@
 </div>
 
 <div [ngClass]="{ 'login-modal': true, 'login-modal--visible': !userSignedIn }">
-  <input type="text" #user />
-  <input type="text" #password />
-  <button (click)="signUserIn(user, password)" type="button">
+  <h1 class="login-modal__title">Ingresar a RS-Prolog</h1>
+  <input
+    class="login-modal__input"
+    type="text"
+    #user
+    placeholder="Nombre de usuario"
+  />
+  <input
+    class="login-modal__input"
+    type="text"
+    #password
+    placeholder="Contraseña"
+  />
+  <button
+    class="login-modal__button"
+    (click)="signUserIn(user, password)"
+    type="button"
+  >
     Ingresar
   </button>
 </div>
